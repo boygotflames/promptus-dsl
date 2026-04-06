@@ -28,7 +28,7 @@ vars:
         .iter()
         .find(|diagnostic| diagnostic.message.contains("`vars`"))
         .expect("expected a vars diagnostic");
-    assert_eq!(diagnostic.span, Some(Span::new(4, 3)));
+    assert_eq!(diagnostic.span, Some(Span::new(3, 1)));
 }
 
 #[test]

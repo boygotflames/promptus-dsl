@@ -1,0 +1,3 @@
+agent: DataExtractor
+system:
+    role: financial_analyst

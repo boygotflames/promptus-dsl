@@ -47,7 +47,7 @@ impl Document {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct MappingEntry {
     pub key: String,
     pub value: Node,
@@ -63,6 +63,14 @@ impl MappingEntry {
         }
     }
 }
+
+impl PartialEq for MappingEntry {
+    fn eq(&self, other: &Self) -> bool {
+        self.key == other.key && self.value == other.value
+    }
+}
+
+impl Eq for MappingEntry {}
 
 #[derive(Clone, Debug)]
 pub enum Node {

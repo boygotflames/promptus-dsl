@@ -40,6 +40,7 @@ Rules:
 - lines whose first non-space character is `#` are treated as comments
 - mappings use `key: value` or `key:` followed by an indented block
 - sequences use `- value`
+- scalars may be bare text, single-quoted strings, or double-quoted strings
 
 ### Grammar Sketch
 
@@ -57,7 +58,10 @@ sequence_item   := "- " scalar
                  | "-" newline block
 
 key             := /[A-Za-z_][A-Za-z0-9_-]*/
-scalar          := any non-empty text after ":" or "- "
+scalar          := bare_scalar | single_quoted | double_quoted
+bare_scalar     := any non-empty text after ":" or "- "
+single_quoted   := "'" .* "'"
+double_quoted   := "\"" .* "\""
 ```
 
 ## AST Model
@@ -118,3 +122,4 @@ memory:
 - semantic normalization passes
 - formatter and editor tooling
 - provider-specific emission layers
+- TODO: includes/imports and multi-file composition

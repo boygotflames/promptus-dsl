@@ -1,6 +1,6 @@
 use crate::ast::{Document, MappingEntry, Node, TopLevelKey};
 use crate::diagnostics::{DiagnosticBag, Span};
-use crate::lexer::{LineToken, tokenize_lines};
+use crate::lexer::{LineKind, LineToken, tokenize_lines};
 
 pub fn parse_str(source: &str) -> Result<Document, DiagnosticBag> {
     let tokens = tokenize_lines(source)?;
@@ -28,12 +28,9 @@ impl Parser {
                 ));
             }
 
-            let (key_text, value, span) = self.parse_mapping_entry(0)?;
-            let Some(key) = TopLevelKey::from_keyword(&key_text) else {
-                return Err(single_error(
-                    format!("unknown top-level key `{key_text}`"),
-                    span,
-                ));
+            let (key, value, span) = self.parse_top_level_entry()?;
+            let Some(key) = TopLevelKey::from_keyword(&key) else {
+                return Err(single_error(format!("unknown top-level key `{key}`"), span));
             };
 
             if document.set(key, value).is_some() {
@@ -47,7 +44,31 @@ impl Parser {
         Ok(document)
     }
 
-    fn parse_block(&mut self, expected_indent: usize) -> Result<Node, DiagnosticBag> {
+    fn parse_top_level_entry(&mut self) -> Result<(String, Node, Span), DiagnosticBag> {
+        let token = self
+            .current()
+            .cloned()
+            .ok_or_else(|| single_error("expected a top-level entry", Span::new(1, 1)))?;
+        let span = token.span();
+
+        match token.kind {
+            LineKind::Mapping(mapping) => {
+                self.advance();
+                let value = match mapping.value {
+                    Some(value) => Node::scalar_at(value.value, mapping.key.span),
+                    None => self.parse_nested_block(0, mapping.key.span)?,
+                };
+
+                Ok((mapping.key.value, value, mapping.key.span))
+            }
+            LineKind::ListItem(_) => Err(single_error(
+                "top-level entries must be mappings, not list items",
+                span,
+            )),
+        }
+    }
+
+    fn parse_block(&mut self, expected_indent: usize, span: Span) -> Result<Node, DiagnosticBag> {
         let Some(token) = self.current().cloned() else {
             return Err(single_error(
                 "expected an indented block, but found end of input",
@@ -62,10 +83,9 @@ impl Parser {
             ));
         }
 
-        if token.content.starts_with("- ") || token.content == "-" {
-            self.parse_sequence(expected_indent, token.span())
-        } else {
-            self.parse_mapping(expected_indent, token.span())
+        match token.kind {
+            LineKind::ListItem(_) => self.parse_sequence(expected_indent, span),
+            LineKind::Mapping(_) => self.parse_mapping(expected_indent, span),
         }
     }
 
@@ -88,21 +108,16 @@ impl Parser {
                 ));
             }
 
-            if !token.content.starts_with('-') {
+            let LineKind::ListItem(item) = token.kind else {
                 break;
-            }
+            };
 
-            let remainder = token
-                .content
-                .strip_prefix('-')
-                .unwrap_or_default()
-                .trim_start();
             self.advance();
 
-            if remainder.is_empty() {
-                items.push(self.parse_nested_block(expected_indent, token.span())?);
+            if let Some(value) = item.value {
+                items.push(Node::scalar_at(value.value, item.dash));
             } else {
-                items.push(Node::scalar_at(remainder, token.span()));
+                items.push(self.parse_nested_block(expected_indent, item.dash)?);
             }
         }
 
@@ -124,7 +139,7 @@ impl Parser {
                 ));
             }
 
-            if token.content.starts_with('-') {
+            if matches!(&token.kind, LineKind::ListItem(_)) {
                 return Err(single_error(
                     "list item found where a mapping entry was expected",
                     token.span(),
@@ -153,22 +168,23 @@ impl Parser {
                 token.span(),
             ));
         }
+        let span = token.span();
 
-        let Some((key, inline_value)) = split_mapping_entry(&token.content) else {
+        let LineKind::Mapping(mapping) = token.kind else {
             return Err(single_error(
-                "expected `key: value` or `key:` syntax",
-                token.span(),
+                "expected a mapping entry, but found a list item",
+                span,
             ));
         };
 
         self.advance();
 
-        let value = match inline_value {
-            Some(value) => Node::scalar_at(value, token.span()),
-            None => self.parse_nested_block(expected_indent, token.span())?,
+        let value = match mapping.value {
+            Some(value) => Node::scalar_at(value.value, mapping.key.span),
+            None => self.parse_nested_block(expected_indent, mapping.key.span)?,
         };
 
-        Ok((key.to_owned(), value, token.span()))
+        Ok((mapping.key.value, value, mapping.key.span))
     }
 
     fn parse_nested_block(
@@ -198,7 +214,7 @@ impl Parser {
             ));
         }
 
-        self.parse_block(expected_indent)
+        self.parse_block(expected_indent, parent_span)
     }
 
     fn current(&self) -> Option<&LineToken> {
@@ -207,21 +223,6 @@ impl Parser {
 
     fn advance(&mut self) {
         self.cursor += 1;
-    }
-}
-
-fn split_mapping_entry(content: &str) -> Option<(&str, Option<&str>)> {
-    let (raw_key, raw_value) = content.split_once(':')?;
-    let key = raw_key.trim();
-    if key.is_empty() {
-        return None;
-    }
-
-    let value = raw_value.trim();
-    if value.is_empty() {
-        Some((key, None))
-    } else {
-        Some((key, Some(value)))
     }
 }
 
