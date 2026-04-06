@@ -1,15 +1,19 @@
 use crate::ast::{Document, Node};
 
-use super::quote;
+use super::{Emitter, quote};
 
-pub fn transpile(document: &Document) -> String {
-    let mut lines = Vec::new();
+pub struct ShadowEmitter;
 
-    for (key, value) in document.ordered_entries() {
-        flatten_node(&mut lines, key.as_str().to_owned(), value);
+impl Emitter for ShadowEmitter {
+    fn emit(&self, document: &Document) -> String {
+        let mut lines = Vec::new();
+
+        for (key, value) in document.ordered_entries() {
+            flatten_node(&mut lines, key.as_str().to_owned(), value);
+        }
+
+        lines.join("\n")
     }
-
-    lines.join("\n")
 }
 
 fn flatten_node(lines: &mut Vec<String>, path: String, value: &Node) {

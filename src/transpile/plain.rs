@@ -1,20 +1,28 @@
 use crate::ast::{Document, Node};
 
-pub fn transpile(document: &Document) -> String {
-    let mut lines = Vec::new();
+use super::{Emitter, format_plain_scalar};
 
-    for (key, value) in document.ordered_entries() {
-        render_mapping_entry(&mut lines, 0, key.as_str(), value);
+pub struct PlainEmitter;
+
+impl Emitter for PlainEmitter {
+    fn emit(&self, document: &Document) -> String {
+        let mut lines = Vec::new();
+
+        for (key, value) in document.ordered_entries() {
+            render_mapping_entry(&mut lines, 0, key.as_str(), value);
+        }
+
+        lines.join("\n")
     }
-
-    lines.join("\n")
 }
 
 fn render_mapping_entry(lines: &mut Vec<String>, indent: usize, key: &str, value: &Node) {
     let prefix = " ".repeat(indent);
 
     match value {
-        Node::Scalar { value: scalar, .. } => lines.push(format!("{prefix}{key}: {scalar}")),
+        Node::Scalar { value: scalar, .. } => {
+            lines.push(format!("{prefix}{key}: {}", format_plain_scalar(scalar)))
+        }
         Node::Mapping { entries, .. } => {
             lines.push(format!("{prefix}{key}:"));
             for entry in entries {
@@ -34,7 +42,9 @@ fn render_list_item(lines: &mut Vec<String>, indent: usize, value: &Node) {
     let prefix = " ".repeat(indent);
 
     match value {
-        Node::Scalar { value: scalar, .. } => lines.push(format!("{prefix}- {scalar}")),
+        Node::Scalar { value: scalar, .. } => {
+            lines.push(format!("{prefix}- {}", format_plain_scalar(scalar)))
+        }
         Node::Mapping { entries, .. } => {
             lines.push(format!("{prefix}-"));
             for entry in entries {

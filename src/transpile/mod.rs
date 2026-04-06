@@ -4,6 +4,10 @@ pub mod json_ir;
 pub mod plain;
 pub mod shadow;
 
+pub trait Emitter {
+    fn emit(&self, document: &Document) -> String;
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Target {
     Plain,
@@ -13,9 +17,9 @@ pub enum Target {
 
 pub fn transpile(document: &Document, target: Target) -> String {
     match target {
-        Target::Plain => plain::transpile(document),
-        Target::Shadow => shadow::transpile(document),
-        Target::JsonIr => json_ir::transpile(document),
+        Target::Plain => plain::PlainEmitter.emit(document),
+        Target::Shadow => shadow::ShadowEmitter.emit(document),
+        Target::JsonIr => json_ir::JsonIrEmitter.emit(document),
     }
 }
 
@@ -36,4 +40,19 @@ fn quote(value: &str) -> String {
 
     quoted.push('"');
     quoted
+}
+
+fn format_plain_scalar(value: &str) -> String {
+    if is_plain_bare_scalar(value) {
+        value.to_owned()
+    } else {
+        quote(value)
+    }
+}
+
+fn is_plain_bare_scalar(value: &str) -> bool {
+    !value.is_empty()
+        && value
+            .chars()
+            .all(|ch| ch.is_ascii_alphanumeric() || ch == '_' || ch == '-')
 }

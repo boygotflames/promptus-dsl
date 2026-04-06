@@ -1,69 +1,77 @@
 use crate::ast::{Document, Node};
 
-use super::quote;
+use super::{Emitter, quote};
 
-pub fn transpile(document: &Document) -> String {
-    let mut lines = Vec::new();
-    lines.push("{".to_owned());
+pub struct JsonIrEmitter;
 
-    let entries = document.ordered_entries();
-    for (index, (key, value)) in entries.iter().enumerate() {
-        let suffix = if index + 1 == entries.len() { "" } else { "," };
-        lines.push(format!(
-            "  {}: {}{}",
-            quote(key.as_str()),
-            render_node(value, 4),
-            suffix
-        ));
+impl Emitter for JsonIrEmitter {
+    fn emit(&self, document: &Document) -> String {
+        render_object_from_pairs(
+            document
+                .ordered_entries()
+                .into_iter()
+                .map(|(key, value)| (key.as_str(), value))
+                .collect(),
+            0,
+        )
     }
-
-    lines.push("}".to_owned());
-    lines.join("\n")
 }
 
 fn render_node(value: &Node, indent: usize) -> String {
     match value {
         Node::Scalar { value: scalar, .. } => quote(scalar),
-        Node::Sequence { values: items, .. } => {
-            if items.is_empty() {
-                return "[]".to_owned();
-            }
-
-            let mut lines = Vec::new();
-            lines.push("[".to_owned());
-            for (index, item) in items.iter().enumerate() {
-                let suffix = if index + 1 == items.len() { "" } else { "," };
-                lines.push(format!(
-                    "{}{}{}",
-                    " ".repeat(indent),
-                    render_node(item, indent + 2),
-                    suffix
-                ));
-            }
-            lines.push(format!("{}]", " ".repeat(indent.saturating_sub(2))));
-            lines.join("\n")
-        }
-        Node::Mapping { entries, .. } => {
-            if entries.is_empty() {
-                return "{}".to_owned();
-            }
-
-            let mut lines = Vec::new();
-            lines.push("{".to_owned());
-
-            for (index, entry) in entries.iter().enumerate() {
-                let suffix = if index + 1 == entries.len() { "" } else { "," };
-                lines.push(format!(
-                    "{}{}: {}{}",
-                    " ".repeat(indent),
-                    quote(&entry.key),
-                    render_node(&entry.value, indent + 2),
-                    suffix
-                ));
-            }
-
-            lines.push(format!("{}{}", " ".repeat(indent.saturating_sub(2)), "}"));
-            lines.join("\n")
-        }
+        Node::Sequence { values: items, .. } => render_array(items, indent),
+        Node::Mapping { entries, .. } => render_object_from_pairs(
+            entries
+                .iter()
+                .map(|entry| (entry.key.as_str(), &entry.value))
+                .collect(),
+            indent,
+        ),
     }
+}
+
+fn render_array(items: &[Node], indent: usize) -> String {
+    if items.is_empty() {
+        return "[]".to_owned();
+    }
+
+    let mut lines = Vec::new();
+    lines.push("[".to_owned());
+
+    for (index, item) in items.iter().enumerate() {
+        let suffix = if index + 1 == items.len() { "" } else { "," };
+        lines.push(format!(
+            "{}{}{}",
+            " ".repeat(indent + 2),
+            render_node(item, indent + 2),
+            suffix
+        ));
+    }
+
+    lines.push(format!("{}]", " ".repeat(indent)));
+    lines.join("\n")
+}
+
+fn render_object_from_pairs(entries: Vec<(&str, &Node)>, indent: usize) -> String {
+    if entries.is_empty() {
+        return "{}".to_owned();
+    }
+
+    let mut lines = Vec::new();
+    lines.push("{".to_owned());
+
+    for (index, (key, value)) in entries.iter().enumerate() {
+        let suffix = if index + 1 == entries.len() { "" } else { "," };
+        lines.push(format!(
+            "{}{}: {}{}",
+            " ".repeat(indent + 2),
+            quote(key),
+            render_node(value, indent + 2),
+            suffix
+        ));
+    }
+
+    lines.push(format!("{}{}", " ".repeat(indent), "}"));
+    lines.join("\n")
 }
