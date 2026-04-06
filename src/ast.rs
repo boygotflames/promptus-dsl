@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use crate::diagnostics::Span;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Document {
@@ -48,43 +48,127 @@ impl Document {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum Node {
-    Scalar(String),
-    Sequence(Vec<Node>),
-    Mapping(BTreeMap<String, Node>),
+pub struct MappingEntry {
+    pub key: String,
+    pub value: Node,
+    pub span: Span,
 }
+
+impl MappingEntry {
+    pub fn new<T: Into<String>>(key: T, value: Node, span: Span) -> Self {
+        Self {
+            key: key.into(),
+            value,
+            span,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum Node {
+    Scalar {
+        value: String,
+        span: Span,
+    },
+    Sequence {
+        values: Vec<Node>,
+        span: Span,
+    },
+    Mapping {
+        entries: Vec<MappingEntry>,
+        span: Span,
+    },
+}
+
+impl PartialEq for Node {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Scalar { value: left, .. }, Self::Scalar { value: right, .. }) => left == right,
+            (Self::Sequence { values: left, .. }, Self::Sequence { values: right, .. }) => {
+                left == right
+            }
+            (Self::Mapping { entries: left, .. }, Self::Mapping { entries: right, .. }) => {
+                left == right
+            }
+            _ => false,
+        }
+    }
+}
+
+impl Eq for Node {}
 
 impl Node {
     pub fn scalar<T: Into<String>>(value: T) -> Self {
-        Self::Scalar(value.into())
+        Self::scalar_at(value, Span::new(0, 0))
+    }
+
+    pub fn scalar_at<T: Into<String>>(value: T, span: Span) -> Self {
+        Self::Scalar {
+            value: value.into(),
+            span,
+        }
+    }
+
+    pub fn sequence(items: Vec<Node>) -> Self {
+        Self::sequence_at(items, Span::new(0, 0))
+    }
+
+    pub fn sequence_at(items: Vec<Node>, span: Span) -> Self {
+        Self::Sequence {
+            values: items,
+            span,
+        }
+    }
+
+    pub fn mapping(entries: Vec<MappingEntry>) -> Self {
+        Self::mapping_at(entries, Span::new(0, 0))
+    }
+
+    pub fn mapping_at(entries: Vec<MappingEntry>, span: Span) -> Self {
+        Self::Mapping { entries, span }
+    }
+
+    pub fn span(&self) -> Span {
+        match self {
+            Self::Scalar { span, .. }
+            | Self::Sequence { span, .. }
+            | Self::Mapping { span, .. } => *span,
+        }
     }
 
     pub fn as_scalar(&self) -> Option<&str> {
         match self {
-            Self::Scalar(value) => Some(value.as_str()),
+            Self::Scalar { value, .. } => Some(value.as_str()),
             _ => None,
         }
     }
 
     pub fn as_sequence(&self) -> Option<&[Node]> {
         match self {
-            Self::Sequence(values) => Some(values.as_slice()),
+            Self::Sequence { values, .. } => Some(values.as_slice()),
             _ => None,
         }
     }
 
-    pub fn as_mapping(&self) -> Option<&BTreeMap<String, Node>> {
+    pub fn as_mapping(&self) -> Option<&[MappingEntry]> {
         match self {
-            Self::Mapping(values) => Some(values),
+            Self::Mapping { entries, .. } => Some(entries.as_slice()),
             _ => None,
         }
+    }
+
+    pub fn mapping_get(&self, key: &str) -> Option<&Node> {
+        self.as_mapping()?
+            .iter()
+            .find(|entry| entry.key == key)
+            .map(|entry| &entry.value)
     }
 
     pub fn kind_name(&self) -> &'static str {
         match self {
-            Self::Scalar(_) => "scalar",
-            Self::Sequence(_) => "sequence",
-            Self::Mapping(_) => "mapping",
+            Self::Scalar { .. } => "scalar",
+            Self::Sequence { .. } => "sequence",
+            Self::Mapping { .. } => "mapping",
         }
     }
 }
@@ -115,7 +199,7 @@ impl TopLevelKey {
         }
     }
 
-    pub fn from_str(value: &str) -> Option<Self> {
+    pub fn from_keyword(value: &str) -> Option<Self> {
         match value {
             "agent" => Some(Self::Agent),
             "system" => Some(Self::System),

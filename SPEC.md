@@ -68,7 +68,9 @@ The v0 AST has:
 - a generic `Node` value model:
   - `Scalar(String)`
   - `Sequence(Vec<Node>)`
-  - `Mapping(BTreeMap<String, Node>)`
+- a `MappingEntry` record for keyed children with their own spans
+- every mapping stores `Vec<MappingEntry>` children rather than a raw map
+- every `Node` carries a source `Span` with line and column information
 
 The parser accepts a generic tree shape first. The validator then applies key-specific constraints.
 
@@ -81,6 +83,7 @@ Current validation rules:
 - `memory`, `tools`, and `constraints` must be sequences of scalar values
 - `output` must be either a scalar or a mapping
 - `vars` must be a mapping whose values are scalars
+- mapping keys must be unique within each mapping block
 
 These constraints are intentionally conservative and may expand in later versions.
 
@@ -111,7 +114,6 @@ memory:
 ## Deferred Work
 
 - richer scalar typing
-- source span attachment on AST nodes
 - richer list item structures
 - semantic normalization passes
 - formatter and editor tooling

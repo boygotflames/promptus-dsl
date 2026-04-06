@@ -1,4 +1,4 @@
-use llm_format::{parse_str, validate_document};
+use llm_format::{Span, parse_str, validate_document};
 
 #[test]
 fn valid_example_passes_validation() {
@@ -24,10 +24,29 @@ vars:
     let diagnostics = validate_document(&document);
 
     assert!(diagnostics.has_errors());
-    assert!(
-        diagnostics
-            .iter()
-            .any(|diagnostic| diagnostic.message.contains("`vars`")),
-        "expected a vars diagnostic, got: {diagnostics}"
-    );
+    let diagnostic = diagnostics
+        .iter()
+        .find(|diagnostic| diagnostic.message.contains("`vars`"))
+        .expect("expected a vars diagnostic");
+    assert_eq!(diagnostic.span, Some(Span::new(4, 3)));
+}
+
+#[test]
+fn duplicate_nested_keys_are_rejected_by_validation() {
+    let source = r#"
+agent: DataExtractor
+system:
+  role: first
+  role: second
+"#;
+
+    let document = parse_str(source).expect("duplicate mapping keys should parse");
+    let diagnostics = validate_document(&document);
+
+    assert!(diagnostics.has_errors());
+    let diagnostic = diagnostics
+        .iter()
+        .find(|diagnostic| diagnostic.message.contains("duplicate key `role`"))
+        .expect("expected a duplicate-key diagnostic");
+    assert_eq!(diagnostic.span, Some(Span::new(5, 3)));
 }

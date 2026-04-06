@@ -14,14 +14,14 @@ pub fn transpile(document: &Document) -> String {
 
 fn flatten_node(lines: &mut Vec<String>, path: String, value: &Node) {
     match value {
-        Node::Scalar(scalar) => lines.push(format!("{path} = {}", quote(scalar))),
-        Node::Mapping(entries) => {
-            for (child_key, child_value) in entries {
-                flatten_node(lines, format!("{path}.{child_key}"), child_value);
+        Node::Scalar { value: scalar, .. } => lines.push(format!("{path} = {}", quote(scalar))),
+        Node::Mapping { entries, .. } => {
+            for entry in entries {
+                flatten_node(lines, format!("{path}.{}", entry.key), &entry.value);
             }
         }
-        Node::Sequence(items) => {
-            for (index, item) in items.iter().enumerate() {
+        Node::Sequence { values, .. } => {
+            for (index, item) in values.iter().enumerate() {
                 flatten_node(lines, format!("{path}[{index}]"), item);
             }
         }

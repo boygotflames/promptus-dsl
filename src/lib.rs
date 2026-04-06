@@ -7,7 +7,7 @@ pub mod parser;
 pub mod transpile;
 pub mod validator;
 
-pub use ast::{Document, Node, TopLevelKey};
+pub use ast::{Document, MappingEntry, Node, TopLevelKey};
 pub use diagnostics::{Diagnostic, DiagnosticBag, Severity, Span};
 pub use parser::parse_str;
 pub use validator::validate_document;

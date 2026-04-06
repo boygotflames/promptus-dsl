@@ -1,6 +1,4 @@
-use std::collections::BTreeMap;
-
-use crate::ast::{Document, Node, TopLevelKey};
+use crate::ast::{Document, MappingEntry, Node, TopLevelKey};
 use crate::diagnostics::{DiagnosticBag, Span};
 use crate::lexer::{LineToken, tokenize_lines};
 
@@ -31,7 +29,7 @@ impl Parser {
             }
 
             let (key_text, value, span) = self.parse_mapping_entry(0)?;
-            let Some(key) = TopLevelKey::from_str(&key_text) else {
+            let Some(key) = TopLevelKey::from_keyword(&key_text) else {
                 return Err(single_error(
                     format!("unknown top-level key `{key_text}`"),
                     span,
@@ -65,13 +63,17 @@ impl Parser {
         }
 
         if token.content.starts_with("- ") || token.content == "-" {
-            self.parse_sequence(expected_indent).map(Node::Sequence)
+            self.parse_sequence(expected_indent, token.span())
         } else {
-            self.parse_mapping(expected_indent).map(Node::Mapping)
+            self.parse_mapping(expected_indent, token.span())
         }
     }
 
-    fn parse_sequence(&mut self, expected_indent: usize) -> Result<Vec<Node>, DiagnosticBag> {
+    fn parse_sequence(
+        &mut self,
+        expected_indent: usize,
+        span: Span,
+    ) -> Result<Node, DiagnosticBag> {
         let mut items = Vec::new();
 
         while let Some(token) = self.current().cloned() {
@@ -100,18 +102,15 @@ impl Parser {
             if remainder.is_empty() {
                 items.push(self.parse_nested_block(expected_indent, token.span())?);
             } else {
-                items.push(Node::scalar(remainder));
+                items.push(Node::scalar_at(remainder, token.span()));
             }
         }
 
-        Ok(items)
+        Ok(Node::sequence_at(items, span))
     }
 
-    fn parse_mapping(
-        &mut self,
-        expected_indent: usize,
-    ) -> Result<BTreeMap<String, Node>, DiagnosticBag> {
-        let mut mapping = BTreeMap::new();
+    fn parse_mapping(&mut self, expected_indent: usize, span: Span) -> Result<Node, DiagnosticBag> {
+        let mut entries = Vec::new();
 
         while let Some(token) = self.current().cloned() {
             if token.indent < expected_indent {
@@ -132,13 +131,11 @@ impl Parser {
                 ));
             }
 
-            let (key, value, span) = self.parse_mapping_entry(expected_indent)?;
-            if mapping.insert(key.clone(), value).is_some() {
-                return Err(single_error(format!("duplicate key `{key}`"), span));
-            }
+            let (key, value, entry_span) = self.parse_mapping_entry(expected_indent)?;
+            entries.push(MappingEntry::new(key, value, entry_span));
         }
 
-        Ok(mapping)
+        Ok(Node::mapping_at(entries, span))
     }
 
     fn parse_mapping_entry(
@@ -167,7 +164,7 @@ impl Parser {
         self.advance();
 
         let value = match inline_value {
-            Some(value) => Node::scalar(value),
+            Some(value) => Node::scalar_at(value, token.span()),
             None => self.parse_nested_block(expected_indent, token.span())?,
         };
 

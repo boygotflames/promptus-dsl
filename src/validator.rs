@@ -1,8 +1,16 @@
+use std::collections::HashSet;
+
 use crate::ast::{Document, Node, TopLevelKey};
 use crate::diagnostics::DiagnosticBag;
 
 pub fn validate_document(document: &Document) -> DiagnosticBag {
     let mut diagnostics = DiagnosticBag::new();
+
+    for key in TopLevelKey::ordered() {
+        if let Some(node) = document.get(key) {
+            validate_duplicate_keys(node, key.as_str(), &mut diagnostics);
+        }
+    }
 
     validate_scalar_field(document, TopLevelKey::Agent, &mut diagnostics);
     validate_prompt_field(document, TopLevelKey::System, &mut diagnostics);
@@ -16,21 +24,52 @@ pub fn validate_document(document: &Document) -> DiagnosticBag {
     diagnostics
 }
 
+fn validate_duplicate_keys(node: &Node, path: &str, diagnostics: &mut DiagnosticBag) {
+    match node {
+        Node::Scalar { .. } => {}
+        Node::Sequence { values, .. } => {
+            for (index, item) in values.iter().enumerate() {
+                validate_duplicate_keys(item, &format!("{path}[{index}]"), diagnostics);
+            }
+        }
+        Node::Mapping { entries, .. } => {
+            let mut seen = HashSet::new();
+
+            for entry in entries {
+                if !seen.insert(entry.key.as_str()) {
+                    diagnostics.error(
+                        format!("duplicate key `{}` in `{path}`", entry.key),
+                        Some(entry.span),
+                    );
+                }
+
+                validate_duplicate_keys(
+                    &entry.value,
+                    &format!("{path}.{}", entry.key),
+                    diagnostics,
+                );
+            }
+        }
+    }
+}
+
 fn validate_scalar_field(document: &Document, key: TopLevelKey, diagnostics: &mut DiagnosticBag) {
     let Some(node) = document.get(key) else {
         return;
     };
 
     match node {
-        Node::Scalar(value) if !value.trim().is_empty() => {}
-        Node::Scalar(_) => diagnostics.error(format!("`{}` must not be empty", key.as_str()), None),
+        Node::Scalar { value, .. } if !value.trim().is_empty() => {}
+        Node::Scalar { span, .. } => {
+            diagnostics.error(format!("`{}` must not be empty", key.as_str()), Some(*span))
+        }
         other => diagnostics.error(
             format!(
                 "`{}` must be a scalar value, found {}",
                 key.as_str(),
                 other.kind_name()
             ),
-            None,
+            Some(other.span()),
         ),
     }
 }
@@ -40,14 +79,14 @@ fn validate_prompt_field(document: &Document, key: TopLevelKey, diagnostics: &mu
         return;
     };
 
-    if !matches!(node, Node::Scalar(_) | Node::Mapping(_)) {
+    if !matches!(node, Node::Scalar { .. } | Node::Mapping { .. }) {
         diagnostics.error(
             format!(
                 "`{}` must be a scalar or mapping, found {}",
                 key.as_str(),
                 node.kind_name()
             ),
-            None,
+            Some(node.span()),
         );
     }
 }
@@ -60,16 +99,16 @@ fn validate_sequence_field(document: &Document, key: TopLevelKey, diagnostics: &
     let Some(values) = node.as_sequence() else {
         diagnostics.error(
             format!("`{}` must be a sequence of scalar values", key.as_str()),
-            None,
+            Some(node.span()),
         );
         return;
     };
 
     for value in values {
-        if !matches!(value, Node::Scalar(_)) {
+        if !matches!(value, Node::Scalar { .. }) {
             diagnostics.error(
                 format!("`{}` may only contain scalar list items", key.as_str()),
-                None,
+                Some(value.span()),
             );
             break;
         }
@@ -81,8 +120,8 @@ fn validate_output_field(document: &Document, diagnostics: &mut DiagnosticBag) {
         return;
     };
 
-    if !matches!(node, Node::Scalar(_) | Node::Mapping(_)) {
-        diagnostics.error("`output` must be a scalar or mapping", None);
+    if !matches!(node, Node::Scalar { .. } | Node::Mapping { .. }) {
+        diagnostics.error("`output` must be a scalar or mapping", Some(node.span()));
     }
 }
 
@@ -92,13 +131,19 @@ fn validate_vars_field(document: &Document, diagnostics: &mut DiagnosticBag) {
     };
 
     let Some(entries) = node.as_mapping() else {
-        diagnostics.error("`vars` must be a mapping of scalar values", None);
+        diagnostics.error(
+            "`vars` must be a mapping of scalar values",
+            Some(node.span()),
+        );
         return;
     };
 
-    for (name, value) in entries {
-        if !matches!(value, Node::Scalar(_)) {
-            diagnostics.error(format!("`vars.{name}` must be a scalar value"), None);
+    for entry in entries {
+        if !matches!(&entry.value, Node::Scalar { .. }) {
+            diagnostics.error(
+                format!("`vars.{}` must be a scalar value", entry.key),
+                Some(entry.span),
+            );
         }
     }
 }

@@ -14,16 +14,16 @@ fn render_mapping_entry(lines: &mut Vec<String>, indent: usize, key: &str, value
     let prefix = " ".repeat(indent);
 
     match value {
-        Node::Scalar(scalar) => lines.push(format!("{prefix}{key}: {scalar}")),
-        Node::Mapping(entries) => {
+        Node::Scalar { value: scalar, .. } => lines.push(format!("{prefix}{key}: {scalar}")),
+        Node::Mapping { entries, .. } => {
             lines.push(format!("{prefix}{key}:"));
-            for (child_key, child_value) in entries {
-                render_mapping_entry(lines, indent + 2, child_key, child_value);
+            for entry in entries {
+                render_mapping_entry(lines, indent + 2, &entry.key, &entry.value);
             }
         }
-        Node::Sequence(items) => {
+        Node::Sequence { values, .. } => {
             lines.push(format!("{prefix}{key}:"));
-            for item in items {
+            for item in values {
                 render_list_item(lines, indent + 2, item);
             }
         }
@@ -34,16 +34,16 @@ fn render_list_item(lines: &mut Vec<String>, indent: usize, value: &Node) {
     let prefix = " ".repeat(indent);
 
     match value {
-        Node::Scalar(scalar) => lines.push(format!("{prefix}- {scalar}")),
-        Node::Mapping(entries) => {
+        Node::Scalar { value: scalar, .. } => lines.push(format!("{prefix}- {scalar}")),
+        Node::Mapping { entries, .. } => {
             lines.push(format!("{prefix}-"));
-            for (child_key, child_value) in entries {
-                render_mapping_entry(lines, indent + 2, child_key, child_value);
+            for entry in entries {
+                render_mapping_entry(lines, indent + 2, &entry.key, &entry.value);
             }
         }
-        Node::Sequence(items) => {
+        Node::Sequence { values, .. } => {
             lines.push(format!("{prefix}-"));
-            for item in items {
+            for item in values {
                 render_list_item(lines, indent + 2, item);
             }
         }

@@ -23,8 +23,8 @@ pub fn transpile(document: &Document) -> String {
 
 fn render_node(value: &Node, indent: usize) -> String {
     match value {
-        Node::Scalar(scalar) => quote(scalar),
-        Node::Sequence(items) => {
+        Node::Scalar { value: scalar, .. } => quote(scalar),
+        Node::Sequence { values: items, .. } => {
             if items.is_empty() {
                 return "[]".to_owned();
             }
@@ -43,7 +43,7 @@ fn render_node(value: &Node, indent: usize) -> String {
             lines.push(format!("{}]", " ".repeat(indent.saturating_sub(2))));
             lines.join("\n")
         }
-        Node::Mapping(entries) => {
+        Node::Mapping { entries, .. } => {
             if entries.is_empty() {
                 return "{}".to_owned();
             }
@@ -51,13 +51,13 @@ fn render_node(value: &Node, indent: usize) -> String {
             let mut lines = Vec::new();
             lines.push("{".to_owned());
 
-            for (index, (key, item)) in entries.iter().enumerate() {
+            for (index, entry) in entries.iter().enumerate() {
                 let suffix = if index + 1 == entries.len() { "" } else { "," };
                 lines.push(format!(
                     "{}{}: {}{}",
                     " ".repeat(indent),
-                    quote(key),
-                    render_node(item, indent + 2),
+                    quote(&entry.key),
+                    render_node(&entry.value, indent + 2),
                     suffix
                 ));
             }
