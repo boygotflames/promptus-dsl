@@ -1,34 +1,176 @@
-Mission: .llm Format
-Problem Statement
+# Mission: `.llm` Format
 
-Large language model prompting currently relies on Markdown (.md), a format built for HTML rendering rather than machine logic. When used with token-hungry models like Claude 3 Opus or GPT‑4, Markdown's structural syntax leads to significant token waste; a typical system prompt can lose around 15 % of its tokens to the ```json, ### and --- delimiters. Markdown lacks rigid routing primitives, forcing developers to embed verbose XML-like tags to express state transitions, which bloats prompts further. Worse, Markdown has no strict grammar, so models sometimes hallucinate formatting or leave code blocks unclosed, causing downstream parse errors.
+## Overview
 
-Vision & Solution
+`.llm` is a new prompt format designed for large language models.
 
-Our mission is to solve these inefficiencies by defining a new dual‑layer .llm format and building an accompanying Rust transpiler. The .llm specification embraces a mirror architecture: the human‑readable Surface layer is a concise DSL that uses indentation and clear keywords to describe agents, system roles, memory and tooling. When compiled, this Surface is transformed into a Shadow layer: a normalized machine‑facing representation that uses single‑token ASCII or Unicode markers to encode structural boundaries. This mirror design decouples developer ergonomics from machine efficiency and reduces structural token cost by 40–60 %.
+Its purpose is to replace Markdown as the default authoring layer for structured prompting when the target is not HTML rendering, but machine execution, deterministic parsing, and token efficiency.
 
-Goals
+The project combines two core deliverables:
 
-We aim to establish .llm as the definitive open standard for multi‑provider agent prompts. The core deliverables are:
+- a formal `.llm` specification
+- a Rust-based transpiler that compiles human-readable `.llm` source into machine-optimized output
 
-An unambiguous specification (SPEC.md) defining the Surface grammar, semantics and reserved keywords.
-A safe, high‑performance Rust transpiler that parses .llm files into an abstract syntax tree (AST), validates their semantics and emits multiple targets (Shadow payloads, plain prompts and a JSON intermediate representation).
-A benchmarking suite to demonstrate token cost reductions relative to equivalent Markdown prompts and to measure performance across model tokenizers.
-An open ecosystem that invites contributions and fosters adoption across editors, frameworks and providers.
-Engineering Tenets
+---
 
-Our engineering principles are:
+## Problem Statement
 
-Specification‑First: The grammar and semantics are defined up front in a living specification. Code, tools and examples must adhere to the spec.
-Dual‑Layer Architecture: All compilation stages respect the separation between Surface and Shadow. The Surface must remain readable and writeable by humans; the Shadow must remain deterministic and token‑efficient.
-Deterministic Execution: Parsing, validation and transpilation must be fully deterministic. The same .llm input always produces the same AST and output; error messages include precise line/column diagnostics.
-Pluggable Targets: The transpiler exposes a trait‑based interface for new emitters so that providers can supply optimized Shadow encodings without changing the core grammar.
-Memory‑Safe Performance: We use Rust with crates like logos for lexing and nom or custom iterators for parsing, guaranteeing memory safety and predictable performance.
-Open but Disciplined: The specification, compiler and tooling are open source to encourage community contributions; however, enterprise routing and orchestration may become commercial offerings【959362995327066†L67-L80】.
-Licensing & Philosophy
+Modern prompting still relies heavily on Markdown (`.md`), even though Markdown was designed for presentation and document publishing, not for machine-native prompt orchestration.
 
-We embrace the "Open Claw" philosophy. .llm and its tooling will be released under a permissive license (MIT or Apache‑2.0). This encourages viral adoption and prevents vendor lock‑in. Monetization will focus on optional enterprise routers and cloud orchestration services rather than on the file format itself.
+This creates several problems:
 
-Commitment
+- **Token waste**  
+  Structural syntax such as headings, fenced code blocks, separators, and wrapper markup consumes tokens without adding semantic value to the model.
 
-We commit to an iterative, transparent development process. Every phase will be documented in PLAN.md, with milestones tracked openly. The result will be a robust ecosystem that lowers API costs, improves prompt stability and empowers developers to build sophisticated agentic workflows without worrying about token bloat or ambiguous parsing.
+- **Weak routing semantics**  
+  Markdown has no built-in primitives for agent routing, memory boundaries, execution modes, tool contracts, or state transitions.
+
+- **Prompt bloat through workaround syntax**  
+  Developers often compensate with XML-like wrappers, nested delimiters, and verbose conventions that further increase token overhead.
+
+- **Lack of strict grammar**  
+  Markdown is permissive and ambiguous. Models can hallucinate formatting, close blocks incorrectly, or generate malformed structures that break downstream systems.
+
+In short: Markdown is readable, but it is not a reliable systems language for LLM workflows.
+
+---
+
+## Vision
+
+We are building a **dual-layer prompt architecture**:
+
+### Surface Layer
+A human-readable DSL for authoring structured prompts with clarity and minimal noise.
+
+### Shadow Layer
+A normalized machine-facing representation produced by compilation, using compact markers and deterministic encoding optimized for LLM execution.
+
+This mirror design separates:
+
+- **developer ergonomics** from **runtime efficiency**
+- **authoring clarity** from **machine compactness**
+- **human intent** from **provider-specific prompt serialization**
+
+The result is a format that is easier to write, safer to parse, and substantially more token-efficient.
+
+---
+
+## Core Solution
+
+The `.llm` system consists of:
+
+1. **A formal specification** that defines grammar, semantics, reserved keywords, and canonical structure.
+2. **A Rust transpiler** that parses `.llm` into an AST, validates semantics, and emits multiple targets.
+3. **A benchmarking layer** that proves the token and performance advantages of `.llm` over Markdown-based prompting.
+4. **An open ecosystem** for tooling, editor support, adapters, and future standardization.
+
+---
+
+## Goals
+
+We aim to establish `.llm` as an open standard for multi-provider, structured, agent-oriented prompting.
+
+### Primary goals
+
+- Define an unambiguous specification in `SPEC.md`
+- Build a safe, high-performance Rust compiler/transpiler
+- Support multiple output targets, including:
+  - Shadow payloads
+  - plain prompt output
+  - JSON intermediate representation
+- Demonstrate measurable token savings against Markdown equivalents
+- Enable adoption across editors, frameworks, and model providers
+
+### Success criteria
+
+A successful `.llm` ecosystem should make prompts:
+
+- cheaper to send
+- easier to author
+- safer to validate
+- more deterministic to execute
+- easier to adapt across providers
+
+---
+
+## Engineering Tenets
+
+### 1. Specification First
+The grammar and semantics come first.
+
+Implementation must follow the specification, not invent it on the fly. Code, tooling, examples, and tests must remain aligned with the evolving spec.
+
+### 2. Dual-Layer Architecture
+Surface and Shadow are distinct by design.
+
+The Surface must remain readable and writable by humans.  
+The Shadow must remain deterministic, compact, and optimized for machine consumption.
+
+### 3. Deterministic Execution
+Compilation must be stable and reproducible.
+
+The same `.llm` input must always produce the same AST and the same emitted output. Diagnostics must be precise and source-aware.
+
+### 4. Pluggable Targets
+The transpiler must support extensible emission targets.
+
+Provider-specific Shadow encodings or downstream formats should be addable without changing the core language.
+
+### 5. Memory-Safe Performance
+The implementation language is Rust.
+
+We prioritize:
+- memory safety
+- predictable performance
+- explicit error handling
+- strong compiler guarantees
+
+### 6. Open but Disciplined
+The format and tooling should be open source, but the project must still maintain architectural discipline, versioning clarity, and quality control.
+
+Openness is not an excuse for ambiguity.
+
+---
+
+## Licensing and Philosophy
+
+`.llm` will follow an open ecosystem model.
+
+### Licensing direction
+
+A permissive license such as:
+
+- MIT
+- Apache-2.0
+
+### Philosophy
+
+We follow an **open core / open standard** mindset:
+
+- the format should remain open
+- the compiler and tooling should remain accessible
+- adoption should not depend on vendor lock-in
+
+Commercial value, if introduced, should come from higher-level infrastructure such as:
+
+- enterprise routing
+- hosted orchestration
+- proprietary control planes
+- deployment and observability layers
+
+Not from restricting the format itself.
+
+---
+
+## Commitment
+
+We are building `.llm` as an iterative and transparent engineering effort.
+
+We commit to:
+
+- documenting progress in `PLAN.md`
+- evolving the specification in public
+- benchmarking real gains, not hand-waving them
+- building tooling that is practical, deterministic, and production-oriented
+
+The end state is a robust prompt-engineering ecosystem that reduces token waste, improves structural reliability, and gives developers a format built for LLM systems rather than retrofitted from document markup.

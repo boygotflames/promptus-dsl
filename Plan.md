@@ -1,104 +1,291 @@
-Development Plan for the .llm Transpiler
+# Development Plan for the `.llm` Transpiler
 
-This roadmap tracks the phases of the .llm project. Status markers like [COMPLETED] and [IN PROGRESS] reflect our current progress and will be updated as we advance.
+## Purpose
 
-Phase 0 — Scaffold and Foundation [COMPLETED]
+This roadmap defines the implementation phases for the `.llm` project and tracks progress from initial scaffold to ecosystem standardization.
 
-Goals: Establish a minimal yet production‑grade project scaffold.
+It is intended to be a living project document.
 
-Deliverables:
+---
 
-Create initial Rust crate with Cargo.toml and .gitignore.
-Establish directory structure (src/, examples/, tests/, docs/).
-Add placeholder modules (ast.rs, parser.rs, validator.rs, diagnostics.rs, transpile/, cli/, bench/).
-Draft initial SPEC.md and provide examples.
-Ensure the project compiles and tests run.
+## Status Legend
 
-Status: Completed (see Codex report for details). The foundation includes AST definitions, diagnostics scaffolding, CLI skeleton, basic examples and tests, but no full parser or validator logic.
+- `[COMPLETED]` — finished and stable enough to build on
+- `[IN PROGRESS]` — actively being implemented
+- `[PENDING]` — planned but not started
+- `[BLOCKED]` — waiting on decisions, dependencies, or upstream work
 
-Phase 1 — Parser and AST [IN PROGRESS]
+---
 
-Goals: Turn the Surface .llm DSL into a stable abstract syntax tree.
+## Current Project Status
 
-Tasks:
+### Phase 0 — Scaffold and Foundation
+**Status:** `[COMPLETED]`
 
-Implement a lexer using logos or a custom iterator.
-Implement a deterministic parser handling scalar values, nested maps, lists and indentation. Support top‑level blocks (agent, system, user, memory, tools, output, constraints, vars) and nested structures.
-Track source spans (line and column) for all AST nodes to facilitate precise diagnostics.
-Produce clear syntax errors with contextual messages.
-Create golden tests for valid and invalid .llm samples to ensure the parser is robust.
-Update SPEC.md as grammar details solidify.
+The project foundation exists and is usable.
 
-Success Criteria: The parser can round‑trip sample files into AST snapshots and the tests pass.
+Current baseline includes:
 
-Phase 2 — Semantic Validation [PENDING]
+- initial Rust crate structure
+- core module scaffolding
+- AST definitions
+- diagnostics scaffolding
+- CLI skeleton
+- examples and basic tests
 
-Goals: Enforce semantic correctness and provide meaningful diagnostics.
+This phase established the project shape, but not the full parser/validator/transpiler implementation.
 
-Tasks:
+### Phase 1 — Parser and AST
+**Status:** `[IN PROGRESS]`
 
-Implement a validation layer that checks for duplicate keys, unknown blocks and required fields.
-Validate lists, maps and scalars according to the spec.
-Define and implement error codes and messages.
-Phase 3 — Transpiler Targets [PENDING]
+Current effort is focused on turning the Surface `.llm` syntax into a stable, deterministic AST with strong source diagnostics.
 
-Goals: Generate useful outputs from the AST.
+---
 
-Tasks:
+# Roadmap
 
-Define a TargetEmitter trait and implement PlainEmitter, ShadowEmitter and JsonIrEmitter.
-Make target encoding pluggable to allow provider‑specific Shadow encodings.
-Ensure deterministic output for each target.
-Phase 4 — Command‑Line Interface [PENDING]
+## Phase 0 — Scaffold and Foundation `[COMPLETED]`
 
-Goals: Provide a user‑friendly CLI.
+### Objective
+Establish a minimal but production-grade project skeleton.
 
-Tasks:
+### Deliverables
+- Create the initial Rust crate with `Cargo.toml` and `.gitignore`
+- Establish the base directory structure:
+  - `src/`
+  - `examples/`
+  - `tests/`
+  - `docs/`
+- Add initial placeholder modules:
+  - `ast.rs`
+  - `parser.rs`
+  - `validator.rs`
+  - `diagnostics.rs`
+  - `transpile/`
+  - `cli/`
+  - `bench/`
+- Draft the initial `SPEC.md`
+- Add basic examples
+- Ensure the project compiles and tests run
 
-Implement commands: parse, validate, transpile, bench, fmt, explain-error.
-Ensure commands integrate with parser, validator and transpiler modules.
-Provide helpful usage messages and handle file inputs/outputs.
-Phase 5 — Benchmarking and Proof [PENDING]
+### Outcome
+Foundation completed. The project is now ready for full parser and compiler work.
 
-Goals: Validate performance and token reductions.
+---
 
-Tasks:
+## Phase 1 — Parser and AST `[IN PROGRESS]`
 
-Abstract over tokenizer implementations (e.g., tiktoken).
-Build fixtures for comparing .llm files against Markdown and other formats.
-Generate reports on token counts, byte sizes and compile times.
-Phase 6 — Formatter and Language Ergonomics [PENDING]
+### Objective
+Turn the Surface `.llm` DSL into a deterministic and inspectable abstract syntax tree.
 
-Goals: Improve authoring experience.
+### Tasks
+- Implement a lexer using `logos` or a custom iterator
+- Implement a deterministic parser for:
+  - scalar values
+  - nested maps
+  - lists
+  - indentation-based structure
+- Support top-level blocks such as:
+  - `agent`
+  - `system`
+  - `user`
+  - `memory`
+  - `tools`
+  - `output`
+  - `constraints`
+  - `vars`
+- Track source spans for all AST nodes:
+  - line
+  - column
+  - source range
+- Produce clear syntax errors with useful context
+- Add golden tests for valid and invalid `.llm` samples
+- Refine `SPEC.md` as grammar details become stable
 
-Tasks:
+### Exit Criteria
+- Sample `.llm` files parse successfully into AST snapshots
+- Invalid syntax produces deterministic diagnostics
+- Parser tests pass consistently
 
-Implement a formatter that normalizes .llm files according to canonical style rules.
-Add syntax highlighting grammar for editors.
-Provide example library demonstrating best practices.
-Phase 7 — Editor Support [PENDING]
+---
 
-Goals: Increase adoption.
+## Phase 2 — Semantic Validation `[PENDING]`
 
-Tasks:
+### Objective
+Enforce semantic correctness beyond syntax.
 
-Develop a VS Code extension offering syntax highlighting, validation on save and transpilation previews.
-Explore integrations with other editors and IDEs.
-Phase 8 — Provider‑Aware Adapters [PENDING]
+### Tasks
+- Detect duplicate keys
+- Detect unknown blocks or unsupported structures
+- Enforce required fields
+- Validate scalar, list, and map shapes against the spec
+- Define a consistent error-code system
+- Implement semantic diagnostics with actionable messages
 
-Goals: Optimize output across model providers.
+### Exit Criteria
+- Valid documents pass semantic validation
+- Invalid documents fail with precise, spec-aligned errors
 
-Tasks:
+---
 
-Implement provider adapters for OpenAI, Anthropic and others.
-Make token optimization tables configurable.
-Support features like function calling or system vs user prompts as provider capabilities evolve.
-Phase 9 — Ecosystem and Standardization [PENDING]
+## Phase 3 — Transpiler Targets `[PENDING]`
 
-Goals: Establish .llm as a public standard.
+### Objective
+Generate useful outputs from the AST.
 
-Tasks:
+### Tasks
+- Define a `TargetEmitter` trait
+- Implement:
+  - `PlainEmitter`
+  - `ShadowEmitter`
+  - `JsonIrEmitter`
+- Ensure output generation is deterministic
+- Make target encoding pluggable for provider-specific Shadow formats
 
-Formalize versioning and publish a compatibility matrix.
-Provide conformance tests and migration guides.
-Engage with the community through open‑source governance and contributions.
+### Exit Criteria
+- A parsed AST can be emitted reliably into all supported output targets
+- Emission behavior is stable and test-covered
+
+---
+
+## Phase 4 — Command-Line Interface `[PENDING]`
+
+### Objective
+Provide a usable developer-facing CLI.
+
+### Tasks
+- Implement commands such as:
+  - `parse`
+  - `validate`
+  - `transpile`
+  - `bench`
+  - `fmt`
+  - `explain-error`
+- Connect CLI commands to parser, validator, and transpiler modules
+- Handle file input/output paths cleanly
+- Provide strong help text and failure messages
+
+### Exit Criteria
+- The CLI supports core workflows end-to-end
+- Output and errors are readable and predictable
+
+---
+
+## Phase 5 — Benchmarking and Proof `[PENDING]`
+
+### Objective
+Quantify the value of `.llm`.
+
+### Tasks
+- Abstract over tokenizer implementations
+- Build benchmark fixtures comparing:
+  - `.llm`
+  - Markdown
+  - other structured prompt formats
+- Measure:
+  - token count
+  - byte size
+  - compile time
+- Generate repeatable reports for internal validation and public proof
+
+### Exit Criteria
+- Benchmark suite is automated
+- Results clearly demonstrate the efficiency profile of `.llm`
+
+---
+
+## Phase 6 — Formatter and Language Ergonomics `[PENDING]`
+
+### Objective
+Improve authoring quality and consistency.
+
+### Tasks
+- Implement a canonical formatter for `.llm`
+- Normalize file layout according to official style rules
+- Add syntax-highlighting grammar for editors
+- Build a library of examples and best-practice patterns
+
+### Exit Criteria
+- `.llm` files can be auto-formatted into canonical form
+- Authoring becomes easier and less error-prone
+
+---
+
+## Phase 7 — Editor Support `[PENDING]`
+
+### Objective
+Support real developer workflows.
+
+### Tasks
+- Build a VS Code extension
+- Provide:
+  - syntax highlighting
+  - validation on save
+  - transpilation previews
+- Explore support for additional editors and IDEs
+
+### Exit Criteria
+- Authors can work comfortably with `.llm` inside mainstream tooling
+
+---
+
+## Phase 8 — Provider-Aware Adapters `[PENDING]`
+
+### Objective
+Optimize output across model vendors.
+
+### Tasks
+- Implement adapters for major providers such as:
+  - OpenAI
+  - Anthropic
+  - others as needed
+- Make token-optimization tables configurable
+- Support provider-specific capabilities as they evolve, including:
+  - function/tool calling
+  - system/user channel differences
+  - structured output conventions
+
+### Exit Criteria
+- `.llm` output can be specialized without changing core source documents
+
+---
+
+## Phase 9 — Ecosystem and Standardization `[PENDING]`
+
+### Objective
+Turn `.llm` into a durable public standard.
+
+### Tasks
+- Formalize versioning strategy
+- Publish a compatibility matrix
+- Add conformance tests
+- Publish migration guides
+- Establish contribution and governance processes
+- Grow ecosystem participation around tooling and adoption
+
+### Exit Criteria
+- `.llm` is documented, versioned, testable, and adoptable beyond the core project
+
+---
+
+## Immediate Priorities
+
+1. Complete deterministic parsing for the Surface DSL
+2. Lock down AST structure and source-span tracking
+3. Expand parser test coverage
+4. Refine the spec in parallel with implementation
+5. Prepare the validation layer as the next execution phase
+
+---
+
+## Working Principle
+
+Each phase should produce artifacts that are:
+
+- testable
+- deterministic
+- spec-aligned
+- extensible
+- useful on their own
+
+The project should evolve in layers, with each completed phase reducing ambiguity for the next one.
