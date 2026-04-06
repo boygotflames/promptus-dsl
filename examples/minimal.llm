@@ -1,0 +1,6 @@
+agent: DataExtractor
+system:
+  role: financial_analyst
+  output: json
+memory:
+  - user_history

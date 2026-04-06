@@ -1,0 +1,12 @@
+agent: Extractor
+system:
+  role: financial_analyst
+  objective: extract structured facts
+user:
+  prompt: summarize the quarterly filing
+tools:
+  - web_search
+  - calculator
+constraints:
+  - cite_sources
+  - stay_provider_agnostic

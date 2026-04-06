@@ -1,0 +1,9 @@
+agent: DataExtractor
+system:
+  role: financial_analyst
+  output: json
+output:
+  schema: invoice_summary
+vars:
+  region: apac
+  currency: usd

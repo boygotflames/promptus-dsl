@@ -1,0 +1,5 @@
+agent: SampleAgent
+system:
+  role: example
+memory:
+  - prior_context
