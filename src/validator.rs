@@ -6,6 +6,8 @@ use crate::diagnostics::DiagnosticBag;
 pub fn validate_document(document: &Document) -> DiagnosticBag {
     let mut diagnostics = DiagnosticBag::new();
 
+    validate_required_structure(document, &mut diagnostics);
+
     for key in TopLevelKey::ordered() {
         if let Some(node) = document.get(key) {
             validate_duplicate_keys(node, key.as_str(), &mut diagnostics);
@@ -24,6 +26,10 @@ pub fn validate_document(document: &Document) -> DiagnosticBag {
     diagnostics
 }
 
+fn validate_required_structure(_document: &Document, _diagnostics: &mut DiagnosticBag) {
+    // TODO: v0 does not yet declare any required top-level blocks in SPEC.md.
+}
+
 fn validate_duplicate_keys(node: &Node, path: &str, diagnostics: &mut DiagnosticBag) {
     match node {
         Node::Scalar { .. } => {}
@@ -37,7 +43,7 @@ fn validate_duplicate_keys(node: &Node, path: &str, diagnostics: &mut Diagnostic
 
             for entry in entries {
                 if !seen.insert(entry.key.as_str()) {
-                    diagnostics.error(
+                    diagnostics.semantic_error(
                         format!("duplicate key `{}` in `{path}`", entry.key),
                         Some(entry.span),
                     );
@@ -61,9 +67,9 @@ fn validate_scalar_field(document: &Document, key: TopLevelKey, diagnostics: &mu
     match node {
         Node::Scalar { value, .. } if !value.trim().is_empty() => {}
         Node::Scalar { span, .. } => {
-            diagnostics.error(format!("`{}` must not be empty", key.as_str()), Some(*span))
+            diagnostics.semantic_error(format!("`{}` must not be empty", key.as_str()), Some(*span))
         }
-        other => diagnostics.error(
+        other => diagnostics.semantic_error(
             format!(
                 "`{}` must be a scalar value, found {}",
                 key.as_str(),
@@ -80,7 +86,7 @@ fn validate_prompt_field(document: &Document, key: TopLevelKey, diagnostics: &mu
     };
 
     if !matches!(node, Node::Scalar { .. } | Node::Mapping { .. }) {
-        diagnostics.error(
+        diagnostics.semantic_error(
             format!(
                 "`{}` must be a scalar or mapping, found {}",
                 key.as_str(),
@@ -97,7 +103,7 @@ fn validate_sequence_field(document: &Document, key: TopLevelKey, diagnostics: &
     };
 
     let Some(values) = node.as_sequence() else {
-        diagnostics.error(
+        diagnostics.semantic_error(
             format!("`{}` must be a sequence of scalar values", key.as_str()),
             Some(node.span()),
         );
@@ -106,7 +112,7 @@ fn validate_sequence_field(document: &Document, key: TopLevelKey, diagnostics: &
 
     for value in values {
         if !matches!(value, Node::Scalar { .. }) {
-            diagnostics.error(
+            diagnostics.semantic_error(
                 format!("`{}` may only contain scalar list items", key.as_str()),
                 Some(value.span()),
             );
@@ -121,7 +127,7 @@ fn validate_output_field(document: &Document, diagnostics: &mut DiagnosticBag) {
     };
 
     if !matches!(node, Node::Scalar { .. } | Node::Mapping { .. }) {
-        diagnostics.error("`output` must be a scalar or mapping", Some(node.span()));
+        diagnostics.semantic_error("`output` must be a scalar or mapping", Some(node.span()));
     }
 }
 
@@ -131,7 +137,7 @@ fn validate_vars_field(document: &Document, diagnostics: &mut DiagnosticBag) {
     };
 
     let Some(entries) = node.as_mapping() else {
-        diagnostics.error(
+        diagnostics.semantic_error(
             "`vars` must be a mapping of scalar values",
             Some(node.span()),
         );
@@ -140,7 +146,7 @@ fn validate_vars_field(document: &Document, diagnostics: &mut DiagnosticBag) {
 
     for entry in entries {
         if !matches!(&entry.value, Node::Scalar { .. }) {
-            diagnostics.error(
+            diagnostics.semantic_error(
                 format!("`vars.{}` must be a scalar value", entry.key),
                 Some(entry.span),
             );

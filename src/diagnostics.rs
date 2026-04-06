@@ -8,6 +8,12 @@ pub enum Severity {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DiagnosticPhase {
+    Syntax,
+    Semantic,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Span {
     pub line: usize,
     pub column: usize,
@@ -21,22 +27,43 @@ impl Span {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Diagnostic {
+    pub phase: DiagnosticPhase,
     pub severity: Severity,
     pub message: String,
     pub span: Option<Span>,
 }
 
 impl Diagnostic {
-    pub fn error<T: Into<String>>(message: T, span: Option<Span>) -> Self {
+    pub fn syntax_error<T: Into<String>>(message: T, span: Option<Span>) -> Self {
         Self {
+            phase: DiagnosticPhase::Syntax,
             severity: Severity::Error,
             message: message.into(),
             span,
         }
     }
 
-    pub fn warning<T: Into<String>>(message: T, span: Option<Span>) -> Self {
+    pub fn semantic_error<T: Into<String>>(message: T, span: Option<Span>) -> Self {
         Self {
+            phase: DiagnosticPhase::Semantic,
+            severity: Severity::Error,
+            message: message.into(),
+            span,
+        }
+    }
+
+    pub fn syntax_warning<T: Into<String>>(message: T, span: Option<Span>) -> Self {
+        Self {
+            phase: DiagnosticPhase::Syntax,
+            severity: Severity::Warning,
+            message: message.into(),
+            span,
+        }
+    }
+
+    pub fn semantic_warning<T: Into<String>>(message: T, span: Option<Span>) -> Self {
+        Self {
+            phase: DiagnosticPhase::Semantic,
             severity: Severity::Warning,
             message: message.into(),
             span,
@@ -46,9 +73,11 @@ impl Diagnostic {
 
 impl fmt::Display for Diagnostic {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let label = match self.severity {
-            Severity::Error => "error",
-            Severity::Warning => "warning",
+        let label = match (self.phase, self.severity) {
+            (DiagnosticPhase::Syntax, Severity::Error) => "syntax error",
+            (DiagnosticPhase::Semantic, Severity::Error) => "semantic error",
+            (DiagnosticPhase::Syntax, Severity::Warning) => "syntax warning",
+            (DiagnosticPhase::Semantic, Severity::Warning) => "semantic warning",
         };
 
         match self.span {
@@ -76,12 +105,20 @@ impl DiagnosticBag {
         self.diagnostics.push(diagnostic);
     }
 
-    pub fn error<T: Into<String>>(&mut self, message: T, span: Option<Span>) {
-        self.push(Diagnostic::error(message, span));
+    pub fn syntax_error<T: Into<String>>(&mut self, message: T, span: Option<Span>) {
+        self.push(Diagnostic::syntax_error(message, span));
     }
 
-    pub fn warning<T: Into<String>>(&mut self, message: T, span: Option<Span>) {
-        self.push(Diagnostic::warning(message, span));
+    pub fn semantic_error<T: Into<String>>(&mut self, message: T, span: Option<Span>) {
+        self.push(Diagnostic::semantic_error(message, span));
+    }
+
+    pub fn syntax_warning<T: Into<String>>(&mut self, message: T, span: Option<Span>) {
+        self.push(Diagnostic::syntax_warning(message, span));
+    }
+
+    pub fn semantic_warning<T: Into<String>>(&mut self, message: T, span: Option<Span>) {
+        self.push(Diagnostic::semantic_warning(message, span));
     }
 
     pub fn extend(&mut self, other: Self) {

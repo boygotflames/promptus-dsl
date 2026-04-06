@@ -59,7 +59,7 @@ pub fn tokenize_lines(source: &str) -> Result<Vec<LineToken>, DiagnosticBag> {
         }
 
         if raw_line.contains('\t') {
-            diagnostics.error(
+            diagnostics.syntax_error(
                 "tabs are not supported; use two-space indentation",
                 Some(Span::new(line_number, 1)),
             );
@@ -68,7 +68,7 @@ pub fn tokenize_lines(source: &str) -> Result<Vec<LineToken>, DiagnosticBag> {
 
         let indent = raw_line.chars().take_while(|ch| *ch == ' ').count();
         if indent % 2 != 0 {
-            diagnostics.error(
+            diagnostics.syntax_error(
                 "indentation must use multiples of two spaces",
                 Some(Span::new(line_number, 1)),
             );
@@ -262,6 +262,6 @@ fn is_identifier_continue(ch: char) -> bool {
 
 fn single_error<T: Into<String>>(message: T, span: Span) -> DiagnosticBag {
     let mut diagnostics = DiagnosticBag::new();
-    diagnostics.error(message, Some(span));
+    diagnostics.syntax_error(message, Some(span));
     diagnostics
 }

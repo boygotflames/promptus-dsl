@@ -228,6 +228,6 @@ impl Parser {
 
 fn single_error<T: Into<String>>(message: T, span: Span) -> DiagnosticBag {
     let mut diagnostics = DiagnosticBag::new();
-    diagnostics.error(message, Some(span));
+    diagnostics.syntax_error(message, Some(span));
     diagnostics
 }

@@ -7,7 +7,18 @@ fn reports_unknown_top_level_keys() {
 
     assert_eq!(
         diagnostics.to_string(),
-        "error at 2:1: unknown top-level key `persona`"
+        "syntax error at 2:1: unknown top-level key `persona`"
+    );
+}
+
+#[test]
+fn reports_duplicate_top_level_blocks_during_parsing() {
+    let diagnostics = parse_str(include_str!("../examples/invalid/duplicate-top-level.llm"))
+        .expect_err("duplicate top-level keys should fail during parsing");
+
+    assert_eq!(
+        diagnostics.to_string(),
+        "syntax error at 2:1: duplicate top-level key `agent`"
     );
 }
 
@@ -18,7 +29,7 @@ fn reports_mismatched_indentation() {
 
     assert_eq!(
         diagnostics.to_string(),
-        "error at 3:5: nested blocks must be indented by exactly 2 spaces"
+        "syntax error at 3:5: nested blocks must be indented by exactly 2 spaces"
     );
 }
 
@@ -29,7 +40,7 @@ fn reports_missing_colons() {
 
     assert_eq!(
         diagnostics.to_string(),
-        "error at 1:6: expected `:` after mapping key"
+        "syntax error at 1:6: expected `:` after mapping key"
     );
 }
 
@@ -40,6 +51,6 @@ fn reports_unterminated_quoted_scalars() {
 
     assert_eq!(
         diagnostics.to_string(),
-        "error at 1:8: unterminated quoted scalar"
+        "syntax error at 1:8: unterminated quoted scalar"
     );
 }

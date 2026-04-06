@@ -1,4 +1,4 @@
-use llm_format::{Span, parse_str, validate_document};
+use llm_format::{DiagnosticPhase, Span, parse_str, validate_document};
 
 #[test]
 fn valid_example_passes_validation() {
@@ -49,4 +49,28 @@ system:
         .find(|diagnostic| diagnostic.message.contains("duplicate key `role`"))
         .expect("expected a duplicate-key diagnostic");
     assert_eq!(diagnostic.span, Some(Span::new(5, 3)));
+    assert_eq!(diagnostic.phase, DiagnosticPhase::Semantic);
+    assert_eq!(
+        diagnostic.to_string(),
+        "semantic error at 5:3: duplicate key `role` in `system`"
+    );
+}
+
+#[test]
+fn same_key_name_in_different_map_scopes_is_allowed() {
+    let source = r#"
+agent: DataExtractor
+system:
+  role: summarizer
+  nested:
+    role: helper
+"#;
+
+    let document = parse_str(source).expect("fixture should parse");
+    let diagnostics = validate_document(&document);
+
+    assert!(
+        !diagnostics.has_errors(),
+        "expected no validation errors, got: {diagnostics}"
+    );
 }
