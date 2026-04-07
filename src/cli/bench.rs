@@ -1,12 +1,12 @@
 use std::fs;
+use std::io::{self, Write};
 use std::path::PathBuf;
 
 use anyhow::{Context, Result, anyhow};
 use clap::Args;
 
-use crate::bench::tokenizer::count_tokens;
+use crate::bench;
 use crate::parser::parse_str;
-use crate::transpile::{self, Target};
 use crate::validator::validate_document;
 
 #[derive(Debug, Args)]
@@ -15,6 +15,18 @@ pub struct BenchArgs {
 }
 
 pub fn run(args: BenchArgs) -> Result<()> {
+    let report = execute(args)?;
+    let mut stdout = io::stdout().lock();
+    stdout
+        .write_all(report.as_bytes())
+        .context("failed to write bench report to stdout")?;
+    stdout
+        .write_all(b"\n")
+        .context("failed to finalize bench report output")?;
+    Ok(())
+}
+
+pub fn execute(args: BenchArgs) -> Result<String> {
     let source = fs::read_to_string(&args.input)
         .with_context(|| format!("failed to read {}", args.input.display()))?;
 
@@ -29,12 +41,6 @@ pub fn run(args: BenchArgs) -> Result<()> {
         return Err(anyhow!("validation failed"));
     }
 
-    let plain = transpile::transpile(&document, Target::Plain);
-    let shadow = transpile::transpile(&document, Target::Shadow);
-
-    println!("source_tokens: {}", count_tokens(&source)?);
-    println!("plain_tokens: {}", count_tokens(&plain)?);
-    println!("shadow_tokens: {}", count_tokens(&shadow)?);
-
-    Ok(())
+    let report = bench::measure_document(&source, &document)?;
+    Ok(report.render())
 }
