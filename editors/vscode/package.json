@@ -1,0 +1,36 @@
+{
+  "name": "llm-vscode",
+  "displayName": ".llm Syntax Support",
+  "description": "Minimal VS Code support for .llm surface files",
+  "version": "0.1.0",
+  "publisher": "llm-format",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "llm",
+        "aliases": [
+          "llm",
+          ".llm"
+        ],
+        "extensions": [
+          ".llm"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "llm",
+        "scopeName": "source.llm",
+        "path": "./syntaxes/llm.tmLanguage.json"
+      }
+    ]
+  }
+}

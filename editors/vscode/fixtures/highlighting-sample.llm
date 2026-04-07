@@ -1,0 +1,9 @@
+# editor smoke comment
+agent: DataExtractor
+system:
+  role: financial_analyst
+memory:
+  - user_history
+user: 'Summarize "Q1" results'
+vars:
+  company: "Acme Corp"

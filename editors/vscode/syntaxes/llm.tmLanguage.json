@@ -1,0 +1,121 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "llm",
+  "scopeName": "source.llm",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#topLevelKeys"
+    },
+    {
+      "include": "#mappingKeys"
+    },
+    {
+      "include": "#listMarkers"
+    },
+    {
+      "include": "#doubleQuotedStrings"
+    },
+    {
+      "include": "#singleQuotedStrings"
+    },
+    {
+      "include": "#bareScalars"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.llm",
+          "match": "^\\s*(#.*)$"
+        }
+      ]
+    },
+    "topLevelKeys": {
+      "patterns": [
+        {
+          "name": "meta.mapping.key.top-level.llm",
+          "match": "^(\\s*)(agent|system|user|memory|tools|output|constraints|vars)(\\s*)(:)",
+          "captures": {
+            "2": {
+              "name": "keyword.control.top-level.llm"
+            },
+            "4": {
+              "name": "punctuation.separator.key-value.llm"
+            }
+          }
+        }
+      ]
+    },
+    "mappingKeys": {
+      "patterns": [
+        {
+          "name": "meta.mapping.key.llm",
+          "match": "^(\\s*)([A-Za-z_][A-Za-z0-9_-]*)(\\s*)(:)",
+          "captures": {
+            "2": {
+              "name": "entity.name.tag.llm"
+            },
+            "4": {
+              "name": "punctuation.separator.key-value.llm"
+            }
+          }
+        }
+      ]
+    },
+    "listMarkers": {
+      "patterns": [
+        {
+          "name": "meta.sequence.item.llm",
+          "match": "^(\\s*)(-)($|\\s)",
+          "captures": {
+            "2": {
+              "name": "punctuation.definition.sequence.llm"
+            }
+          }
+        }
+      ]
+    },
+    "doubleQuotedStrings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.llm",
+          "match": "\"(?:\\\\.|[^\"\\\\])*\""
+        }
+      ]
+    },
+    "singleQuotedStrings": {
+      "patterns": [
+        {
+          "name": "string.quoted.single.llm",
+          "match": "'[^'\\n]*'"
+        }
+      ]
+    },
+    "bareScalars": {
+      "patterns": [
+        {
+          "name": "meta.inline.scalar.llm",
+          "match": "^(\\s*[A-Za-z_][A-Za-z0-9_-]*\\s*:\\s*)([^\"'\\n#][^\\n#]*)$",
+          "captures": {
+            "2": {
+              "name": "string.unquoted.llm"
+            }
+          }
+        },
+        {
+          "name": "meta.inline.scalar.llm",
+          "match": "^(\\s*-\\s*)([^\"'\\n#][^\\n#]*)$",
+          "captures": {
+            "2": {
+              "name": "string.unquoted.llm"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
