@@ -1,0 +1,7 @@
+vars:
+  region: "apac"
+  company: 'Acme Corp'
+user: 'Summarize "Q1" results'
+system:
+  role: "financial analyst"
+agent: "Data Extractor"

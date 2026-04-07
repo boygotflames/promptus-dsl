@@ -41,18 +41,3 @@ fn quote(value: &str) -> String {
     quoted.push('"');
     quoted
 }
-
-fn format_plain_scalar(value: &str) -> String {
-    if is_plain_bare_scalar(value) {
-        value.to_owned()
-    } else {
-        quote(value)
-    }
-}
-
-fn is_plain_bare_scalar(value: &str) -> bool {
-    !value.is_empty()
-        && value
-            .chars()
-            .all(|ch| ch.is_ascii_alphanumeric() || ch == '_' || ch == '-')
-}

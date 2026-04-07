@@ -2,6 +2,7 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 pub mod bench;
+pub mod fmt;
 pub mod parse;
 pub mod transpile;
 pub mod validate;
@@ -18,6 +19,7 @@ enum Command {
     Parse(parse::ParseArgs),
     Validate(validate::ValidateArgs),
     Transpile(transpile::TranspileArgs),
+    Fmt(fmt::FmtArgs),
     Bench(bench::BenchArgs),
 }
 
@@ -28,6 +30,7 @@ pub fn run() -> Result<()> {
         Command::Parse(args) => parse::run(args),
         Command::Validate(args) => validate::run(args),
         Command::Transpile(args) => transpile::run(args),
+        Command::Fmt(args) => fmt::run(args),
         Command::Bench(args) => bench::run(args),
     }
 }

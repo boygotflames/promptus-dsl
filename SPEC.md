@@ -78,6 +78,17 @@ The v0 AST has:
 
 The parser accepts a generic tree shape first. The validator then applies key-specific constraints.
 
+## Canonical Formatting
+
+The v0 formatter emits an AST-normalized surface form.
+
+- top-level blocks follow the reserved key order in the `Document`
+- mapping entries preserve AST/source insertion order
+- indentation is always 2 spaces per nesting level
+- scalars remain bare only when they are non-empty and contain only ASCII letters, digits, `_`, or `-`
+- all other scalars are emitted as double-quoted strings with backslash escaping
+- comments and blank-line layout are not preserved by the current formatter
+
 ## Validation Semantics
 
 Current validation rules:
