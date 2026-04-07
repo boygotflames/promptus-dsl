@@ -12,6 +12,9 @@ use crate::validator::validate_document;
 #[derive(Debug, Args)]
 pub struct BenchArgs {
     pub input: PathBuf,
+
+    #[arg(long)]
+    pub baseline: Option<PathBuf>,
 }
 
 pub fn run(args: BenchArgs) -> Result<()> {
@@ -41,6 +44,14 @@ pub fn execute(args: BenchArgs) -> Result<String> {
         return Err(anyhow!("validation failed"));
     }
 
-    let report = bench::measure_document(&source, &document)?;
+    let baseline = match args.baseline {
+        Some(path) => Some(
+            fs::read_to_string(&path)
+                .with_context(|| format!("failed to read baseline {}", path.display()))?,
+        ),
+        None => None,
+    };
+
+    let report = bench::measure_document_with_baseline(&source, &document, baseline.as_deref())?;
     Ok(report.render())
 }
