@@ -1,5 +1,6 @@
-use std::fs;
-use std::path::PathBuf;
+use std::fs::{self, OpenOptions};
+use std::io::{self, Write};
+use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, anyhow};
 use clap::{Args, ValueEnum};
@@ -31,9 +32,40 @@ pub struct TranspileArgs {
 
     #[arg(long, value_enum, default_value_t = TargetArg::Plain)]
     pub target: TargetArg,
+
+    #[arg(short, long)]
+    pub output: Option<PathBuf>,
+
+    #[arg(long)]
+    pub force: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum OutputDestination {
+    Stdout,
+    File(PathBuf),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TranspileExecution {
+    pub rendered: String,
+    pub destination: OutputDestination,
 }
 
 pub fn run(args: TranspileArgs) -> Result<()> {
+    let execution = execute(args)?;
+
+    if execution.destination == OutputDestination::Stdout {
+        let mut stdout = io::stdout().lock();
+        stdout
+            .write_all(execution.rendered.as_bytes())
+            .context("failed to write transpile output to stdout")?;
+    }
+
+    Ok(())
+}
+
+pub fn execute(args: TranspileArgs) -> Result<TranspileExecution> {
     let source = fs::read_to_string(&args.input)
         .with_context(|| format!("failed to read {}", args.input.display()))?;
 
@@ -49,6 +81,68 @@ pub fn run(args: TranspileArgs) -> Result<()> {
     }
 
     let rendered = transpile::transpile(&document, args.target.into());
-    println!("{rendered}");
-    Ok(())
+    let destination = match args.output {
+        Some(output_path) => {
+            write_output_file(&output_path, &rendered, args.force)?;
+            OutputDestination::File(output_path)
+        }
+        None => OutputDestination::Stdout,
+    };
+
+    Ok(TranspileExecution {
+        rendered,
+        destination,
+    })
+}
+
+fn write_output_file(path: &Path, rendered: &str, force: bool) -> Result<()> {
+    if path.is_dir() {
+        return Err(anyhow!("output path is a directory: {}", path.display()));
+    }
+
+    if let Some(parent) = path
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+    {
+        if !parent.exists() {
+            return Err(anyhow!(
+                "output directory does not exist: {}",
+                parent.display()
+            ));
+        }
+
+        if !parent.is_dir() {
+            return Err(anyhow!(
+                "output parent is not a directory: {}",
+                parent.display()
+            ));
+        }
+    }
+
+    if path.exists() && !force {
+        return Err(anyhow!(
+            "refusing to overwrite existing output file {} (pass --force to overwrite)",
+            path.display()
+        ));
+    }
+
+    let mut options = OpenOptions::new();
+    options.write(true);
+
+    if force {
+        options.create(true).truncate(true);
+    } else {
+        options.create_new(true);
+    }
+
+    let mut file = options.open(path).map_err(|error| match error.kind() {
+        io::ErrorKind::AlreadyExists => anyhow!(
+            "refusing to overwrite existing output file {} (pass --force to overwrite)",
+            path.display()
+        ),
+        _ => anyhow!("failed to create output file {}: {}", path.display(), error),
+    })?;
+
+    file.write_all(rendered.as_bytes())
+        .with_context(|| format!("failed to write {}", path.display()))
 }
