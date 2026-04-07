@@ -93,16 +93,24 @@ These constraints are intentionally conservative and may expand in later version
 
 ## Shadow Representation
 
-The shadow layer is a normalized path-based projection of the AST. Example:
+The v0 transpiler includes a provisional Shadow target.
+
+- it is deterministic and provider-agnostic
+- it uses reserved top-level markers plus compact structural delimiters
+- it preserves the current AST ordering:
+  - top-level blocks follow the reserved key order in the `Document`
+  - mapping entries preserve source/AST insertion order
+  - sequence items preserve source order
+
+The current Shadow mapping is implementation-defined for v0 and is not yet a frozen public compatibility contract. It should be treated as a machine-facing intermediate form that may be revised as the specification matures.
+
+Example:
 
 ```text
-agent = "DataExtractor"
-system.role = "financial_analyst"
-system.output = "json"
-memory[0] = "user_history"
+@a="DataExtractor"
+@s={role="financial_analyst";output="json"}
+@m=["user_history"]
 ```
-
-This representation is intended to be deterministic and easy for downstream tooling to consume.
 
 ## Example
 

@@ -70,16 +70,19 @@ fn transpile_outputs_are_deterministic_across_repeated_calls() {
     let second_plain = transpile::transpile(&document, Target::Plain);
     let first_json = transpile::transpile(&document, Target::JsonIr);
     let second_json = transpile::transpile(&document, Target::JsonIr);
+    let first_shadow = transpile::transpile(&document, Target::Shadow);
+    let second_shadow = transpile::transpile(&document, Target::Shadow);
 
     assert_eq!(first_plain, second_plain);
     assert_eq!(first_json, second_json);
+    assert_eq!(first_shadow, second_shadow);
 }
 
 #[test]
 fn transpile_cli_rejects_semantically_invalid_input() {
     let result = llm_format::cli::transpile::run(TranspileArgs {
         input: PathBuf::from("examples/invalid/vars-sequence.llm"),
-        target: TargetArg::Plain,
+        target: TargetArg::Shadow,
     });
 
     assert!(result.is_err(), "expected transpile CLI path to fail");
@@ -91,13 +94,25 @@ fn transpile_cli_rejects_semantically_invalid_input() {
 }
 
 #[test]
-fn shadow_transpile_flattens_nested_paths() {
+fn shadow_transpile_matches_minimal_fixture() {
     let source = include_str!("../examples/minimal.llm");
     let document = parse_valid_document(source);
     let rendered = transpile::transpile(&document, Target::Shadow);
 
     assert_eq!(
         rendered,
-        "agent = \"DataExtractor\"\nsystem.role = \"financial_analyst\"\nsystem.output = \"json\"\nmemory[0] = \"user_history\""
+        "@a=\"DataExtractor\"\n@s={role=\"financial_analyst\";output=\"json\"}\n@m=[\"user_history\"]"
+    );
+}
+
+#[test]
+fn shadow_transpile_matches_quoted_fixture() {
+    let source = include_str!("../examples/quoted.llm");
+    let document = parse_valid_document(source);
+    let rendered = transpile::transpile(&document, Target::Shadow);
+
+    assert_eq!(
+        rendered,
+        "@a=\"Data Extractor\"\n@s={role=\"financial analyst\"}\n@u=\"Summarize \\\"Q1\\\" results\"\n@v={company=\"Acme Corp\";region=\"apac\"}"
     );
 }
