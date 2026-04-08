@@ -25,6 +25,7 @@ Current state, in plain terms:
 - canonical formatting exists
 - minimal VS Code syntax support exists
 - provider profile selection exists for `shadow` and `bench`
+- a public compatibility matrix and conformance suite now define the first explicit contract boundary
 
 The repository is still evolving, especially around standardization, compatibility promises, and release/public adoption polish.
 
@@ -66,13 +67,35 @@ cargo run -- fmt examples/noncanonical/messy.llm
 
 ## Current Scope
 
-This repository currently acts as a reference implementation and proving ground for the v0 `.llm` language slice documented in [SPEC.md](/D:/llm_format/SPEC.md).
+This repository currently acts as a reference implementation and proving ground for the v0 `.llm` language slice documented in [SPEC.md](SPEC.md).
 
 The main public documents are:
 
-- [Mission.md](/D:/llm_format/Mission.md)
-- [Plan.md](/D:/llm_format/Plan.md)
-- [SPEC.md](/D:/llm_format/SPEC.md)
+- [Mission.md](Mission.md)
+- [Plan.md](Plan.md)
+- [SPEC.md](SPEC.md)
+- [docs/compatibility-matrix.md](docs/compatibility-matrix.md)
+
+## Public Contract Status
+
+The current public contract boundary is intentionally split rather than treated as one giant frozen promise.
+
+- `stable`
+  - surface syntax
+  - canonical formatter behavior
+  - `plain` output
+  - `json-ir` output
+- `provisional`
+  - `shadow` output
+  - `bench` report shape
+- `partial`
+  - semantic validation breadth
+  - provider-specific profile behavior
+  - VS Code support
+- `unsupported`
+  - provider profiles without an explicit supported tokenizer/shadow path, currently `anthropic`
+
+See [docs/compatibility-matrix.md](docs/compatibility-matrix.md) for the public matrix and contract notes.
 
 ## Provider Support Truth
 
@@ -92,7 +115,7 @@ This repo does not make claims of universal token behavior across providers.
 
 ## Editor Support Truth
 
-Minimal VS Code support lives under [editors/vscode](/D:/llm_format/editors/vscode).
+Minimal VS Code support lives under [editors/vscode](editors/vscode).
 
 Current editor support includes:
 
@@ -120,10 +143,10 @@ Current editor support does not include:
 
 ## Repository Layout
 
-- [src](/D:/llm_format/src): compiler, CLI, formatter, bench, provider, and transpile code
-- [tests](/D:/llm_format/tests): deterministic behavior coverage
-- [examples](/D:/llm_format/examples): valid, invalid, noncanonical, and benchmark baseline fixtures
-- [editors/vscode](/D:/llm_format/editors/vscode): minimal VS Code support package
+- [src](src): compiler, CLI, formatter, bench, provider, and transpile code
+- [tests](tests): deterministic behavior coverage
+- [examples](examples): valid, invalid, noncanonical, and benchmark baseline fixtures
+- [editors/vscode](editors/vscode): minimal VS Code support package
 
 ## Status Note
 

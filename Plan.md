@@ -28,6 +28,8 @@ The repository is no longer a scaffold. Current tracked reality includes:
 - a canonical formatter
 - minimal VS Code syntax support
 - provider/profile selection for `shadow` and `bench`
+- a public compatibility matrix
+- a dedicated conformance test layer for the currently claimed contract surface
 
 The biggest remaining weakness is not runtime functionality. It is public-surface truth: documentation, compatibility clarity, standardization prep, release readiness, and governance/contribution structure.
 
@@ -211,10 +213,14 @@ This kickoff packet is focused on documentation truth and public/private boundar
 - privatize `Genesis.md` as local continuity rather than public repo surface
 - prepare the repo for standardization work instead of pretending standardization is already done
 
+The first public-contract hardening slice has now also landed:
+
+- add a public compatibility matrix
+- add a dedicated conformance suite for the claimed contract surface
+- make stable vs provisional boundaries explicit in the public docs
+
 ### Remaining Work
 - versioning strategy
-- compatibility matrix
-- conformance tests
 - contribution workflow
 - release/process hygiene
 - public adoption polish
@@ -223,10 +229,10 @@ This kickoff packet is focused on documentation truth and public/private boundar
 
 ## Immediate Priorities
 
-1. Keep public docs truthful and current.
-2. Decide what v0 compatibility means for `plain`, `json-ir`, and provisional `shadow`.
-3. Add conformance/compatibility scaffolding before claiming standardization progress.
-4. Clarify tracked public surface vs private continuity artifacts.
+1. Keep public docs, compatibility status, and conformance coverage truthful and current.
+2. Decide what versioning and compatibility language mean for the stable v0 contract surface.
+3. Expand conformance only where the repo is actually ready to make public promises.
+4. Clarify contribution, release, and process expectations for external use.
 5. Annotate or remove stale scaffold residues that confuse the source tree.
 
 ---
@@ -237,12 +243,11 @@ This forecast is a judgment call based on current repo reality, not a guarantee.
 
 ### Likely Next Track 1 — Contract Hardening
 - define versioning language for the project and outputs
-- decide what is public contract vs internal implementation detail
-- tighten `SPEC.md` where behavior is currently implied only by tests
+- keep sharpening what is public contract vs internal implementation detail
+- tighten `SPEC.md` where behavior is currently implied only by tests or matrix notes
 
 ### Likely Next Track 2 — Conformance and Release Readiness
-- build conformance fixtures and compatibility checks
-- add a compatibility matrix
+- maintain and expand conformance only where the contract is explicit
 - tighten release hygiene, contribution guidance, and packaging expectations
 
 ### Likely Next Track 3 — Adoption Polish

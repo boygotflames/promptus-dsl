@@ -102,6 +102,27 @@ Current validation rules:
 
 These constraints are intentionally conservative and may expand in later versions.
 
+## Public Contract Status
+
+The current public v0 boundary is intentionally split:
+
+- `stable`
+  - surface syntax
+  - canonical formatting
+  - `plain` output
+  - `json-ir` output
+- `partial`
+  - current semantic validation breadth
+  - provider-selection plumbing
+  - minimal VS Code syntax support
+- `provisional`
+  - `shadow` output
+  - `bench` report behavior
+- `unsupported`
+  - provider profiles without an explicit supported tokenizer/shadow path
+
+The public compatibility summary lives in [docs/compatibility-matrix.md](docs/compatibility-matrix.md). The current public contract is backed by a dedicated conformance layer in [tests/conformance.rs](tests/conformance.rs).
+
 ## Shadow Representation
 
 The v0 transpiler includes a provisional Shadow target.
