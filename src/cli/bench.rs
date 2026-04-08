@@ -7,11 +7,15 @@ use clap::Args;
 
 use crate::bench;
 use crate::parser::parse_str;
+use crate::provider::Provider;
 use crate::validator::validate_document;
 
 #[derive(Debug, Args)]
 pub struct BenchArgs {
     pub input: PathBuf,
+
+    #[arg(long, value_enum, default_value_t = Provider::Generic)]
+    pub provider: Provider,
 
     #[arg(long)]
     pub baseline: Option<PathBuf>,
@@ -52,6 +56,11 @@ pub fn execute(args: BenchArgs) -> Result<String> {
         None => None,
     };
 
-    let report = bench::measure_document_with_baseline(&source, &document, baseline.as_deref())?;
+    let report = bench::measure_document_with_provider_and_baseline(
+        &source,
+        &document,
+        args.provider,
+        baseline.as_deref(),
+    )?;
     Ok(report.render())
 }

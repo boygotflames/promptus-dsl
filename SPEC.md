@@ -112,6 +112,9 @@ The v0 transpiler includes a provisional Shadow target.
   - top-level blocks follow the reserved key order in the `Document`
   - mapping entries preserve source/AST insertion order
   - sequence items preserve source order
+- runtime tooling may select a provider profile for shadow emission
+- for the current kickoff implementation, `generic` and `openai` share the same provisional shadow mapping
+- unsupported provider profiles must fail explicitly rather than silently falling back
 
 The current Shadow mapping is implementation-defined for v0 and is not yet a frozen public compatibility contract. It should be treated as a machine-facing intermediate form that may be revised as the specification matures.
 

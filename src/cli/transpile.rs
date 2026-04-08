@@ -6,6 +6,7 @@ use anyhow::{Context, Result, anyhow};
 use clap::{Args, ValueEnum};
 
 use crate::parser::parse_str;
+use crate::provider::Provider;
 use crate::transpile::{self, Target};
 use crate::validator::validate_document;
 
@@ -32,6 +33,9 @@ pub struct TranspileArgs {
 
     #[arg(long, value_enum, default_value_t = TargetArg::Plain)]
     pub target: TargetArg,
+
+    #[arg(long, value_enum, default_value_t = Provider::Generic)]
+    pub provider: Provider,
 
     #[arg(short, long)]
     pub output: Option<PathBuf>,
@@ -80,7 +84,8 @@ pub fn execute(args: TranspileArgs) -> Result<TranspileExecution> {
         return Err(anyhow!("validation failed"));
     }
 
-    let rendered = transpile::transpile(&document, args.target.into());
+    let rendered =
+        transpile::transpile_with_provider(&document, args.target.into(), args.provider)?;
     let destination = match args.output {
         Some(output_path) => {
             write_output_file(&output_path, &rendered, args.force)?;

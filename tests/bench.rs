@@ -3,8 +3,10 @@ use std::path::PathBuf;
 use llm_format::bench::tokenizer::{DEFAULT_ENCODING_NAME, count_tokens};
 use llm_format::bench::{
     BASELINE_ROW_NAME, BenchReport, measure_document, measure_document_with_baseline,
+    measure_document_with_provider, measure_document_with_provider_and_baseline,
 };
 use llm_format::cli::bench::{BenchArgs, execute};
+use llm_format::provider::Provider;
 use llm_format::transpile::{self, Target};
 use llm_format::{parse_str, validate_document};
 
@@ -27,6 +29,7 @@ fn assert_report_matches_representations(source: &str, report: &BenchReport) {
         ("shadow", transpile::transpile(&document, Target::Shadow)),
     ];
 
+    assert_eq!(report.provider, Provider::Generic.as_str());
     assert_eq!(report.tokenizer, DEFAULT_ENCODING_NAME);
     assert_eq!(report.rows.len(), representations.len());
 
@@ -61,6 +64,7 @@ fn assert_report_matches_representations_with_baseline(
         ("shadow", transpile::transpile(&document, Target::Shadow)),
     ];
 
+    assert_eq!(report.provider, Provider::Generic.as_str());
     assert_eq!(report.tokenizer, DEFAULT_ENCODING_NAME);
     assert_eq!(report.rows.len(), representations.len());
 
@@ -111,11 +115,13 @@ fn bench_report_measures_quoted_fixture_representations() {
 fn bench_cli_output_is_deterministic() {
     let first = execute(BenchArgs {
         input: PathBuf::from("examples/minimal.llm"),
+        provider: Provider::Generic,
         baseline: None,
     })
     .expect("bench execution should succeed");
     let second = execute(BenchArgs {
         input: PathBuf::from("examples/minimal.llm"),
+        provider: Provider::Generic,
         baseline: None,
     })
     .expect("bench execution should succeed");
@@ -123,7 +129,7 @@ fn bench_cli_output_is_deterministic() {
     assert_eq!(first, second);
     assert_eq!(
         first,
-        "tokenizer: cl100k_base\nsource  | bytes=95 | tokens=27 | delta_bytes=+0 | delta_tokens=+0\nplain   | bytes=94 | tokens=26 | delta_bytes=-1 | delta_tokens=-1\njson-ir | bytes=141 | tokens=46 | delta_bytes=+46 | delta_tokens=+19\nshadow  | bytes=82 | tokens=23 | delta_bytes=-13 | delta_tokens=-4"
+        "provider: generic\ntokenizer: cl100k_base\nsource  | bytes=95 | tokens=27 | delta_bytes=+0 | delta_tokens=+0\nplain   | bytes=94 | tokens=26 | delta_bytes=-1 | delta_tokens=-1\njson-ir | bytes=141 | tokens=46 | delta_bytes=+46 | delta_tokens=+19\nshadow  | bytes=82 | tokens=23 | delta_bytes=-13 | delta_tokens=-4"
     );
 }
 
@@ -131,10 +137,12 @@ fn bench_cli_output_is_deterministic() {
 fn bench_cli_reports_quoted_fixture_structure() {
     let report = execute(BenchArgs {
         input: PathBuf::from("examples/quoted.llm"),
+        provider: Provider::Generic,
         baseline: None,
     })
     .expect("bench execution should succeed");
 
+    assert!(report.contains("provider: generic"));
     assert!(report.contains("tokenizer: cl100k_base"));
     assert!(report.contains("source  | bytes="));
     assert!(report.contains("plain   | bytes="));
@@ -146,6 +154,7 @@ fn bench_cli_reports_quoted_fixture_structure() {
 fn bench_cli_rejects_semantically_invalid_input() {
     let result = execute(BenchArgs {
         input: PathBuf::from("examples/invalid/vars-sequence.llm"),
+        provider: Provider::Generic,
         baseline: None,
     });
 
@@ -182,16 +191,19 @@ fn bench_report_measures_quoted_fixture_with_baseline() {
 fn bench_cli_output_is_deterministic_with_baseline() {
     let first = execute(BenchArgs {
         input: PathBuf::from("examples/minimal.llm"),
+        provider: Provider::Generic,
         baseline: Some(PathBuf::from("examples/baselines/minimal.md")),
     })
     .expect("bench execution with baseline should succeed");
     let second = execute(BenchArgs {
         input: PathBuf::from("examples/minimal.llm"),
+        provider: Provider::Generic,
         baseline: Some(PathBuf::from("examples/baselines/minimal.md")),
     })
     .expect("bench execution with baseline should succeed");
 
     assert_eq!(first, second);
+    assert!(first.contains("provider: generic"));
     assert!(first.contains("baseline | bytes="));
     assert!(first.contains("delta_bytes_vs_baseline="));
     assert!(first.contains("delta_tokens_vs_baseline="));
@@ -201,6 +213,7 @@ fn bench_cli_output_is_deterministic_with_baseline() {
 fn bench_cli_reports_missing_baseline_files() {
     let result = execute(BenchArgs {
         input: PathBuf::from("examples/minimal.llm"),
+        provider: Provider::Generic,
         baseline: Some(PathBuf::from("examples/baselines/does-not-exist.md")),
     });
 
@@ -208,5 +221,83 @@ fn bench_cli_reports_missing_baseline_files() {
     assert!(
         error.to_string().contains("failed to read baseline"),
         "expected baseline read failure, got: {error}"
+    );
+}
+
+#[test]
+fn bench_report_matches_explicit_openai_provider() {
+    let source = include_str!("../examples/minimal.llm");
+    let document = parse_valid_document(source);
+    let report = measure_document_with_provider(source, &document, Provider::Openai)
+        .expect("openai bench report should build");
+
+    assert_eq!(report.provider, "openai");
+    assert_eq!(report.tokenizer, DEFAULT_ENCODING_NAME);
+    assert_eq!(report.rows[0].name, "source");
+}
+
+#[test]
+fn bench_report_matches_explicit_openai_provider_with_baseline() {
+    let source = include_str!("../examples/minimal.llm");
+    let baseline = include_str!("../examples/baselines/minimal.md");
+    let document = parse_valid_document(source);
+    let report = measure_document_with_provider_and_baseline(
+        source,
+        &document,
+        Provider::Openai,
+        Some(baseline),
+    )
+    .expect("openai bench report with baseline should build");
+
+    assert_eq!(report.provider, "openai");
+    assert_eq!(report.tokenizer, DEFAULT_ENCODING_NAME);
+    assert_eq!(report.rows[1].name, BASELINE_ROW_NAME);
+}
+
+#[test]
+fn bench_cli_reports_openai_provider_selection() {
+    let report = execute(BenchArgs {
+        input: PathBuf::from("examples/minimal.llm"),
+        provider: Provider::Openai,
+        baseline: None,
+    })
+    .expect("bench execution should succeed for openai provider");
+
+    assert!(report.contains("provider: openai"));
+    assert!(report.contains("tokenizer: cl100k_base"));
+}
+
+#[test]
+fn bench_cli_output_is_deterministic_for_openai_provider() {
+    let first = execute(BenchArgs {
+        input: PathBuf::from("examples/minimal.llm"),
+        provider: Provider::Openai,
+        baseline: None,
+    })
+    .expect("bench execution should succeed for openai provider");
+    let second = execute(BenchArgs {
+        input: PathBuf::from("examples/minimal.llm"),
+        provider: Provider::Openai,
+        baseline: None,
+    })
+    .expect("bench execution should succeed for openai provider");
+
+    assert_eq!(first, second);
+}
+
+#[test]
+fn bench_cli_rejects_unsupported_provider_selection() {
+    let result = execute(BenchArgs {
+        input: PathBuf::from("examples/minimal.llm"),
+        provider: Provider::Anthropic,
+        baseline: None,
+    });
+
+    let error = result.expect_err("unsupported provider should fail");
+    assert!(
+        error
+            .to_string()
+            .contains("provider anthropic does not have a supported tokenizer profile yet"),
+        "expected unsupported provider/tokenizer message, got: {error}"
     );
 }

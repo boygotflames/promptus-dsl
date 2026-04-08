@@ -3,6 +3,7 @@ pub mod tokenizer;
 use anyhow::Result;
 
 use crate::Document;
+use crate::provider::Provider;
 use crate::transpile::{self, Target};
 
 use self::tokenizer::TokenCounter;
@@ -22,6 +23,7 @@ pub struct BenchRow {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BenchReport {
+    pub provider: &'static str,
     pub tokenizer: &'static str,
     pub rows: Vec<BenchRow>,
 }
@@ -40,6 +42,7 @@ impl BenchReport {
             .any(|row| row.delta_bytes_vs_baseline.is_some());
 
         let mut lines = Vec::with_capacity(self.rows.len() + 1);
+        lines.push(format!("provider: {}", self.provider));
         lines.push(format!("tokenizer: {}", self.tokenizer));
 
         for row in &self.rows {
@@ -79,7 +82,7 @@ impl BenchReport {
 }
 
 pub fn measure_document(source: &str, document: &Document) -> Result<BenchReport> {
-    measure_document_with_baseline(source, document, None)
+    measure_document_with_provider_and_baseline(source, document, Provider::Generic, None)
 }
 
 pub fn measure_document_with_baseline(
@@ -87,7 +90,24 @@ pub fn measure_document_with_baseline(
     document: &Document,
     baseline: Option<&str>,
 ) -> Result<BenchReport> {
-    let counter = TokenCounter::new()?;
+    measure_document_with_provider_and_baseline(source, document, Provider::Generic, baseline)
+}
+
+pub fn measure_document_with_provider(
+    source: &str,
+    document: &Document,
+    provider: Provider,
+) -> Result<BenchReport> {
+    measure_document_with_provider_and_baseline(source, document, provider, None)
+}
+
+pub fn measure_document_with_provider_and_baseline(
+    source: &str,
+    document: &Document,
+    provider: Provider,
+    baseline: Option<&str>,
+) -> Result<BenchReport> {
+    let counter = TokenCounter::for_provider(provider)?;
     let source_metrics = BenchMetrics::from_text(source, &counter);
     let baseline_metrics = baseline.map(|text| BenchMetrics::from_text(text, &counter));
 
@@ -100,7 +120,10 @@ pub fn measure_document_with_baseline(
 
     representations.push(("plain", transpile::transpile(document, Target::Plain)));
     representations.push(("json-ir", transpile::transpile(document, Target::JsonIr)));
-    representations.push(("shadow", transpile::transpile(document, Target::Shadow)));
+    representations.push((
+        "shadow",
+        transpile::transpile_with_provider(document, Target::Shadow, provider)?,
+    ));
 
     let rows = representations
         .into_iter()
@@ -108,6 +131,7 @@ pub fn measure_document_with_baseline(
         .collect();
 
     Ok(BenchReport {
+        provider: provider.as_str(),
         tokenizer: counter.encoding_name(),
         rows,
     })

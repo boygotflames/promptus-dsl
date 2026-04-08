@@ -1,4 +1,7 @@
+use anyhow::Result;
+
 use crate::ast::{Document, Node, TopLevelKey};
+use crate::provider::{Provider, ShadowProfile};
 
 use super::{Emitter, quote};
 
@@ -68,19 +71,35 @@ const SHADOW_SYNTAX: ShadowSyntax = ShadowSyntax {
 
 impl Emitter for ShadowEmitter {
     fn emit(&self, document: &Document) -> String {
-        let mut lines = Vec::new();
-
-        for (key, value) in document.ordered_entries() {
-            lines.push(format!(
-                "{}{}{}",
-                marker_for(key),
-                SHADOW_SYNTAX.assignment,
-                render_node(value)
-            ));
-        }
-
-        lines.join("\n")
+        emit_with_provider(document, Provider::Generic)
+            .expect("generic provider must support the provisional v0 shadow profile")
     }
+}
+
+pub fn emit_with_provider(document: &Document, provider: Provider) -> Result<String> {
+    let shadow_profile = provider.profile().shadow_profile()?;
+    Ok(render_document(document, shadow_profile))
+}
+
+fn render_document(document: &Document, shadow_profile: ShadowProfile) -> String {
+    match shadow_profile {
+        ShadowProfile::ProvisionalV0 => render_v0_document(document),
+    }
+}
+
+fn render_v0_document(document: &Document) -> String {
+    let mut lines = Vec::new();
+
+    for (key, value) in document.ordered_entries() {
+        lines.push(format!(
+            "{}{}{}",
+            marker_for(key),
+            SHADOW_SYNTAX.assignment,
+            render_node(value)
+        ));
+    }
+
+    lines.join("\n")
 }
 
 fn marker_for(key: TopLevelKey) -> &'static str {

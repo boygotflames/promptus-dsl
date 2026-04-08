@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use llm_format::cli::transpile::{OutputDestination, TargetArg, TranspileArgs, execute};
+use llm_format::provider::Provider;
 use llm_format::transpile::{self, Target};
 use llm_format::{parse_str, validate_document};
 
@@ -118,6 +119,7 @@ fn transpile_cli_rejects_semantically_invalid_input() {
     let result = llm_format::cli::transpile::run(TranspileArgs {
         input: PathBuf::from("examples/invalid/vars-sequence.llm"),
         target: TargetArg::Shadow,
+        provider: Provider::Generic,
         output: None,
         force: false,
     });
@@ -155,10 +157,52 @@ fn shadow_transpile_matches_quoted_fixture() {
 }
 
 #[test]
+fn shadow_transpile_matches_explicit_generic_provider() {
+    let source = include_str!("../examples/minimal.llm");
+    let document = parse_valid_document(source);
+    let rendered = transpile::transpile_with_provider(&document, Target::Shadow, Provider::Generic)
+        .expect("generic provider shadow transpilation should succeed");
+
+    assert_eq!(
+        rendered,
+        "@a=\"DataExtractor\"\n@s={role=\"financial_analyst\";output=\"json\"}\n@m=[\"user_history\"]"
+    );
+}
+
+#[test]
+fn shadow_transpile_matches_explicit_openai_provider() {
+    let source = include_str!("../examples/minimal.llm");
+    let document = parse_valid_document(source);
+    let rendered = transpile::transpile_with_provider(&document, Target::Shadow, Provider::Openai)
+        .expect("openai provider shadow transpilation should succeed");
+
+    assert_eq!(
+        rendered,
+        "@a=\"DataExtractor\"\n@s={role=\"financial_analyst\";output=\"json\"}\n@m=[\"user_history\"]"
+    );
+}
+
+#[test]
+fn shadow_transpile_reports_unsupported_providers_explicitly() {
+    let source = include_str!("../examples/minimal.llm");
+    let document = parse_valid_document(source);
+    let error = transpile::transpile_with_provider(&document, Target::Shadow, Provider::Anthropic)
+        .expect_err("unsupported provider should fail for shadow transpilation");
+
+    assert!(
+        error
+            .to_string()
+            .contains("provider anthropic does not have a supported shadow profile yet"),
+        "expected explicit unsupported shadow-provider message, got: {error}"
+    );
+}
+
+#[test]
 fn transpile_execute_returns_stdout_payload_when_no_output_path_is_given() {
     let execution = execute(TranspileArgs {
         input: PathBuf::from("examples/minimal.llm"),
         target: TargetArg::Plain,
+        provider: Provider::Generic,
         output: None,
         force: false,
     })
@@ -179,6 +223,7 @@ fn transpile_execute_writes_requested_output_file() {
     let execution = execute(TranspileArgs {
         input: PathBuf::from("examples/minimal.llm"),
         target: TargetArg::Shadow,
+        provider: Provider::Generic,
         output: Some(output_path.clone()),
         force: false,
     })
@@ -203,6 +248,7 @@ fn transpile_execute_refuses_to_overwrite_existing_file_without_force() {
     let result = execute(TranspileArgs {
         input: PathBuf::from("examples/minimal.llm"),
         target: TargetArg::JsonIr,
+        provider: Provider::Generic,
         output: Some(output_path.clone()),
         force: false,
     });
@@ -229,6 +275,7 @@ fn transpile_execute_overwrites_existing_file_with_force() {
     let execution = execute(TranspileArgs {
         input: PathBuf::from("examples/minimal.llm"),
         target: TargetArg::JsonIr,
+        provider: Provider::Generic,
         output: Some(output_path.clone()),
         force: true,
     })
@@ -249,6 +296,7 @@ fn transpile_execute_respects_cli_target_selection() {
     let execution = execute(TranspileArgs {
         input: PathBuf::from("examples/minimal.llm"),
         target: TargetArg::Shadow,
+        provider: Provider::Openai,
         output: None,
         force: false,
     })
@@ -266,6 +314,7 @@ fn transpile_execute_reports_missing_input_files() {
     let result = execute(TranspileArgs {
         input: PathBuf::from("examples/does-not-exist.llm"),
         target: TargetArg::Plain,
+        provider: Provider::Generic,
         output: None,
         force: false,
     });
@@ -285,6 +334,7 @@ fn transpile_execute_reports_missing_output_directories() {
     let result = execute(TranspileArgs {
         input: PathBuf::from("examples/minimal.llm"),
         target: TargetArg::Plain,
+        provider: Provider::Generic,
         output: Some(output_path),
         force: false,
     });
@@ -295,5 +345,24 @@ fn transpile_execute_reports_missing_output_directories() {
             .to_string()
             .contains("output directory does not exist"),
         "expected missing directory failure, got: {error}"
+    );
+}
+
+#[test]
+fn transpile_execute_reports_unsupported_provider_selection() {
+    let result = execute(TranspileArgs {
+        input: PathBuf::from("examples/minimal.llm"),
+        target: TargetArg::Shadow,
+        provider: Provider::Anthropic,
+        output: None,
+        force: false,
+    });
+
+    let error = result.expect_err("unsupported shadow provider should fail");
+    assert!(
+        error
+            .to_string()
+            .contains("provider anthropic does not have a supported shadow profile yet"),
+        "expected explicit unsupported provider message, got: {error}"
     );
 }

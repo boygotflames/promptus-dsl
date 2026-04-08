@@ -1,4 +1,7 @@
+use anyhow::Result;
+
 use crate::ast::Document;
+use crate::provider::Provider;
 
 pub mod json_ir;
 pub mod plain;
@@ -16,10 +19,19 @@ pub enum Target {
 }
 
 pub fn transpile(document: &Document, target: Target) -> String {
+    transpile_with_provider(document, target, Provider::Generic)
+        .expect("generic provider must support built-in transpilation targets")
+}
+
+pub fn transpile_with_provider(
+    document: &Document,
+    target: Target,
+    provider: Provider,
+) -> Result<String> {
     match target {
-        Target::Plain => plain::PlainEmitter.emit(document),
-        Target::Shadow => shadow::ShadowEmitter.emit(document),
-        Target::JsonIr => json_ir::JsonIrEmitter.emit(document),
+        Target::Plain => Ok(plain::PlainEmitter.emit(document)),
+        Target::Shadow => shadow::emit_with_provider(document, provider),
+        Target::JsonIr => Ok(json_ir::JsonIrEmitter.emit(document)),
     }
 }
 
