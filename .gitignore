@@ -1,1 +1,22 @@
-target/
+/target/
+
+# Local editor state at the repo root.
+/.vscode/
+/.idea/
+
+# OS junk.
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Disposable local artifacts and patch residue.
+*.swp
+*.swo
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+
+# VS Code extension packaging artifacts.
+*.vsix
