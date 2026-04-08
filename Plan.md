@@ -2,43 +2,34 @@
 
 ## Purpose
 
-This roadmap defines the implementation phases for the `.llm` project and tracks progress from initial scaffold to ecosystem standardization.
-
-It is intended to be a living project document.
+This roadmap tracks the project from scaffold to standardization. It is both a planning document and a status document, so it must reflect what the repository actually contains, not what we vaguely hoped to build later.
 
 ---
 
 ## Status Legend
 
-- `[COMPLETED]` — finished and stable enough to build on
-- `[IN PROGRESS]` — actively being implemented
+- `[COMPLETED]` — landed and stable enough to build on
+- `[PARTIAL]` — materially implemented, but not closed against the original phase ambition
+- `[IN PROGRESS]` — the active focus right now
 - `[PENDING]` — planned but not started
-- `[BLOCKED]` — waiting on decisions, dependencies, or upstream work
+- `[BLOCKED]` — waiting on a decision or prerequisite
 
 ---
 
-## Current Project Status
+## Current Reality Snapshot
 
-### Phase 0 — Scaffold and Foundation
-**Status:** `[COMPLETED]`
+The repository is no longer a scaffold. Current tracked reality includes:
 
-The project foundation exists and is usable.
+- a deterministic parser and span-bearing AST
+- initial semantic validation
+- deterministic `plain`, `json-ir`, and provisional `shadow` outputs
+- a working CLI for `parse`, `validate`, `transpile`, `fmt`, and `bench`
+- benchmarking with external baseline comparison
+- a canonical formatter
+- minimal VS Code syntax support
+- provider/profile selection for `shadow` and `bench`
 
-Current baseline includes:
-
-- initial Rust crate structure
-- core module scaffolding
-- AST definitions
-- diagnostics scaffolding
-- CLI skeleton
-- examples and basic tests
-
-This phase established the project shape, but not the full parser/validator/transpiler implementation.
-
-### Phase 1 — Parser and AST
-**Status:** `[IN PROGRESS]`
-
-Current effort is focused on turning the Surface `.llm` syntax into a stable, deterministic AST with strong source diagnostics.
+The biggest remaining weakness is not runtime functionality. It is public-surface truth: documentation, compatibility clarity, standardization prep, release readiness, and governance/contribution structure.
 
 ---
 
@@ -47,245 +38,220 @@ Current effort is focused on turning the Surface `.llm` syntax into a stable, de
 ## Phase 0 — Scaffold and Foundation `[COMPLETED]`
 
 ### Objective
-Establish a minimal but production-grade project skeleton.
+Establish a minimal but production-structured Rust project.
 
-### Deliverables
-- Create the initial Rust crate with `Cargo.toml` and `.gitignore`
-- Establish the base directory structure:
-  - `src/`
-  - `examples/`
-  - `tests/`
-  - `docs/`
-- Add initial placeholder modules:
-  - `ast.rs`
-  - `parser.rs`
-  - `validator.rs`
-  - `diagnostics.rs`
-  - `transpile/`
-  - `cli/`
-  - `bench/`
-- Draft the initial `SPEC.md`
-- Add basic examples
-- Ensure the project compiles and tests run
+### Reality
+- crate and module structure exist
+- examples and tests exist
+- initial spec/docs surface exists
+- basic project shape is stable
 
-### Outcome
-Foundation completed. The project is now ready for full parser and compiler work.
+### Remaining Notes
+The scaffold succeeded, but two placeholder residues still remain tracked:
+- `src/tokenizer.rs`
+- `src/transpiler.rs`
 
 ---
 
-## Phase 1 — Parser and AST `[IN PROGRESS]`
+## Phase 1 — Parser and AST `[COMPLETED]`
 
 ### Objective
-Turn the Surface `.llm` DSL into a deterministic and inspectable abstract syntax tree.
+Turn the Surface `.llm` DSL into a deterministic and inspectable AST.
 
-### Tasks
-- Implement a lexer using `logos` or a custom iterator
-- Implement a deterministic parser for:
-  - scalar values
-  - nested maps
-  - lists
-  - indentation-based structure
-- Support top-level blocks such as:
-  - `agent`
-  - `system`
-  - `user`
-  - `memory`
-  - `tools`
-  - `output`
-  - `constraints`
-  - `vars`
-- Track source spans for all AST nodes:
-  - line
-  - column
-  - source range
-- Produce clear syntax errors with useful context
-- Add golden tests for valid and invalid `.llm` samples
-- Refine `SPEC.md` as grammar details become stable
+### Reality
+- indentation-based parsing is implemented
+- reserved top-level keys are enforced
+- scalars, quoted strings, lists, and nested maps are supported
+- comments are supported
+- spans are carried through the AST
+- syntax failures produce deterministic diagnostics
 
-### Exit Criteria
-- Sample `.llm` files parse successfully into AST snapshots
-- Invalid syntax produces deterministic diagnostics
-- Parser tests pass consistently
+### Remaining Notes
+The parser is a real milestone now, not an in-progress stub.
 
 ---
 
-## Phase 2 — Semantic Validation `[PENDING]`
+## Phase 2 — Semantic Validation `[PARTIAL]`
 
 ### Objective
-Enforce semantic correctness beyond syntax.
+Enforce semantic correctness beyond raw syntax.
 
-### Tasks
-- Detect duplicate keys
-- Detect unknown blocks or unsupported structures
-- Enforce required fields
-- Validate scalar, list, and map shapes against the spec
-- Define a consistent error-code system
-- Implement semantic diagnostics with actionable messages
+### Reality
+- duplicate keys in mapping scope are detected
+- top-level shape rules for current keys exist
+- semantic diagnostics are separated from syntax diagnostics
+- duplicate and unknown top-level keys remain parser-owned by design
 
-### Exit Criteria
-- Valid documents pass semantic validation
-- Invalid documents fail with precise, spec-aligned errors
+### Remaining Work
+- fuller required-structure rules once the spec is explicit
+- richer semantic contracts beyond current conservative v0 checks
+- any future error-code strategy
 
 ---
 
-## Phase 3 — Transpiler Targets `[PENDING]`
+## Phase 3 — Transpiler Targets `[PARTIAL]`
 
 ### Objective
 Generate useful outputs from the AST.
 
-### Tasks
-- Define a `TargetEmitter` trait
-- Implement:
-  - `PlainEmitter`
-  - `ShadowEmitter`
-  - `JsonIrEmitter`
-- Ensure output generation is deterministic
-- Make target encoding pluggable for provider-specific Shadow formats
+### Reality
+- `plain` is implemented and deterministic
+- `json-ir` is implemented and deterministic
+- provisional `shadow` is implemented and deterministic
+- output ordering is test-backed
 
-### Exit Criteria
-- A parsed AST can be emitted reliably into all supported output targets
-- Emission behavior is stable and test-covered
+### Remaining Work
+- freeze output compatibility expectations
+- clarify which outputs are internal/intermediate vs public contract
+- evolve `shadow` without pretending the current provisional form is final
 
 ---
 
-## Phase 4 — Command-Line Interface `[PENDING]`
+## Phase 4 — Command-Line Interface `[PARTIAL]`
 
 ### Objective
 Provide a usable developer-facing CLI.
 
-### Tasks
-- Implement commands such as:
-  - `parse`
-  - `validate`
-  - `transpile`
-  - `bench`
-  - `fmt`
-  - `explain-error`
-- Connect CLI commands to parser, validator, and transpiler modules
-- Handle file input/output paths cleanly
-- Provide strong help text and failure messages
+### Reality
+- `parse`, `validate`, `transpile`, `fmt`, and `bench` exist
+- transpile supports stdout and file output with safe overwrite behavior
+- parse/validate/transpile/fmt/bench flows are test-backed
 
-### Exit Criteria
-- The CLI supports core workflows end-to-end
-- Output and errors are readable and predictable
+### Remaining Work
+- stronger public CLI documentation
+- decide whether `explain-error` is real roadmap or dead wish-list
+- packaging/help polish for external users
 
 ---
 
-## Phase 5 — Benchmarking and Proof `[PENDING]`
+## Phase 5 — Benchmarking and Proof `[PARTIAL]`
 
 ### Objective
 Quantify the value of `.llm`.
 
-### Tasks
-- Abstract over tokenizer implementations
-- Build benchmark fixtures comparing:
-  - `.llm`
-  - Markdown
-  - other structured prompt formats
-- Measure:
-  - token count
-  - byte size
-  - compile time
-- Generate repeatable reports for internal validation and public proof
+### Reality
+- bench measures `source`, `plain`, `json-ir`, and `shadow`
+- token counting uses an explicit tokenizer path
+- external baseline comparison is implemented
+- reports are deterministic and provider-visible
 
-### Exit Criteria
-- Benchmark suite is automated
-- Results clearly demonstrate the efficiency profile of `.llm`
+### Remaining Work
+- conformance around what proof claims are allowed publicly
+- broader benchmark discipline beyond one tokenizer family
+- release-quality benchmark fixtures and reporting conventions
 
 ---
 
-## Phase 6 — Formatter and Language Ergonomics `[PENDING]`
+## Phase 6 — Formatter and Language Ergonomics `[PARTIAL]`
 
 ### Objective
-Improve authoring quality and consistency.
+Improve authoring quality and canonical normalization.
 
-### Tasks
-- Implement a canonical formatter for `.llm`
-- Normalize file layout according to official style rules
-- Add syntax-highlighting grammar for editors
-- Build a library of examples and best-practice patterns
+### Reality
+- canonical formatter exists
+- `fmt` CLI exists
+- formatter is idempotent
+- canonical quoting and indentation rules are implemented
 
-### Exit Criteria
-- `.llm` files can be auto-formatted into canonical form
-- Authoring becomes easier and less error-prone
+### Remaining Work
+- decide whether comments/blank-line preservation matters
+- expand public style guidance
+- separate canonical language contract from mere implementation convenience where needed
 
 ---
 
-## Phase 7 — Editor Support `[PENDING]`
+## Phase 7 — Editor Support `[PARTIAL]`
 
 ### Objective
-Support real developer workflows.
+Support real developer workflows in editors.
 
-### Tasks
-- Build a VS Code extension
-- Provide:
-  - syntax highlighting
-  - validation on save
-  - transpilation previews
-- Explore support for additional editors and IDEs
+### Reality
+- minimal VS Code package exists
+- `.llm` association exists
+- grammar and language configuration exist
+- extension assets have basic sanity coverage
 
-### Exit Criteria
-- Authors can work comfortably with `.llm` inside mainstream tooling
+### Remaining Work
+- no LSP
+- no live validation
+- no formatter integration
+- no broader editor story
 
 ---
 
-## Phase 8 — Provider-Aware Adapters `[PENDING]`
+## Phase 8 — Provider-Aware Adapters `[PARTIAL]`
 
 ### Objective
-Optimize output across model vendors.
+Introduce explicit provider-profile plumbing without faking provider behavior.
 
-### Tasks
-- Implement adapters for major providers such as:
-  - OpenAI
-  - Anthropic
-  - others as needed
-- Make token-optimization tables configurable
-- Support provider-specific capabilities as they evolve, including:
-  - function/tool calling
-  - system/user channel differences
-  - structured output conventions
+### Reality
+- provider abstraction exists
+- `generic` is the default path
+- `openai` is explicit and currently maps to the same current behavior
+- `anthropic` is explicitly unsupported
+- bench and `shadow` both expose provider selection
 
-### Exit Criteria
-- `.llm` output can be specialized without changing core source documents
+### Remaining Work
+- real provider differentiation
+- tokenizer/profile plurality beyond the current single concrete path
+- spec language for what provider-aware behavior is allowed to affect
 
 ---
 
-## Phase 9 — Ecosystem and Standardization `[PENDING]`
+## Phase 9 — Ecosystem and Standardization `[IN PROGRESS]`
 
 ### Objective
-Turn `.llm` into a durable public standard.
+Turn the repository from a strong internal prototype into a public-facing, disciplined, adoptable project surface.
 
-### Tasks
-- Formalize versioning strategy
-- Publish a compatibility matrix
-- Add conformance tests
-- Publish migration guides
-- Establish contribution and governance processes
-- Grow ecosystem participation around tooling and adoption
+### Kickoff Reality
+This kickoff packet is focused on documentation truth and public/private boundary cleanup:
 
-### Exit Criteria
-- `.llm` is documented, versioned, testable, and adoptable beyond the core project
+- create a real root `README.md`
+- update this plan to match the actual repository
+- privatize `Genesis.md` as local continuity rather than public repo surface
+- prepare the repo for standardization work instead of pretending standardization is already done
+
+### Remaining Work
+- versioning strategy
+- compatibility matrix
+- conformance tests
+- contribution workflow
+- release/process hygiene
+- public adoption polish
 
 ---
 
 ## Immediate Priorities
 
-1. Complete deterministic parsing for the Surface DSL
-2. Lock down AST structure and source-span tracking
-3. Expand parser test coverage
-4. Refine the spec in parallel with implementation
-5. Prepare the validation layer as the next execution phase
+1. Keep public docs truthful and current.
+2. Decide what v0 compatibility means for `plain`, `json-ir`, and provisional `shadow`.
+3. Add conformance/compatibility scaffolding before claiming standardization progress.
+4. Clarify tracked public surface vs private continuity artifacts.
+5. Annotate or remove stale scaffold residues that confuse the source tree.
+
+---
+
+## Predicted Next Roadmap After This Phase 9 Kickoff
+
+This forecast is a judgment call based on current repo reality, not a guarantee.
+
+### Likely Next Track 1 — Contract Hardening
+- define versioning language for the project and outputs
+- decide what is public contract vs internal implementation detail
+- tighten `SPEC.md` where behavior is currently implied only by tests
+
+### Likely Next Track 2 — Conformance and Release Readiness
+- build conformance fixtures and compatibility checks
+- add a compatibility matrix
+- tighten release hygiene, contribution guidance, and packaging expectations
+
+### Likely Next Track 3 — Adoption Polish
+- improve README/onboarding examples
+- decide how much editor support should grow before LSP work is justified
+- make provider-support truth legible without overselling it
 
 ---
 
 ## Working Principle
 
-Each phase should produce artifacts that are:
-
-- testable
-- deterministic
-- spec-aligned
-- extensible
-- useful on their own
-
-The project should evolve in layers, with each completed phase reducing ambiguity for the next one.
+Each new phase or sub-phase should reduce ambiguity, not just add code. The repo is now mature enough that documentation drift, compatibility ambiguity, and public-surface sloppiness are real engineering problems, not secondary chores.
