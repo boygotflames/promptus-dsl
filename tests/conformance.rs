@@ -12,8 +12,8 @@ const SHADOW_MINIMAL: &str =
     "@a=\"DataExtractor\"\n@s={role=\"financial_analyst\";output=\"json\"}\n@m=[\"user_history\"]";
 const SHADOW_QUOTED: &str = "@a=\"Data Extractor\"\n@s={role=\"financial analyst\"}\n@u=\"Summarize \\\"Q1\\\" results\"\n@v={company=\"Acme Corp\";region=\"apac\"}";
 const FORMATTER_CANONICAL_MESSY: &str = "agent: \"Data Extractor\"\nsystem:\n  role: \"financial analyst\"\nuser: \"Summarize \\\"Q1\\\" results\"\nvars:\n  region: apac\n  company: \"Acme Corp\"";
-const BENCH_GENERIC_MINIMAL: &str = "provider: generic\ntokenizer: cl100k_base\nsource  | bytes=95 | tokens=27 | delta_bytes=+0 | delta_tokens=+0\nplain   | bytes=94 | tokens=26 | delta_bytes=-1 | delta_tokens=-1\njson-ir | bytes=141 | tokens=46 | delta_bytes=+46 | delta_tokens=+19\nshadow  | bytes=82 | tokens=23 | delta_bytes=-13 | delta_tokens=-4";
-const BENCH_OPENAI_MINIMAL: &str = "provider: openai\ntokenizer: cl100k_base\nsource  | bytes=95 | tokens=27 | delta_bytes=+0 | delta_tokens=+0\nplain   | bytes=94 | tokens=26 | delta_bytes=-1 | delta_tokens=-1\njson-ir | bytes=141 | tokens=46 | delta_bytes=+46 | delta_tokens=+19\nshadow  | bytes=82 | tokens=23 | delta_bytes=-13 | delta_tokens=-4";
+const BENCH_GENERIC_MINIMAL: &str = "provider: generic\ntokenizer: cl100k_base\nsource  | bytes=101 | tokens=27 | delta_bytes=+0 | delta_tokens=+0\nplain   | bytes=94 | tokens=26 | delta_bytes=-7 | delta_tokens=-1\njson-ir | bytes=141 | tokens=46 | delta_bytes=+40 | delta_tokens=+19\nshadow  | bytes=82 | tokens=23 | delta_bytes=-19 | delta_tokens=-4";
+const BENCH_OPENAI_MINIMAL: &str = "provider: openai\ntokenizer: cl100k_base\nsource  | bytes=101 | tokens=27 | delta_bytes=+0 | delta_tokens=+0\nplain   | bytes=94 | tokens=26 | delta_bytes=-7 | delta_tokens=-1\njson-ir | bytes=141 | tokens=46 | delta_bytes=+40 | delta_tokens=+19\nshadow  | bytes=82 | tokens=23 | delta_bytes=-19 | delta_tokens=-4";
 
 fn parse_valid_document(source: &str) -> llm_format::Document {
     let document = parse_str(source).expect("fixture should parse");
