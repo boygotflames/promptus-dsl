@@ -199,7 +199,7 @@ Introduce explicit provider-profile plumbing without faking provider behavior.
 
 ---
 
-## Phase 9 — Ecosystem and Standardization `[IN PROGRESS]`
+## Phase 9 — Ecosystem and Standardization `[COMPLETE]`
 
 ### Objective
 Turn the repository from a strong internal prototype into a public-facing, disciplined, adoptable project surface.
@@ -233,31 +233,37 @@ The first public-contract hardening slice has now also landed:
 
 ## Immediate Priorities
 
-1. Keep public docs, compatibility status, and conformance coverage truthful and current.
-2. Decide what versioning and compatibility language mean for the stable v0 contract surface.
-3. Expand conformance only where the repo is actually ready to make public promises.
-4. Clarify contribution, release, and process expectations for external use.
-5. Annotate or remove stale scaffold residues that confuse the source tree.
+All Phase 9 immediate priorities are resolved:
+1. ✓ Public docs, compatibility status, and conformance coverage are
+   truthful and current.
+2. ✓ Versioning and compatibility language defined in docs/versioning.md.
+3. ✓ Conformance expanded to match the stable v0 contract surface.
+4. ✓ Contribution and release expectations documented in CONTRIBUTING.md.
+5. ✓ Stale scaffold residues (src/tokenizer.rs, src/transpiler.rs) removed.
 
 ---
 
-## Predicted Next Roadmap After This Phase 9 Kickoff
+## Next Phase
 
-This forecast is a judgment call based on current repo reality, not a guarantee.
+Phase 9 is complete. The repository has a clean public surface, honest
+documentation, explicit contract boundaries, and a full test suite.
 
-### Likely Next Track 1 — Contract Hardening
-- define versioning language for the project and outputs
-- keep sharpening what is public contract vs internal implementation detail
-- tighten `SPEC.md` where behavior is currently implied only by tests or matrix notes
+The next work track is **contract and capability deepening**:
 
-### Likely Next Track 2 — Conformance and Release Readiness
-- maintain and expand conformance only where the contract is explicit
-- tighten release hygiene, contribution guidance, and packaging expectations
+- **Track 1 — Semantic validation depth** (Phase 2 remaining work):
+  fuller required-structure rules, richer type constraints, error-code
+  strategy
+- **Track 2 — Shadow output stabilization** (Phase 3 remaining work):
+  freeze shadow compatibility expectations, evolve provisional shadow
+  toward a stable contract
+- **Track 3 — Provider differentiation** (Phase 8 remaining work):
+  real provider behavior beyond the current generic/openai stub,
+  tokenizer/profile plurality
+- **Track 4 — Editor and tooling** (Phase 7 remaining work):
+  formatter-on-save, LSP groundwork assessment
 
-### Likely Next Track 3 — Adoption Polish
-- improve README/onboarding examples
-- decide how much editor support should grow before LSP work is justified
-- make provider-support truth legible without overselling it
+Tracks are not sequential. The active track will be chosen based on
+priority at the start of each packet.
 
 ---
 

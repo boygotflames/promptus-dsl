@@ -40,6 +40,17 @@ surfaces are always noted explicitly.
 
 ## Notable Changes
 
+### Phase 9 completion
+- Added docs/versioning.md: v0 stability strategy and v1 bump criteria
+- Added CONTRIBUTING.md: contribution scope, workflow, commit style
+- Added CHANGELOG.md
+- Removed src/tokenizer.rs and src/transpiler.rs (empty scaffold residues)
+- README.md: Getting Started, input/output example, Contributing section
+- SPEC.md: Mapping node documented, Deferred Work explicitly marked
+  post-v0, conformance anchor added
+- docs/compatibility-matrix.md: cross-link audit completed, consistent
+  with SPEC.md contract status
+
 ### Phase 9 kickoff (standardization prep)
 - Added root README.md
 - Added docs/compatibility-matrix.md
