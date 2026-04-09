@@ -217,12 +217,17 @@ The first public-contract hardening slice has now also landed:
 - add a public compatibility matrix
 - add a dedicated conformance suite for the claimed contract surface
 - make stable vs provisional boundaries explicit in the public docs
+- Added CONTRIBUTING.md: scope, workflow, commit style, stability contract
+- Added docs/versioning.md: v0 strategy, stability table, bump criteria
+- Added CHANGELOG.md: v0 surface record and Phase 9 milestone log
 
 ### Remaining Work
-- versioning strategy
-- contribution workflow
-- release/process hygiene
-- public adoption polish
+- README onboarding depth (getting-started walkthrough, install steps,
+  example output)
+- SPEC.md deferred section cleanup and contract freeze language
+- compatibility matrix cross-link consistency audit
+- versioning and release process hygiene (now addressed in docs/versioning.md)
+- contribution workflow (now addressed in CONTRIBUTING.md)
 
 ---
 

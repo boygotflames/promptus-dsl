@@ -11,36 +11,45 @@ Markdown is readable, but it is a poor systems language for prompt orchestration
 - compact machine-facing output targets
 - measurable benchmarking against explicit baselines
 
-## Current Repository Status
+## Getting Started
 
-This project is beyond the scaffold stage and usable for controlled internal workflows. It is not yet a frozen public standard.
+### Prerequisites
 
-Current state, in plain terms:
+- [Rust](https://rustup.rs/) (stable toolchain, 2021 edition or later)
+- Cargo (included with Rust)
 
-- parser and AST are implemented
-- first-pass semantic validation is implemented
-- deterministic `plain`, `json-ir`, and provisional `shadow` targets exist
-- CLI flows exist for `parse`, `validate`, `transpile`, `fmt`, and `bench`
-- benchmarking supports external baseline text comparison
-- canonical formatting exists
-- minimal VS Code syntax support exists
-- provider profile selection exists for `shadow` and `bench`
-- a public compatibility matrix and conformance suite now define the first explicit contract boundary
-
-The repository is still evolving, especially around standardization, compatibility promises, and release/public adoption polish.
-
-## Quickstart
+### Build and test
 
 ```powershell
+git clone <repo-url>
+cd llm_format
+cargo build
 cargo test
+```
+
+### Run the CLI
+
+```powershell
+# Parse a .llm file and inspect the AST
 cargo run -- parse examples/minimal.llm
+
+# Validate a .llm file
 cargo run -- validate examples/minimal.llm
+
+# Transpile to plain text output
 cargo run -- transpile examples/minimal.llm --target plain
+
+# Transpile to JSON intermediate representation
 cargo run -- transpile examples/minimal.llm --target json-ir
+
+# Transpile to shadow representation (provisional)
 cargo run -- transpile examples/minimal.llm --target shadow
-cargo run -- bench examples/minimal.llm
-cargo run -- bench examples/minimal.llm --baseline examples/baselines/minimal.md
+
+# Format a .llm file to canonical form
 cargo run -- fmt examples/noncanonical/messy.llm
+
+# Benchmark token usage
+cargo run -- bench examples/minimal.llm --baseline examples/baselines/minimal.md
 ```
 
 ## What Currently Works
@@ -64,6 +73,64 @@ cargo run -- fmt examples/noncanonical/messy.llm
 - canonical formatting with 2-space indentation
 - token counting and comparison against explicit baseline text files
 - minimal VS Code file association and syntax highlighting
+
+## Example: Input and Output
+
+Given `examples/minimal.llm`:
+
+```
+agent: DataExtractor
+system:
+  role: financial_analyst
+  output: json
+memory:
+  - user_history
+```
+
+**`--target plain`** (stable) — canonical normalized surface form:
+
+```
+agent: DataExtractor
+system:
+  role: financial_analyst
+  output: json
+memory:
+  - user_history
+```
+
+**`--target json-ir`** (stable) — deterministic JSON intermediate representation:
+
+```json
+{
+  "agent": "DataExtractor",
+  "system": {
+    "role": "financial_analyst",
+    "output": "json"
+  },
+  "memory": [
+    "user_history"
+  ]
+}
+```
+
+**`--target shadow`** (provisional) — compact machine-facing representation:
+
+```
+@a="DataExtractor"
+@s={role="financial_analyst";output="json"}
+@m=["user_history"]
+```
+
+**Benchmark against `examples/baselines/minimal.md`:**
+
+```
+provider: generic
+tokenizer: cl100k_base
+source  | bytes=101 | tokens=27 | delta_bytes=+0  | delta_tokens=+0
+plain   | bytes=94  | tokens=26 | delta_bytes=-7  | delta_tokens=-1
+json-ir | bytes=141 | tokens=46 | delta_bytes=+40 | delta_tokens=+19
+shadow  | bytes=82  | tokens=23 | delta_bytes=-19 | delta_tokens=-4
+```
 
 ## Current Scope
 
@@ -147,6 +214,21 @@ Current editor support does not include:
 - [tests](tests): deterministic behavior coverage
 - [examples](examples): valid, invalid, noncanonical, and benchmark baseline fixtures
 - [editors/vscode](editors/vscode): minimal VS Code support package
+- [docs](docs): compatibility matrix, versioning strategy
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for scope, development workflow, commit style, and the public contract stability model.
+
+Before submitting anything, run:
+
+```powershell
+cargo fmt
+cargo clippy --all-targets --all-features -- -D warnings
+cargo test
+```
+
+All three must be clean.
 
 ## Status Note
 

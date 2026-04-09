@@ -2,6 +2,10 @@
 
 ## Scope
 
+This specification describes the v0 surface. It is implemented by the
+reference transpiler in this repository. Behavior marked stable here
+is covered by the conformance suite in tests/conformance.rs.
+
 This draft defines the initial foundation for `.llm`, a human-readable prompt and configuration format with a machine-oriented shadow representation.
 
 The v0 scope is intentionally small:
@@ -72,6 +76,7 @@ The v0 AST has:
 - a generic `Node` value model:
   - `Scalar(String)`
   - `Sequence(Vec<Node>)`
+  - `Mapping(Vec<MappingEntry>)`
 - a `MappingEntry` record for keyed children with their own spans
 - every mapping stores `Vec<MappingEntry>` children rather than a raw map
 - every `Node` carries a source `Span` with line and column information
@@ -160,9 +165,25 @@ memory:
 
 ## Deferred Work
 
-- richer scalar typing
-- richer list item structures
-- semantic normalization passes
-- formatter and editor tooling
-- provider-specific emission layers
-- TODO: includes/imports and multi-file composition
+The following are explicitly out of scope for v0. They are recorded here
+so readers know they are intentionally deferred, not overlooked.
+
+- **Richer scalar typing** — Deferred to post-v0. Current scalars are
+  untyped strings. Numeric, boolean, and date types are not part of the
+  v0 contract.
+- **Richer list item structures** — Deferred to post-v0. Sequence items
+  are currently scalars only (or nested blocks). Structured list items
+  with typed sub-fields are not part of the v0 contract.
+- **Semantic normalization passes** — Deferred to post-v0. The current
+  validator enforces structure constraints only. Value normalization,
+  interpolation, and derived fields are not part of the v0 contract.
+- **Canonical formatter** — Implemented in v0. The `fmt` CLI command and
+  `src/formatter.rs` provide canonical AST-based formatting with
+  deterministic scalar quoting and 2-space indentation. See
+  [Canonical Formatting](#canonical-formatting) above.
+- **Provider-specific emission layers** — Partial in v0. The `generic`
+  and `openai` profiles exist and share a single provisional shadow
+  mapping. Real per-provider divergence is deferred to post-v0.
+- **Includes/imports and multi-file composition** — Deferred to post-v0.
+  Each `.llm` document is a standalone unit at v0. Cross-file references
+  are not part of the v0 contract.

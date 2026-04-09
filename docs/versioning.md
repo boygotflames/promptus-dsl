@@ -19,7 +19,7 @@ v0 is an intentional designation, not a placeholder. It means:
 ## What v0 Means for Stability
 
 The public contract at v0 is intentionally split. See
-[docs/compatibility-matrix.md](docs/compatibility-matrix.md) for the
+[compatibility-matrix.md](compatibility-matrix.md) for the
 full matrix.
 
 | Surface | Status | Commitment |
