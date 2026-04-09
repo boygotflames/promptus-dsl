@@ -1,5 +1,5 @@
 use crate::ast::{Document, MappingEntry, Node, TopLevelKey};
-use crate::diagnostics::{DiagnosticBag, Span};
+use crate::diagnostics::{Diagnostic, DiagnosticBag, Span};
 use crate::lexer::{LineKind, LineToken, tokenize_lines};
 
 pub fn parse_str(source: &str) -> Result<Document, DiagnosticBag> {
@@ -25,18 +25,24 @@ impl Parser {
                 return Err(single_error(
                     "top-level keys must start at column 1",
                     token.span(),
+                    "E012",
                 ));
             }
 
             let (key, value, span) = self.parse_top_level_entry()?;
             let Some(key) = TopLevelKey::from_keyword(&key) else {
-                return Err(single_error(format!("unknown top-level key `{key}`"), span));
+                return Err(single_error(
+                    format!("unknown top-level key `{key}`"),
+                    span,
+                    "E013",
+                ));
             };
 
             if document.set(key, value).is_some() {
                 return Err(single_error(
                     format!("duplicate top-level key `{}`", key.as_str()),
                     span,
+                    "E014",
                 ));
             }
         }
@@ -48,7 +54,7 @@ impl Parser {
         let token = self
             .current()
             .cloned()
-            .ok_or_else(|| single_error("expected a top-level entry", Span::new(1, 1)))?;
+            .ok_or_else(|| single_error("expected a top-level entry", Span::new(1, 1), "E015"))?;
         let span = token.span();
 
         match token.kind {
@@ -64,6 +70,7 @@ impl Parser {
             LineKind::ListItem(_) => Err(single_error(
                 "top-level entries must be mappings, not list items",
                 span,
+                "E016",
             )),
         }
     }
@@ -73,6 +80,7 @@ impl Parser {
             return Err(single_error(
                 "expected an indented block, but found end of input",
                 Span::new(1, 1),
+                "E017",
             ));
         };
 
@@ -80,6 +88,7 @@ impl Parser {
             return Err(single_error(
                 format!("expected indentation of {expected_indent} spaces"),
                 token.span(),
+                "E018",
             ));
         }
 
@@ -105,6 +114,7 @@ impl Parser {
                 return Err(single_error(
                     "unexpected indentation inside sequence",
                     token.span(),
+                    "E019",
                 ));
             }
 
@@ -136,6 +146,7 @@ impl Parser {
                 return Err(single_error(
                     "unexpected indentation inside mapping",
                     token.span(),
+                    "E018",
                 ));
             }
 
@@ -143,6 +154,7 @@ impl Parser {
                 return Err(single_error(
                     "list item found where a mapping entry was expected",
                     token.span(),
+                    "E020",
                 ));
             }
 
@@ -160,12 +172,13 @@ impl Parser {
         let token = self
             .current()
             .cloned()
-            .ok_or_else(|| single_error("expected a mapping entry", Span::new(1, 1)))?;
+            .ok_or_else(|| single_error("expected a mapping entry", Span::new(1, 1), "E021"))?;
 
         if token.indent != expected_indent {
             return Err(single_error(
                 format!("expected indentation of {expected_indent} spaces"),
                 token.span(),
+                "E018",
             ));
         }
         let span = token.span();
@@ -174,6 +187,7 @@ impl Parser {
             return Err(single_error(
                 "expected a mapping entry, but found a list item",
                 span,
+                "E022",
             ));
         };
 
@@ -196,6 +210,7 @@ impl Parser {
             return Err(single_error(
                 "expected an indented block after `:`",
                 parent_span,
+                "E023",
             ));
         };
 
@@ -204,6 +219,7 @@ impl Parser {
             return Err(single_error(
                 "expected an indented block after `:`",
                 parent_span,
+                "E023",
             ));
         }
 
@@ -211,6 +227,7 @@ impl Parser {
             return Err(single_error(
                 format!("nested blocks must be indented by exactly {expected_indent} spaces"),
                 token.span(),
+                "E024",
             ));
         }
 
@@ -226,8 +243,8 @@ impl Parser {
     }
 }
 
-fn single_error<T: Into<String>>(message: T, span: Span) -> DiagnosticBag {
+fn single_error<T: Into<String>>(message: T, span: Span, code: &'static str) -> DiagnosticBag {
     let mut diagnostics = DiagnosticBag::new();
-    diagnostics.syntax_error(message, Some(span));
+    diagnostics.push(Diagnostic::syntax_error(message, Some(span)).with_code(code));
     diagnostics
 }

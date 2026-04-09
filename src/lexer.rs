@@ -1,4 +1,4 @@
-use crate::diagnostics::{DiagnosticBag, Span};
+use crate::diagnostics::{Diagnostic, DiagnosticBag, Span};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct IdentifierToken {
@@ -59,18 +59,24 @@ pub fn tokenize_lines(source: &str) -> Result<Vec<LineToken>, DiagnosticBag> {
         }
 
         if raw_line.contains('\t') {
-            diagnostics.syntax_error(
-                "tabs are not supported; use two-space indentation",
-                Some(Span::new(line_number, 1)),
+            diagnostics.push(
+                Diagnostic::syntax_error(
+                    "tabs are not supported; use two-space indentation",
+                    Some(Span::new(line_number, 1)),
+                )
+                .with_code("E001"),
             );
             continue;
         }
 
         let indent = raw_line.chars().take_while(|ch| *ch == ' ').count();
         if indent % 2 != 0 {
-            diagnostics.syntax_error(
-                "indentation must use multiples of two spaces",
-                Some(Span::new(line_number, 1)),
+            diagnostics.push(
+                Diagnostic::syntax_error(
+                    "indentation must use multiples of two spaces",
+                    Some(Span::new(line_number, 1)),
+                )
+                .with_code("E002"),
             );
             continue;
         }
@@ -108,6 +114,7 @@ fn tokenize_list_item(
         return Err(single_error(
             "expected a space after `-` in a list item",
             dash,
+            "E003",
         ));
     }
 
@@ -130,6 +137,7 @@ fn tokenize_mapping(content: &str, line: usize, column: usize) -> Result<LineKin
         return Err(single_error(
             "expected a mapping entry or list item",
             Span::new(line, column),
+            "E004",
         ));
     };
 
@@ -137,6 +145,7 @@ fn tokenize_mapping(content: &str, line: usize, column: usize) -> Result<LineKin
         return Err(single_error(
             "expected an identifier at the start of a mapping entry",
             Span::new(line, column),
+            "E005",
         ));
     }
 
@@ -161,6 +170,7 @@ fn tokenize_mapping(content: &str, line: usize, column: usize) -> Result<LineKin
         return Err(single_error(
             "expected `:` after mapping key",
             Span::new(line, column + key_end),
+            "E006",
         ));
     };
 
@@ -196,7 +206,7 @@ fn parse_scalar(source: &str, span: Span) -> Result<ScalarToken, DiagnosticBag> 
             value: source.to_owned(),
             span,
         }),
-        None => Err(single_error("expected a scalar value", span)),
+        None => Err(single_error("expected a scalar value", span, "E007")),
     }
 }
 
@@ -215,6 +225,7 @@ fn parse_quoted_scalar(source: &str, span: Span) -> Result<ScalarToken, Diagnost
                 return Err(single_error(
                     "unexpected trailing characters after quoted scalar",
                     Span::new(span.line, span.column + index + ch.len_utf8()),
+                    "E008",
                 ));
             }
 
@@ -226,6 +237,7 @@ fn parse_quoted_scalar(source: &str, span: Span) -> Result<ScalarToken, Diagnost
                 return Err(single_error(
                     "unterminated escape sequence in quoted scalar",
                     Span::new(span.line, span.column + index),
+                    "E009",
                 ));
             };
 
@@ -240,6 +252,7 @@ fn parse_quoted_scalar(source: &str, span: Span) -> Result<ScalarToken, Diagnost
                     return Err(single_error(
                         format!("unsupported escape sequence `\\{escaped}`"),
                         Span::new(span.line, span.column + escape_index),
+                        "E010",
                     ));
                 }
             });
@@ -249,7 +262,7 @@ fn parse_quoted_scalar(source: &str, span: Span) -> Result<ScalarToken, Diagnost
         value.push(ch);
     }
 
-    Err(single_error("unterminated quoted scalar", span))
+    Err(single_error("unterminated quoted scalar", span, "E011"))
 }
 
 fn is_identifier_start(ch: char) -> bool {
@@ -260,8 +273,8 @@ fn is_identifier_continue(ch: char) -> bool {
     ch == '_' || ch == '-' || ch.is_ascii_alphanumeric()
 }
 
-fn single_error<T: Into<String>>(message: T, span: Span) -> DiagnosticBag {
+fn single_error<T: Into<String>>(message: T, span: Span, code: &'static str) -> DiagnosticBag {
     let mut diagnostics = DiagnosticBag::new();
-    diagnostics.syntax_error(message, Some(span));
+    diagnostics.push(Diagnostic::syntax_error(message, Some(span)).with_code(code));
     diagnostics
 }

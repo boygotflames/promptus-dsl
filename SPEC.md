@@ -118,6 +118,69 @@ Current validation rules:
 
 These constraints are intentionally conservative and may expand in later versions.
 
+### Diagnostic Codes
+
+Every diagnostic emitted by the parser or validator carries a structured
+error code. Codes are stable identifiers for specific error conditions,
+intended for programmatic use, editor integration, and documentation.
+
+Code format: `E` followed by a 3-digit number.
+
+- `E001`–`E099`: parser and lexer errors (syntax phase)
+- `E101`–`E199`: validator errors (semantic phase)
+
+The code is exposed as the `code: Option<&'static str>` field on the
+`Diagnostic` type and is included in the human-readable display format
+as a `[E001]` prefix before the message text when a code is present.
+
+#### Parser and Lexer Codes
+
+| Code | Description |
+|---|---|
+| `E001` | tabs are not allowed; use two-space indentation |
+| `E002` | indentation must be a multiple of two spaces |
+| `E003` | expected a space after `-` in a list item |
+| `E004` | expected a mapping entry or list item |
+| `E005` | expected an identifier at the start of a mapping entry |
+| `E006` | expected `:` after mapping key |
+| `E007` | expected a scalar value |
+| `E008` | unexpected trailing characters after quoted scalar |
+| `E009` | unterminated escape sequence in quoted scalar |
+| `E010` | unsupported escape sequence |
+| `E011` | unterminated quoted scalar |
+| `E012` | top-level key must start at column 1 |
+| `E013` | unknown top-level key |
+| `E014` | duplicate top-level key |
+| `E015` | unexpected end of input while expecting a top-level entry |
+| `E016` | top-level entry must be a mapping, not a list item |
+| `E017` | unexpected end of input after `:` |
+| `E018` | wrong indentation level |
+| `E019` | unexpected indentation inside a sequence |
+| `E020` | list item found where a mapping entry was expected |
+| `E021` | unexpected end of input inside a mapping |
+| `E022` | expected a mapping entry but found a list item |
+| `E023` | expected an indented block after `:` |
+| `E024` | nested block indented by wrong number of spaces |
+
+#### Validator Codes
+
+| Code | Description |
+|---|---|
+| `E101` | missing required key: `agent` |
+| `E102` | duplicate key in mapping |
+| `E103` | scalar field value must not be empty |
+| `E104` | field must be a scalar value |
+| `E105` | field must be a scalar or mapping (`system`, `user`) |
+| `E106` | field must be a sequence |
+| `E107` | sequence field may only contain scalar items |
+| `E108` | `output` must be a scalar or mapping |
+| `E109` | `vars` must be a mapping |
+| `E110` | `vars` entry must be a scalar value |
+
+Diagnostic codes are part of the stable public contract. Once assigned,
+a code's meaning does not change. New codes may be added; existing codes
+are never reused for a different error.
+
 ## Public Contract Status
 
 The current public v0 boundary is intentionally split:

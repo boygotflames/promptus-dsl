@@ -31,6 +31,7 @@ pub struct Diagnostic {
     pub severity: Severity,
     pub message: String,
     pub span: Option<Span>,
+    pub code: Option<&'static str>,
 }
 
 impl Diagnostic {
@@ -40,6 +41,7 @@ impl Diagnostic {
             severity: Severity::Error,
             message: message.into(),
             span,
+            code: None,
         }
     }
 
@@ -49,6 +51,7 @@ impl Diagnostic {
             severity: Severity::Error,
             message: message.into(),
             span,
+            code: None,
         }
     }
 
@@ -58,6 +61,7 @@ impl Diagnostic {
             severity: Severity::Warning,
             message: message.into(),
             span,
+            code: None,
         }
     }
 
@@ -67,7 +71,13 @@ impl Diagnostic {
             severity: Severity::Warning,
             message: message.into(),
             span,
+            code: None,
         }
+    }
+
+    pub fn with_code(mut self, code: &'static str) -> Self {
+        self.code = Some(code);
+        self
     }
 }
 
@@ -80,13 +90,19 @@ impl fmt::Display for Diagnostic {
             (DiagnosticPhase::Semantic, Severity::Warning) => "semantic warning",
         };
 
-        match self.span {
-            Some(span) => write!(
+        match (self.span, &self.code) {
+            (Some(span), Some(code)) => write!(
+                f,
+                "{label} at {}:{}: [{code}] {}",
+                span.line, span.column, self.message
+            ),
+            (Some(span), None) => write!(
                 f,
                 "{label} at {}:{}: {}",
                 span.line, span.column, self.message
             ),
-            None => write!(f, "{label}: {}", self.message),
+            (None, Some(code)) => write!(f, "{label}: [{code}] {}", self.message),
+            (None, None) => write!(f, "{label}: {}", self.message),
         }
     }
 }

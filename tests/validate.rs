@@ -52,7 +52,7 @@ system:
     assert_eq!(diagnostic.phase, DiagnosticPhase::Semantic);
     assert_eq!(
         diagnostic.to_string(),
-        "semantic error at 5:3: duplicate key `role` in `system`"
+        "semantic error at 5:3: [E102] duplicate key `role` in `system`"
     );
 }
 
@@ -92,6 +92,6 @@ fn missing_agent_key_is_rejected() {
     assert_eq!(diagnostic.phase, DiagnosticPhase::Semantic);
     assert_eq!(
         diagnostic.to_string(),
-        "semantic error at 1:1: missing required key: `agent`"
+        "semantic error at 1:1: [E101] missing required key: `agent`"
     );
 }

@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use crate::ast::{Document, Node, TopLevelKey};
-use crate::diagnostics::{DiagnosticBag, Span};
+use crate::diagnostics::{Diagnostic, DiagnosticBag, Span};
 
 pub fn validate_document(document: &Document) -> DiagnosticBag {
     let mut diagnostics = DiagnosticBag::new();
@@ -28,7 +28,10 @@ pub fn validate_document(document: &Document) -> DiagnosticBag {
 
 fn validate_required_structure(document: &Document, diagnostics: &mut DiagnosticBag) {
     if document.agent.is_none() {
-        diagnostics.semantic_error("missing required key: `agent`", Some(Span::new(1, 1)));
+        diagnostics.push(
+            Diagnostic::semantic_error("missing required key: `agent`", Some(Span::new(1, 1)))
+                .with_code("E101"),
+        );
     }
 }
 
@@ -45,9 +48,12 @@ fn validate_duplicate_keys(node: &Node, path: &str, diagnostics: &mut Diagnostic
 
             for entry in entries {
                 if !seen.insert(entry.key.as_str()) {
-                    diagnostics.semantic_error(
-                        format!("duplicate key `{}` in `{path}`", entry.key),
-                        Some(entry.span),
+                    diagnostics.push(
+                        Diagnostic::semantic_error(
+                            format!("duplicate key `{}` in `{path}`", entry.key),
+                            Some(entry.span),
+                        )
+                        .with_code("E102"),
                     );
                 }
 
@@ -68,16 +74,23 @@ fn validate_scalar_field(document: &Document, key: TopLevelKey, diagnostics: &mu
 
     match node {
         Node::Scalar { value, .. } if !value.trim().is_empty() => {}
-        Node::Scalar { span, .. } => {
-            diagnostics.semantic_error(format!("`{}` must not be empty", key.as_str()), Some(*span))
-        }
-        other => diagnostics.semantic_error(
-            format!(
-                "`{}` must be a scalar value, found {}",
-                key.as_str(),
-                other.kind_name()
-            ),
-            Some(other.span()),
+        Node::Scalar { span, .. } => diagnostics.push(
+            Diagnostic::semantic_error(
+                format!("`{}` must not be empty", key.as_str()),
+                Some(*span),
+            )
+            .with_code("E103"),
+        ),
+        other => diagnostics.push(
+            Diagnostic::semantic_error(
+                format!(
+                    "`{}` must be a scalar value, found {}",
+                    key.as_str(),
+                    other.kind_name()
+                ),
+                Some(other.span()),
+            )
+            .with_code("E104"),
         ),
     }
 }
@@ -88,13 +101,16 @@ fn validate_prompt_field(document: &Document, key: TopLevelKey, diagnostics: &mu
     };
 
     if !matches!(node, Node::Scalar { .. } | Node::Mapping { .. }) {
-        diagnostics.semantic_error(
-            format!(
-                "`{}` must be a scalar or mapping, found {}",
-                key.as_str(),
-                node.kind_name()
-            ),
-            Some(node.span()),
+        diagnostics.push(
+            Diagnostic::semantic_error(
+                format!(
+                    "`{}` must be a scalar or mapping, found {}",
+                    key.as_str(),
+                    node.kind_name()
+                ),
+                Some(node.span()),
+            )
+            .with_code("E105"),
         );
     }
 }
@@ -105,18 +121,24 @@ fn validate_sequence_field(document: &Document, key: TopLevelKey, diagnostics: &
     };
 
     let Some(values) = node.as_sequence() else {
-        diagnostics.semantic_error(
-            format!("`{}` must be a sequence of scalar values", key.as_str()),
-            Some(node.span()),
+        diagnostics.push(
+            Diagnostic::semantic_error(
+                format!("`{}` must be a sequence of scalar values", key.as_str()),
+                Some(node.span()),
+            )
+            .with_code("E106"),
         );
         return;
     };
 
     for value in values {
         if !matches!(value, Node::Scalar { .. }) {
-            diagnostics.semantic_error(
-                format!("`{}` may only contain scalar list items", key.as_str()),
-                Some(value.span()),
+            diagnostics.push(
+                Diagnostic::semantic_error(
+                    format!("`{}` may only contain scalar list items", key.as_str()),
+                    Some(value.span()),
+                )
+                .with_code("E107"),
             );
             break;
         }
@@ -129,7 +151,10 @@ fn validate_output_field(document: &Document, diagnostics: &mut DiagnosticBag) {
     };
 
     if !matches!(node, Node::Scalar { .. } | Node::Mapping { .. }) {
-        diagnostics.semantic_error("`output` must be a scalar or mapping", Some(node.span()));
+        diagnostics.push(
+            Diagnostic::semantic_error("`output` must be a scalar or mapping", Some(node.span()))
+                .with_code("E108"),
+        );
     }
 }
 
@@ -139,18 +164,24 @@ fn validate_vars_field(document: &Document, diagnostics: &mut DiagnosticBag) {
     };
 
     let Some(entries) = node.as_mapping() else {
-        diagnostics.semantic_error(
-            "`vars` must be a mapping of scalar values",
-            Some(node.span()),
+        diagnostics.push(
+            Diagnostic::semantic_error(
+                "`vars` must be a mapping of scalar values",
+                Some(node.span()),
+            )
+            .with_code("E109"),
         );
         return;
     };
 
     for entry in entries {
         if !matches!(&entry.value, Node::Scalar { .. }) {
-            diagnostics.semantic_error(
-                format!("`vars.{}` must be a scalar value", entry.key),
-                Some(entry.span),
+            diagnostics.push(
+                Diagnostic::semantic_error(
+                    format!("`vars.{}` must be a scalar value", entry.key),
+                    Some(entry.span),
+                )
+                .with_code("E110"),
             );
         }
     }

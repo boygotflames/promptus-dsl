@@ -7,7 +7,7 @@ fn reports_unknown_top_level_keys() {
 
     assert_eq!(
         diagnostics.to_string(),
-        "syntax error at 2:1: unknown top-level key `persona`"
+        "syntax error at 2:1: [E013] unknown top-level key `persona`"
     );
 }
 
@@ -18,7 +18,7 @@ fn reports_duplicate_top_level_blocks_during_parsing() {
 
     assert_eq!(
         diagnostics.to_string(),
-        "syntax error at 2:1: duplicate top-level key `agent`"
+        "syntax error at 2:1: [E014] duplicate top-level key `agent`"
     );
 }
 
@@ -29,7 +29,7 @@ fn reports_mismatched_indentation() {
 
     assert_eq!(
         diagnostics.to_string(),
-        "syntax error at 3:5: nested blocks must be indented by exactly 2 spaces"
+        "syntax error at 3:5: [E024] nested blocks must be indented by exactly 2 spaces"
     );
 }
 
@@ -40,7 +40,7 @@ fn reports_missing_colons() {
 
     assert_eq!(
         diagnostics.to_string(),
-        "syntax error at 1:6: expected `:` after mapping key"
+        "syntax error at 1:6: [E006] expected `:` after mapping key"
     );
 }
 
@@ -51,6 +51,6 @@ fn reports_unterminated_quoted_scalars() {
 
     assert_eq!(
         diagnostics.to_string(),
-        "syntax error at 1:8: unterminated quoted scalar"
+        "syntax error at 1:8: [E011] unterminated quoted scalar"
     );
 }

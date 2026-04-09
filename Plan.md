@@ -85,11 +85,14 @@ Enforce semantic correctness beyond raw syntax.
 
 ### Remaining Work
 - ✓ `agent` required-key rule implemented and conformance-tested
+- ✓ error-code strategy: `code: Option<&'static str>` field on
+  `Diagnostic`, E001–E024 (parser/lexer) and E101–E110 (validator)
+  vocabulary defined in SPEC.md, all emission sites carry codes,
+  conformance-tested
 - remaining: define required status for other keys (spec decision
   needed per key — deferred until use cases justify)
 - remaining: richer semantic contracts beyond current conservative
   v0 checks
-- remaining: error-code strategy
 
 ---
 

@@ -40,6 +40,28 @@ surfaces are always noted explicitly.
 
 ## Notable Changes
 
+### Diagnostic error codes (E0xx/E1xx)
+- `Diagnostic` struct gains `code: Option<&'static str>` field and
+  `with_code()` builder method
+- Error code vocabulary defined: E001–E024 (lexer/parser errors),
+  E101–E110 (validator errors) — see SPEC.md Diagnostic Codes section
+- All lexer, parser, and validator emission sites carry codes
+- Display format updated: `[E001] message` prefix when code is present
+- SPEC.md: `### Diagnostic Codes` subsection added to Validation
+  Semantics with full code table and stability declaration
+- Conformance tests: `conformance_missing_agent_diagnostic_carries_e101_code`
+  and `conformance_diagnostic_codes_are_present_on_all_validator_errors`
+  added
+- Existing parse-error and validate tests updated to reflect new display
+  format with code prefix
+
+### Compatibility matrix cross-link audit
+- `plain` row: SPEC.md §Plain Output cross-link added
+- `json-ir` row: SPEC.md §JSON-IR Output cross-link added
+- `shadow` row: SPEC.md §Shadow Representation direct link added
+- `openai` row: stale "provisional shadow mapping" language corrected
+- Boundary Notes: stable contract summary updated to include `shadow`
+
 ### Plain and JSON-IR output contracts formally specified
 - SPEC.md: added `## Plain Output` section — prescriptive encoding rules,
   stability declaration, and example; cross-links added from Public

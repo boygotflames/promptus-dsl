@@ -47,14 +47,14 @@ fn conformance_parse_rejects_known_invalid_surface_fixtures() {
         .expect_err("unknown key fixture should fail");
     assert_eq!(
         unknown_key.to_string(),
-        "syntax error at 2:1: unknown top-level key `persona`"
+        "syntax error at 2:1: [E013] unknown top-level key `persona`"
     );
 
     let missing_colon = parse_str(include_str!("../examples/invalid/missing-colon.llm"))
         .expect_err("missing colon fixture should fail");
     assert_eq!(
         missing_colon.to_string(),
-        "syntax error at 1:6: expected `:` after mapping key"
+        "syntax error at 1:6: [E006] expected `:` after mapping key"
     );
 
     let duplicate_top_level =
@@ -62,7 +62,7 @@ fn conformance_parse_rejects_known_invalid_surface_fixtures() {
             .expect_err("duplicate top-level fixture should fail");
     assert_eq!(
         duplicate_top_level.to_string(),
-        "syntax error at 2:1: duplicate top-level key `agent`"
+        "syntax error at 2:1: [E014] duplicate top-level key `agent`"
     );
 }
 
@@ -93,7 +93,7 @@ fn conformance_validation_rejects_known_semantic_failures() {
     assert_eq!(vars_error.phase, DiagnosticPhase::Semantic);
     assert_eq!(
         vars_error.to_string(),
-        "semantic error at 2:1: `vars` must be a mapping of scalar values"
+        "semantic error at 2:1: [E109] `vars` must be a mapping of scalar values"
     );
 
     let duplicate_mapping_source = r#"
@@ -112,7 +112,7 @@ system:
     assert_eq!(duplicate_mapping_error.phase, DiagnosticPhase::Semantic);
     assert_eq!(
         duplicate_mapping_error.to_string(),
-        "semantic error at 5:3: duplicate key `role` in `system`"
+        "semantic error at 5:3: [E102] duplicate key `role` in `system`"
     );
 }
 
@@ -271,4 +271,48 @@ fn conformance_shadow_generic_and_openai_produce_identical_output() {
         .expect("openai shadow should succeed");
     assert_eq!(generic, openai);
     assert_eq!(generic, SHADOW_EXTRACTOR);
+}
+
+// --- Diagnostic code conformance ---
+
+#[test]
+fn conformance_missing_agent_diagnostic_carries_e101_code() {
+    let source = "system:\n  role: assistant";
+    let document = parse_str(source).expect("missing-agent source should parse");
+    let diagnostics = validate_document(&document);
+    assert!(diagnostics.has_errors());
+    let e101 = diagnostics
+        .iter()
+        .find(|d| d.code == Some("E101"))
+        .expect("expected a diagnostic with code E101 for missing agent");
+    assert_eq!(e101.phase, DiagnosticPhase::Semantic);
+    assert!(e101.message.contains("agent"));
+}
+
+#[test]
+fn conformance_diagnostic_codes_are_present_on_all_validator_errors() {
+    // E101: missing required key: agent
+    let no_agent = parse_str("system:\n  role: assistant").expect("should parse");
+    let diags = validate_document(&no_agent);
+    assert!(
+        diags.iter().any(|d| d.code == Some("E101")),
+        "expected E101 for missing agent"
+    );
+
+    // E102: duplicate mapping key
+    let dup_key = parse_str("agent: X\nsystem:\n  role: a\n  role: b").expect("should parse");
+    let diags = validate_document(&dup_key);
+    assert!(
+        diags.iter().any(|d| d.code == Some("E102")),
+        "expected E102 for duplicate mapping key"
+    );
+
+    // E109: vars must be a mapping
+    let vars_seq = parse_str(include_str!("../examples/invalid/vars-sequence.llm"))
+        .expect("vars-sequence fixture should parse");
+    let diags = validate_document(&vars_seq);
+    assert!(
+        diags.iter().any(|d| d.code == Some("E109")),
+        "expected E109 for vars non-mapping"
+    );
 }
