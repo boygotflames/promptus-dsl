@@ -49,9 +49,8 @@ Establish a minimal but production-structured Rust project.
 - basic project shape is stable
 
 ### Remaining Notes
-The scaffold succeeded, but two placeholder residues still remain tracked:
-- `src/tokenizer.rs`
-- `src/transpiler.rs`
+Scaffold residues src/tokenizer.rs and src/transpiler.rs have been
+removed. Phase 0 is fully closed.
 
 ---
 
