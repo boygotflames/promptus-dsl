@@ -96,6 +96,17 @@ The v0 formatter emits an AST-normalized surface form.
 
 ## Validation Semantics
 
+### Required Keys
+
+The following top-level keys are required in every valid `.llm` document:
+
+- `agent` — every document must declare an agent identity
+
+All other top-level keys are optional. A document containing only
+`agent` is valid.
+
+### Type Constraints
+
 Current validation rules:
 
 - `agent` must be a non-empty scalar

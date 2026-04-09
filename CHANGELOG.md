@@ -40,6 +40,14 @@ surfaces are always noted explicitly.
 
 ## Notable Changes
 
+### Semantic validation: agent key required
+- `agent` is now a required key — documents missing it produce an
+  Error diagnostic with message "missing required key: `agent`"
+- SPEC.md Validation Semantics section restructured: Required Keys
+  paragraph added before Type Constraints list
+- New invalid fixture: examples/invalid/missing-agent.llm
+- Conformance and validate tests added
+
 ### Shadow output stabilization
 - Shadow format promoted from `provisional` to `stable`
 - SPEC.md Shadow Representation section rewritten as a prescriptive

@@ -67,6 +67,21 @@ fn conformance_parse_rejects_known_invalid_surface_fixtures() {
 }
 
 #[test]
+fn conformance_validation_rejects_document_without_agent_key() {
+    let source = "system:\n  role: assistant";
+    let document = parse_str(source).expect("missing-agent source should parse");
+    let diagnostics = validate_document(&document);
+    assert!(
+        diagnostics.has_errors(),
+        "expected validation errors for document missing the agent key"
+    );
+    assert!(
+        diagnostics.iter().any(|d| d.message.contains("agent")),
+        "expected diagnostic mentioning 'agent', got: {diagnostics}"
+    );
+}
+
+#[test]
 fn conformance_validation_rejects_known_semantic_failures() {
     let vars_fixture = parse_str(include_str!("../examples/invalid/vars-sequence.llm"))
         .expect("vars-sequence fixture should parse before validation");

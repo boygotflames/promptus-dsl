@@ -74,3 +74,24 @@ system:
         "expected no validation errors, got: {diagnostics}"
     );
 }
+
+#[test]
+fn missing_agent_key_is_rejected() {
+    let source = include_str!("../examples/invalid/missing-agent.llm");
+    let document = parse_str(source).expect("missing-agent fixture should parse");
+    let diagnostics = validate_document(&document);
+
+    assert!(
+        diagnostics.has_errors(),
+        "expected validation errors for missing agent key"
+    );
+    let diagnostic = diagnostics
+        .iter()
+        .find(|d| d.message.contains("agent"))
+        .expect("expected a diagnostic mentioning 'agent'");
+    assert_eq!(diagnostic.phase, DiagnosticPhase::Semantic);
+    assert_eq!(
+        diagnostic.to_string(),
+        "semantic error at 1:1: missing required key: `agent`"
+    );
+}

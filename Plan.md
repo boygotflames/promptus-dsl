@@ -84,9 +84,12 @@ Enforce semantic correctness beyond raw syntax.
 - duplicate and unknown top-level keys remain parser-owned by design
 
 ### Remaining Work
-- fuller required-structure rules once the spec is explicit
-- richer semantic contracts beyond current conservative v0 checks
-- any future error-code strategy
+- ✓ `agent` required-key rule implemented and conformance-tested
+- remaining: define required status for other keys (spec decision
+  needed per key — deferred until use cases justify)
+- remaining: richer semantic contracts beyond current conservative
+  v0 checks
+- remaining: error-code strategy
 
 ---
 

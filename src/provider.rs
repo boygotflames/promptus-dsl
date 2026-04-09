@@ -21,14 +21,6 @@ pub enum ShadowProfile {
     ProvisionalV0,
 }
 
-impl ShadowProfile {
-    pub fn identifier(self) -> &'static str {
-        match self {
-            ShadowProfile::ProvisionalV0 => "shadow-v0-provisional",
-        }
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TokenizerProfile {
     Cl100kBase,

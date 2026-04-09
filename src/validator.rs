@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use crate::ast::{Document, Node, TopLevelKey};
-use crate::diagnostics::DiagnosticBag;
+use crate::diagnostics::{DiagnosticBag, Span};
 
 pub fn validate_document(document: &Document) -> DiagnosticBag {
     let mut diagnostics = DiagnosticBag::new();
@@ -26,8 +26,10 @@ pub fn validate_document(document: &Document) -> DiagnosticBag {
     diagnostics
 }
 
-fn validate_required_structure(_document: &Document, _diagnostics: &mut DiagnosticBag) {
-    // TODO: v0 does not yet declare any required top-level blocks in SPEC.md.
+fn validate_required_structure(document: &Document, diagnostics: &mut DiagnosticBag) {
+    if document.agent.is_none() {
+        diagnostics.semantic_error("missing required key: `agent`", Some(Span::new(1, 1)));
+    }
 }
 
 fn validate_duplicate_keys(node: &Node, path: &str, diagnostics: &mut DiagnosticBag) {
