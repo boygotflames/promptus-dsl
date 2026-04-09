@@ -101,16 +101,21 @@ Generate useful outputs from the AST.
 ### Reality
 - `plain` is implemented and deterministic
 - `json-ir` is implemented and deterministic
-- provisional `shadow` is implemented and deterministic
+- `shadow` is implemented and deterministic
 - output ordering is test-backed
 
 ### Remaining Work
-- `shadow` output is now stable: v0 format specified in SPEC.md,
+- ✓ `shadow` output stable: v0 format specified in SPEC.md,
   conformance tests added, compatibility matrix updated
-- freeze `plain` and `json-ir` output compatibility expectations
-  formally (currently stable in practice but not yet described with
-  the same prescriptive level as shadow in SPEC.md)
-- clarify which outputs are internal vs public contract in SPEC.md
+- ✓ `plain` and `json-ir` output contracts formally specified in
+  SPEC.md with prescriptive sections, encoding rules, and stability
+  declarations; Public Contract Status updated with cross-links
+- ✓ internal vs public contract boundary explicit in SPEC.md
+  Public Contract Status (stable / partial / provisional /
+  unsupported split with per-section links)
+- remaining: provider differentiation — `plain`, `json-ir`, and
+  `shadow` currently ignore provider; real per-provider behavior
+  is a post-v0 concern
 
 ---
 

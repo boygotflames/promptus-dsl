@@ -40,6 +40,21 @@ surfaces are always noted explicitly.
 
 ## Notable Changes
 
+### Plain and JSON-IR output contracts formally specified
+- SPEC.md: added `## Plain Output` section — prescriptive encoding rules,
+  stability declaration, and example; cross-links added from Public
+  Contract Status
+- SPEC.md: added `## JSON-IR Output` section — full structural encoding
+  rules (object/array/scalar layout, indentation, quoting, absent-key
+  omission), stability declaration, and example
+- SPEC.md: `shadow` moved from `provisional` to `stable` in Public
+  Contract Status (shadow was stabilized in a prior packet; this corrects
+  the status entry that was missed at that time)
+- SPEC.md: stale "provisional shadow mapping" language in Deferred Work
+  updated to reflect current stable status
+- Plan.md: Phase 3 remaining work fully resolved; provider differentiation
+  noted as the remaining post-v0 concern
+
 ### Semantic validation: agent key required
 - `agent` is now a required key — documents missing it produce an
   Error diagnostic with message "missing required key: `agent`"

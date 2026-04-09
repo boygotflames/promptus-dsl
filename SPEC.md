@@ -125,14 +125,14 @@ The current public v0 boundary is intentionally split:
 - `stable`
   - surface syntax
   - canonical formatting
-  - `plain` output
-  - `json-ir` output
+  - `plain` output — see [Plain Output](#plain-output)
+  - `json-ir` output — see [JSON-IR Output](#json-ir-output)
+  - `shadow` output — see [Shadow Representation](#shadow-representation)
 - `partial`
   - current semantic validation breadth
   - provider-selection plumbing
   - minimal VS Code syntax support
 - `provisional`
-  - `shadow` output
   - `bench` report behavior
 - `unsupported`
   - provider profiles without an explicit supported tokenizer/shadow path
@@ -221,6 +221,126 @@ memory:
   - user_history
 ```
 
+## Plain Output
+
+The `plain` target emits the canonical formatter output for a document.
+Its encoding is defined as identical to the output of the `fmt` command.
+See [Canonical Formatting](#canonical-formatting) for the full encoding
+rules.
+
+Key properties:
+
+- Top-level keys follow Document field order: `agent`, `system`, `user`,
+  `memory`, `tools`, `output`, `constraints`, `vars`
+- Absent keys are omitted entirely
+- Mapping entries preserve source insertion order
+- Indentation is always 2 spaces per nesting level
+- Scalars remain bare only when they are non-empty and contain only ASCII
+  letters, digits, `_`, or `-`; all other scalars are double-quoted with
+  backslash escaping
+- Comments and blank-line layout are not preserved
+- Lines are joined with `\n`; there is no trailing newline
+
+The provider parameter is ignored for `plain` output.
+
+### Stability
+
+The `plain` format described in this section is **stable** as of v0.
+The same `.llm` input will always produce the same `plain` output.
+Downstream tooling may depend on this format. Breaking changes require
+a version bump and a CHANGELOG entry.
+
+### Example
+
+Input:
+
+```text
+agent: DataExtractor
+system:
+  role: financial_analyst
+  output: json
+memory:
+  - user_history
+```
+
+Output:
+
+```text
+agent: DataExtractor
+system:
+  role: financial_analyst
+  output: json
+memory:
+  - user_history
+```
+
+---
+
+## JSON-IR Output
+
+The `json-ir` target emits a JSON object representation of the document.
+It is intended as a stable intermediate representation for programmatic
+consumers that prefer structured JSON over the surface DSL syntax.
+
+Key properties:
+
+- The top-level output is a JSON object `{...}`
+- Top-level keys follow Document field order: `agent`, `system`, `user`,
+  `memory`, `tools`, `output`, `constraints`, `vars`
+- Absent keys are omitted entirely — no `null`-valued key is emitted
+- Mapping entries preserve source insertion order
+- Indentation is 2 spaces per nesting level
+- All object keys are double-quoted strings
+- Scalar values are double-quoted strings; the following characters are
+  backslash-escaped inside quoted strings: `\`, `"`, newline (`\n`),
+  carriage return (`\r`), tab (`\t`)
+- Sequence values use JSON array syntax `[...]` with each item on its own
+  indented line; a comma appears after each item except the last
+- Mapping values use JSON object syntax `{...}` with each entry on its
+  own indented line; a comma appears after each entry except the last
+- An empty sequence emits `[]` on a single line
+- An empty mapping emits `{}` on a single line
+- Lines are joined with `\n`; there is no trailing newline
+
+The provider parameter is ignored for `json-ir` output.
+
+### Stability
+
+The `json-ir` format described in this section is **stable** as of v0.
+The same `.llm` input will always produce the same `json-ir` output.
+Downstream tooling may depend on this format. Breaking changes require
+a version bump and a CHANGELOG entry.
+
+### Example
+
+Input:
+
+```text
+agent: DataExtractor
+system:
+  role: financial_analyst
+  output: json
+memory:
+  - user_history
+```
+
+Output:
+
+```json
+{
+  "agent": "DataExtractor",
+  "system": {
+    "role": "financial_analyst",
+    "output": "json"
+  },
+  "memory": [
+    "user_history"
+  ]
+}
+```
+
+---
+
 ## Deferred Work
 
 The following are explicitly out of scope for v0. They are recorded here
@@ -240,8 +360,8 @@ so readers know they are intentionally deferred, not overlooked.
   deterministic scalar quoting and 2-space indentation. See
   [Canonical Formatting](#canonical-formatting) above.
 - **Provider-specific emission layers** — Partial in v0. The `generic`
-  and `openai` profiles exist and share a single provisional shadow
-  mapping. Real per-provider divergence is deferred to post-v0.
+  and `openai` profiles exist and currently share the same v0 shadow
+  encoding. Real per-provider divergence is deferred to post-v0.
 - **Includes/imports and multi-file composition** — Deferred to post-v0.
   Each `.llm` document is a standalone unit at v0. Cross-file references
   are not part of the v0 contract.
