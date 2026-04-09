@@ -130,21 +130,68 @@ The public compatibility summary lives in [docs/compatibility-matrix.md](docs/co
 
 ## Shadow Representation
 
-The v0 transpiler includes a provisional Shadow target.
+The v0 transpiler emits a Shadow target intended as a compact,
+deterministic, machine-facing representation of a `.llm` document.
 
-- it is deterministic and provider-agnostic
-- it uses reserved top-level markers plus compact structural delimiters
-- it preserves the current AST ordering:
-  - top-level blocks follow the reserved key order in the `Document`
-  - mapping entries preserve source/AST insertion order
-  - sequence items preserve source order
-- runtime tooling may select a provider profile for shadow emission
-- for the current kickoff implementation, `generic` and `openai` share the same provisional shadow mapping
-- unsupported provider profiles must fail explicitly rather than silently falling back
+This specification describes the `v0` shadow format. It is implemented
+by `src/transpile/shadow.rs` and covered by the conformance suite in
+`tests/conformance.rs`. The format is stable as of this document.
 
-The current Shadow mapping is implementation-defined for v0 and is not yet a frozen public compatibility contract. It should be treated as a machine-facing intermediate form that may be revised as the specification matures.
+### Marker Table
 
-Example:
+Each supported top-level key maps to a two-character reserved marker:
+
+| Key | Marker | Value encoding |
+|---|---|---|
+| `agent` | `@a` | `="<scalar>"` |
+| `system` | `@s` | scalar: `="<value>"` / mapping: `={key="val";...}` |
+| `user` | `@u` | scalar: `="<value>"` / mapping: `={key="val";...}` |
+| `memory` | `@m` | `=["item1","item2",...]` |
+| `tools` | `@t` | `=["item1","item2",...]` |
+| `output` | `@o` | scalar: `="<value>"` / mapping: `={key="val";...}` |
+| `constraints` | `@c` | `=["item1","item2",...]` |
+| `vars` | `@v` | `={key="val";...}` |
+
+### Encoding Rules
+
+1. **Scalar values** are always double-quoted: `"value"`. The following
+   characters are backslash-escaped inside quoted scalars: `\`, `"`,
+   newline (`\n`), carriage return (`\r`), tab (`\t`).
+2. **Mapping values** use `{` `}` delimiters with `;`-separated
+   `key="value"` pairs. Mapping keys are emitted bare (unquoted).
+   Mapping values are recursively encoded.
+3. **Sequence values** use `[` `]` delimiters with `,`-separated
+   encoded items. Sequence items are recursively encoded.
+4. **Absent keys** are omitted entirely — no empty marker is emitted
+   for a top-level key that is not present in the document.
+5. **Key ordering** follows the Document field order defined in the AST:
+   `agent`, `system`, `user`, `memory`, `tools`, `output`,
+   `constraints`, `vars`. Source insertion order does not affect output
+   order.
+6. **Each marker** appears on its own line. Lines are joined with `\n`
+   (no trailing newline).
+
+### Provider Profiles
+
+The shadow emitter accepts a provider profile parameter:
+
+- `generic` — default; uses the v0 shadow encoding described above
+- `openai` — currently maps to the same v0 shadow encoding as `generic`
+- other profiles — fail explicitly with a descriptive error; no silent
+  fallback
+
+Provider profiles are a plumbing hook for future differentiation.
+At v0, `generic` and `openai` produce identical output.
+
+### Stability
+
+The shadow format described in this section is **stable** as of v0.
+
+The same `.llm` input will always produce the same shadow output.
+Downstream tooling may depend on this format. Breaking changes to
+the shadow format require a version bump and a CHANGELOG entry.
+
+### Example
 
 ```text
 @a="DataExtractor"

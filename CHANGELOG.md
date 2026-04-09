@@ -40,6 +40,15 @@ surfaces are always noted explicitly.
 
 ## Notable Changes
 
+### Shadow output stabilization
+- Shadow format promoted from `provisional` to `stable`
+- SPEC.md Shadow Representation section rewritten as a prescriptive
+  contract: full marker table, encoding rules, provider profile
+  behavior, stability declaration
+- docs/compatibility-matrix.md shadow row updated to `stable`
+- Conformance tests added for stable shadow contract (extractor fixture,
+  absent-key omission, full marker coverage)
+
 ### Phase 9 completion
 - Added docs/versioning.md: v0 stability strategy and v1 bump criteria
 - Added CONTRIBUTING.md: contribution scope, workflow, commit style

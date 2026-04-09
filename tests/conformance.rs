@@ -5,6 +5,9 @@ use llm_format::provider::Provider;
 use llm_format::transpile::{self, Target};
 use llm_format::{DiagnosticPhase, format_document, parse_str, validate_document};
 
+const SHADOW_EXTRACTOR: &str = "@a=\"Extractor\"\n@s={role=\"financial_analyst\";objective=\"extract structured facts\"}\n@u={prompt=\"summarize the quarterly filing\"}\n@t=[\"web_search\",\"calculator\"]\n@c=[\"cite_sources\",\"stay_provider_agnostic\"]";
+const SHADOW_JSON_OUTPUT: &str = "@a=\"DataExtractor\"\n@s={role=\"financial_analyst\";output=\"json\"}\n@o={schema=\"invoice_summary\"}\n@v={region=\"apac\";currency=\"usd\"}";
+
 const PLAIN_MINIMAL: &str = "agent: DataExtractor\nsystem:\n  role: financial_analyst\n  output: json\nmemory:\n  - user_history";
 const PLAIN_QUOTED: &str = "agent: \"Data Extractor\"\nsystem:\n  role: \"financial analyst\"\nuser: \"Summarize \\\"Q1\\\" results\"\nvars:\n  company: \"Acme Corp\"\n  region: apac";
 const JSON_IR_MINIMAL: &str = "{\n  \"agent\": \"DataExtractor\",\n  \"system\": {\n    \"role\": \"financial_analyst\",\n    \"output\": \"json\"\n  },\n  \"memory\": [\n    \"user_history\"\n  ]\n}";
@@ -210,4 +213,47 @@ fn conformance_bench_rejects_unsupported_provider_profiles_explicitly() {
         error.to_string(),
         "provider anthropic does not have a supported tokenizer profile yet"
     );
+}
+
+// --- Stable shadow contract conformance ---
+
+#[test]
+fn conformance_shadow_extractor_fixture_matches_stable_contract() {
+    let document = parse_valid_document(include_str!("../examples/extractor.llm"));
+    let shadow = transpile::transpile(&document, Target::Shadow);
+    assert_eq!(shadow, SHADOW_EXTRACTOR);
+}
+
+#[test]
+fn conformance_shadow_json_output_fixture_covers_output_and_vars_markers() {
+    let document = parse_valid_document(include_str!("../examples/json-output.llm"));
+    let shadow = transpile::transpile(&document, Target::Shadow);
+    assert_eq!(shadow, SHADOW_JSON_OUTPUT);
+}
+
+#[test]
+fn conformance_shadow_absent_keys_are_omitted_not_emitted_empty() {
+    let source = "agent: OnlyAgent";
+    let document = parse_valid_document(source);
+    let shadow = transpile::transpile(&document, Target::Shadow);
+    assert_eq!(shadow, "@a=\"OnlyAgent\"");
+    assert!(
+        !shadow.contains("@s"),
+        "absent system key must not appear in shadow output"
+    );
+    assert!(
+        !shadow.contains("@m"),
+        "absent memory key must not appear in shadow output"
+    );
+}
+
+#[test]
+fn conformance_shadow_generic_and_openai_produce_identical_output() {
+    let document = parse_valid_document(include_str!("../examples/extractor.llm"));
+    let generic = transpile::transpile_with_provider(&document, Target::Shadow, Provider::Generic)
+        .expect("generic shadow should succeed");
+    let openai = transpile::transpile_with_provider(&document, Target::Shadow, Provider::Openai)
+        .expect("openai shadow should succeed");
+    assert_eq!(generic, openai);
+    assert_eq!(generic, SHADOW_EXTRACTOR);
 }

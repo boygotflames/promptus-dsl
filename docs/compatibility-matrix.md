@@ -20,7 +20,7 @@ It is intentionally narrower than the full internal test suite. The goal is to s
 | Canonical formatter (`fmt`) | `stable` | Canonical 2-space indentation, reserved top-level ordering, source-preserved mapping order, and explicit quoting rules are treated as the current v0 formatting contract. | `tests/conformance.rs` |
 | `transpile --target plain` | `stable` | The plain target is the canonical normalized surface rendering for the current v0 slice. | `tests/conformance.rs` |
 | `transpile --target json-ir` | `stable` | The JSON IR is deterministic and provider-agnostic for the current v0 slice. It is treated as a public contract for the presently implemented fields. | `tests/conformance.rs` |
-| `transpile --target shadow` | `provisional` | The shadow target is deterministic and provider-aware, but its mapping remains explicitly provisional and may change as the machine-facing contract matures. | `tests/conformance.rs` |
+| `transpile --target shadow` | `stable` | The shadow target is deterministic and provider-aware. The v0 shadow format is specified as a stable contract in SPEC.md and covered by the conformance suite. | `tests/conformance.rs` |
 | `bench` report | `provisional` | Bench output is deterministic for supported providers, but it remains tied to the current tokenizer/profile path and may evolve as benchmark discipline grows. | `tests/conformance.rs` |
 | Provider profile: `generic` | `partial` | Supported for current `shadow` and `bench` flows. The profile exists, but provider-specific divergence is still intentionally limited. | `tests/conformance.rs` |
 | Provider profile: `openai` | `partial` | Explicitly selectable and supported, but currently shares the same provisional shadow mapping and tokenizer path as `generic`. | `tests/conformance.rs` |
@@ -30,6 +30,7 @@ It is intentionally narrower than the full internal test suite. The goal is to s
 ## Boundary Notes
 
 - The stable v0 contract is currently centered on surface syntax, canonical formatting, `plain`, and `json-ir`.
-- `shadow` and `bench` are real and deterministic, but they remain provisional because their public compatibility commitments are intentionally narrower.
+- `shadow` is now stable: the v0 format is fully specified in SPEC.md and backed by the conformance suite.
+- `bench` remains provisional because its report shape is still tied to a single tokenizer path and may evolve.
 - Provider support is honest by design: explicit support where it exists, explicit failure where it does not.
 - The compatibility matrix should evolve only when the implementation and conformance tests justify it.

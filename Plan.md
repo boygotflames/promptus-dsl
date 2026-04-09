@@ -102,9 +102,12 @@ Generate useful outputs from the AST.
 - output ordering is test-backed
 
 ### Remaining Work
-- freeze output compatibility expectations
-- clarify which outputs are internal/intermediate vs public contract
-- evolve `shadow` without pretending the current provisional form is final
+- `shadow` output is now stable: v0 format specified in SPEC.md,
+  conformance tests added, compatibility matrix updated
+- freeze `plain` and `json-ir` output compatibility expectations
+  formally (currently stable in practice but not yet described with
+  the same prescriptive level as shadow in SPEC.md)
+- clarify which outputs are internal vs public contract in SPEC.md
 
 ---
 
