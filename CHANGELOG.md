@@ -40,6 +40,19 @@ surfaces are always noted explicitly.
 
 ## Notable Changes
 
+### VS Code: formatter-on-save integration
+- `editors/vscode/extension.js`: new entry point; registers
+  `DocumentFormattingEditProvider` for the `llm` language; spawns
+  `llm_format fmt <filepath>` (stdout is the default — no `--write`
+  flag needed); resolves binary from `llm.formatterPath` setting or
+  PATH; graceful ENOENT and non-zero-exit handling
+- `editors/vscode/package.json`: `main`, `activationEvents`, and
+  `llm.formatterPath` configuration contribution added
+- `editors/vscode/README.md`: Formatter section added explaining
+  how to configure; what-it-does list updated
+- Note: `fmt` already outputs to stdout by default (no `--write`);
+  no CLI change required
+
 ### Logo and visual identity
 - `assets/Promptus.svg`: project logo added (Fibonacci spiral,
   dual-gradient visual identity)

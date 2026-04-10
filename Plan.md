@@ -192,10 +192,12 @@ Support real developer workflows in editors.
 ### Remaining Work
 - ✓ visual identity: `assets/Promptus.svg` added, wired into README
   and VS Code extension source (`editors/vscode/images/Promptus.svg`)
-- remaining: PNG export for marketplace publication
-- remaining: formatter-on-save (requires TypeScript extension entry
-  point — medium packet)
-- remaining: LSP, live validation, completion (post-v0)
+- ✓ formatter-on-save: `extension.js` entry point added;
+  `DocumentFormattingEditProvider` spawns `llm_format fmt <filepath>`;
+  `llm.formatterPath` setting; graceful error handling
+- remaining: PNG export of Promptus.svg for marketplace publication
+- remaining: LSP (separate and larger decision — deferred post-v0)
+- remaining: live validation diagnostics (depends on LSP — deferred)
 
 ---
 

@@ -6,6 +6,8 @@
   "publisher": "llm-format",
   "license": "MIT",
   "icon": "images/Promptus.png",
+  "main": "./extension.js",
+  "activationEvents": ["onLanguage:llm"],
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -32,6 +34,16 @@
         "scopeName": "source.llm",
         "path": "./syntaxes/llm.tmLanguage.json"
       }
-    ]
+    ],
+    "configuration": {
+      "title": ".llm",
+      "properties": {
+        "llm.formatterPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the llm_format binary. Leave empty to use PATH."
+        }
+      }
+    }
   }
 }

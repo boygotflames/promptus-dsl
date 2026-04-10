@@ -15,12 +15,28 @@ This folder contains the first minimal VS Code package for `.llm` files.
   - `#` comments
 - enables line comments and quote auto-closing
 
+## Formatter
+
+The extension registers a document formatter for `.llm` files.
+
+To use it:
+
+- Build or install the `llm_format` binary (`cargo build --release`)
+- Either add the binary to your PATH, or set `llm.formatterPath`
+  in VS Code settings to the full binary path
+- Format with `Shift+Alt+F` (Windows/Linux) or `Shift+Option+F` (Mac),
+  or enable Format on Save in VS Code settings
+
+If the binary is not found, a one-time informational message is shown.
+
 ## What It Does Not Yet Do
 
 - no language server
 - no live parse or validation diagnostics
 - no completion, hover, or code actions
-- no formatter-on-save integration
+- ✓ formatter-on-save: DocumentFormattingEditProvider registered
+  for the 'llm' language — requires llm_format binary on PATH or
+  configured via llm.formatterPath setting
 - no marketplace packaging or publishing workflow
 
 ## Icon
