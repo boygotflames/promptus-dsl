@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/Promptus.svg" width="160" alt="Promptus logo" />
+</p>
+
 # `.llm` Transpiler
 
 `.llm` is a spec-first prompt and configuration format for LLM-oriented workflows, paired with a Rust reference implementation that parses, validates, formats, benchmarks, and transpiles `.llm` documents into deterministic machine-facing outputs.
@@ -210,6 +214,7 @@ Current editor support does not include:
 
 ## Repository Layout
 
+- [assets](assets): project logo and visual identity sources
 - [src](src): compiler, CLI, formatter, bench, provider, and transpile code
 - [tests](tests): deterministic behavior coverage
 - [examples](examples): valid, invalid, noncanonical, and benchmark baseline fixtures

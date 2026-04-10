@@ -316,3 +316,19 @@ fn conformance_diagnostic_codes_are_present_on_all_validator_errors() {
         "expected E109 for vars non-mapping"
     );
 }
+
+#[test]
+fn conformance_validation_rejects_empty_agent_scalar() {
+    let source = include_str!("../examples/invalid/empty-agent.llm");
+    let document = parse_str(source).expect("empty-agent fixture should parse");
+    let diagnostics = validate_document(&document);
+    assert!(
+        diagnostics.has_errors(),
+        "expected validation errors for empty agent scalar"
+    );
+    let e103 = diagnostics
+        .iter()
+        .find(|d| d.code == Some("E103"))
+        .expect("expected a diagnostic with code E103 for empty agent scalar");
+    assert_eq!(e103.phase, DiagnosticPhase::Semantic);
+}

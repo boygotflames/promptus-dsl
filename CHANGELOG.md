@@ -40,6 +40,29 @@ surfaces are always noted explicitly.
 
 ## Notable Changes
 
+### Logo and visual identity
+- `assets/Promptus.svg`: project logo added (Fibonacci spiral,
+  dual-gradient visual identity)
+- `editors/vscode/images/Promptus.svg`: logo source for VS Code
+  extension (export to PNG before marketplace publication)
+- `editors/vscode/package.json`: `icon` field added
+- `README.md`: logo header added; `assets/` entry added to
+  Repository Layout
+
+### Validator: empty scalar enforcement
+- `agent`, `memory`/`tools`/`constraints` sequence items, and
+  `vars` scalar values now reject empty strings with E103
+- `validate_sequence_field`: empty-scalar branch added before
+  the non-scalar-type branch
+- `validate_vars_field`: empty-scalar branch added in the
+  per-entry match
+- SPEC.md Type Constraints: introductory empty-scalar rule added;
+  sequence and vars bullets updated to say "non-empty"
+- `examples/invalid/empty-agent.llm`: new invalid fixture
+  (`agent: ""` — empty quoted scalar)
+- `tests/validate.rs`: `empty_agent_scalar_is_rejected` added
+- `tests/conformance.rs`: `conformance_validation_rejects_empty_agent_scalar` added
+
 ### Diagnostic error codes (E0xx/E1xx)
 - `Diagnostic` struct gains `code: Option<&'static str>` field and
   `with_code()` builder method

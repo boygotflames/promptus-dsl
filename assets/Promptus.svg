@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="100%" height="100%">
+  <defs>
+    <linearGradient id="compilerCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF"/>
+      <stop offset="100%" stop-color="#0057FF"/>
+    </linearGradient>
+    
+    <linearGradient id="rustEmber" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="100%" stop-color="#FF6B00"/>
+    </linearGradient>
+
+    <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur1"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="30" result="blur2"/>
+      <feMerge>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="blur1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="lineGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <g transform="translate(500, 500)" stroke="#FFFFFF" fill="none" opacity="0.65" stroke-width="1.5" filter="url(#lineGlow)">
+    <circle r="34"/>
+    <circle r="55"/>
+    <circle r="89"/>
+    <circle r="144"/>
+    <circle r="233"/>
+    <circle r="377"/>
+    
+    <path d="M 0,-34 A 34,34 0 0 1 34,0 A 55,55 0 0 1 -21,55 A 89,89 0 0 1 -110,-34 A 144,144 0 0 1 34,-178 A 233,233 0 0 1 267,55 A 377,377 0 0 1 -110,432" stroke="#FFFFFF" stroke-width="2.5" opacity="0.9"/>
+    
+    <circle cx="0" cy="-34" r="3" fill="#FFFFFF" stroke="none"/>
+    <circle cx="34" cy="0" r="3" fill="#FFFFFF" stroke="none"/>
+    <circle cx="-21" cy="55" r="3" fill="#FFFFFF" stroke="none"/>
+    <circle cx="-110" cy="-34" r="3" fill="#FFFFFF" stroke="none"/>
+    <circle cx="34" cy="-178" r="3" fill="#FFFFFF" stroke="none"/>
+    <circle cx="267" cy="55" r="3" fill="#FFFFFF" stroke="none"/>
+  </g>
+
+  <g transform="translate(500, 500)" stroke="url(#compilerCyan)" stroke-width="3" fill="none" opacity="0.25">
+    <polygon points="0,-350 303,-175 303,175 0,350 -303,175 -303,-175"/>
+    <polygon points="0,-150 130,-75 130,75 0,150 -130,75 -130,-75"/>
+    <line x1="0" y1="-350" x2="0" y2="-150"/>
+    <line x1="303" y1="-175" x2="130" y2="-75"/>
+    <line x1="303" y1="175" x2="130" y2="75"/>
+    <line x1="0" y1="350" x2="0" y2="150"/>
+    <line x1="-303" y1="175" x2="-130" y2="75"/>
+    <line x1="-303" y1="-175" x2="-130" y2="-75"/>
+    
+    <line x1="-400" y1="0" x2="400" y2="0" stroke-dasharray="5, 15" stroke-width="1"/>
+    <line x1="0" y1="-400" x2="0" y2="400" stroke-dasharray="5, 15" stroke-width="1"/>
+  </g>
+
+  <g transform="translate(500, 500)" filter="url(#neonGlow)">
+    
+    <path d="M -130,-75 
+             L -260,-150 
+             L -260,100 
+             L -80,204 
+             L -80,124 
+             L -180,66 
+             L -180,-45
+             L -130,-15 Z" 
+          fill="url(#rustEmber)" stroke="#FFF" stroke-width="2" opacity="0.9"/>
+          
+    <path d="M 130,-75 
+             L 260,-150 
+             L 260,100 
+             L 80,204 
+             L 80,124 
+             L 180,66 
+             L 180,-45
+             L 130,-15 Z" 
+          fill="url(#compilerCyan)" stroke="#FFF" stroke-width="2" opacity="0.9"/>
+
+    <path d="M -130,-75 
+             L -260,-150 
+             L 0,-300 
+             L 260,-150 
+             L 130,-75 
+             L 0,-150 
+             Z" 
+          fill="#FFFFFF" opacity="0.9"/>
+          
+    <polygon points="0,-150 -65,-112 0,-75 65,-112" fill="url(#rustEmber)"/>
+    <polygon points="0,-75 -65,-37 0,0 65,-37" fill="url(#compilerCyan)"/>
+  </g>
+
+  </svg>

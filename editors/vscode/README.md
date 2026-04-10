@@ -23,6 +23,12 @@ This folder contains the first minimal VS Code package for `.llm` files.
 - no formatter-on-save integration
 - no marketplace packaging or publishing workflow
 
+## Icon
+
+Icon source: `images/Promptus.svg` — export to `images/Promptus.png`
+before marketplace publication. VS Code marketplace requires a PNG icon;
+the SVG is stored here as the source of truth.
+
 ## Local Manual Verification
 
 1. Open `D:\llm_format\editors\vscode` as the workspace folder in VS Code.

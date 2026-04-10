@@ -89,6 +89,9 @@ Enforce semantic correctness beyond raw syntax.
   `Diagnostic`, E001–E024 (parser/lexer) and E101–E110 (validator)
   vocabulary defined in SPEC.md, all emission sites carry codes,
   conformance-tested
+- ✓ empty scalar enforcement: agent, sequence items
+  (memory/tools/constraints), and vars values reject empty strings
+  (E103); SPEC.md Type Constraints updated with explicit rule
 - remaining: define required status for other keys (spec decision
   needed per key — deferred until use cases justify)
 - remaining: richer semantic contracts beyond current conservative
@@ -187,10 +190,12 @@ Support real developer workflows in editors.
 - extension assets have basic sanity coverage
 
 ### Remaining Work
-- no LSP
-- no live validation
-- no formatter integration
-- no broader editor story
+- ✓ visual identity: `assets/Promptus.svg` added, wired into README
+  and VS Code extension source (`editors/vscode/images/Promptus.svg`)
+- remaining: PNG export for marketplace publication
+- remaining: formatter-on-save (requires TypeScript extension entry
+  point — medium packet)
+- remaining: LSP, live validation, completion (post-v0)
 
 ---
 

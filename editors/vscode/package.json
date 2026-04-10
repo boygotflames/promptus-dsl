@@ -5,6 +5,7 @@
   "version": "0.1.0",
   "publisher": "llm-format",
   "license": "MIT",
+  "icon": "images/Promptus.png",
   "engines": {
     "vscode": "^1.85.0"
   },

@@ -132,15 +132,28 @@ fn validate_sequence_field(document: &Document, key: TopLevelKey, diagnostics: &
     };
 
     for value in values {
-        if !matches!(value, Node::Scalar { .. }) {
-            diagnostics.push(
-                Diagnostic::semantic_error(
-                    format!("`{}` may only contain scalar list items", key.as_str()),
-                    Some(value.span()),
-                )
-                .with_code("E107"),
-            );
-            break;
+        match value {
+            Node::Scalar { value: v, span } if v.trim().is_empty() => {
+                diagnostics.push(
+                    Diagnostic::semantic_error(
+                        format!("`{}` must not be empty", key.as_str()),
+                        Some(*span),
+                    )
+                    .with_code("E103"),
+                );
+                break;
+            }
+            Node::Scalar { .. } => {}
+            _ => {
+                diagnostics.push(
+                    Diagnostic::semantic_error(
+                        format!("`{}` may only contain scalar list items", key.as_str()),
+                        Some(value.span()),
+                    )
+                    .with_code("E107"),
+                );
+                break;
+            }
         }
     }
 }
@@ -175,14 +188,26 @@ fn validate_vars_field(document: &Document, diagnostics: &mut DiagnosticBag) {
     };
 
     for entry in entries {
-        if !matches!(&entry.value, Node::Scalar { .. }) {
-            diagnostics.push(
-                Diagnostic::semantic_error(
-                    format!("`vars.{}` must be a scalar value", entry.key),
-                    Some(entry.span),
-                )
-                .with_code("E110"),
-            );
+        match &entry.value {
+            Node::Scalar { value, .. } if value.trim().is_empty() => {
+                diagnostics.push(
+                    Diagnostic::semantic_error(
+                        format!("`vars.{}` must not be empty", entry.key),
+                        Some(entry.span),
+                    )
+                    .with_code("E103"),
+                );
+            }
+            Node::Scalar { .. } => {}
+            _ => {
+                diagnostics.push(
+                    Diagnostic::semantic_error(
+                        format!("`vars.{}` must be a scalar value", entry.key),
+                        Some(entry.span),
+                    )
+                    .with_code("E110"),
+                );
+            }
         }
     }
 }

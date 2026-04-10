@@ -107,13 +107,18 @@ All other top-level keys are optional. A document containing only
 
 ### Type Constraints
 
+Scalar values that are syntactically present but empty (zero-length
+after trimming) are treated as validation errors wherever the spec
+requires a non-empty scalar.
+
 Current validation rules:
 
 - `agent` must be a non-empty scalar
 - `system` and `user` must be either a scalar or a mapping
-- `memory`, `tools`, and `constraints` must be sequences of scalar values
+- `memory`, `tools`, and `constraints` must be sequences of
+  non-empty scalar values
 - `output` must be either a scalar or a mapping
-- `vars` must be a mapping whose values are scalars
+- `vars` must be a mapping whose values are non-empty scalars
 - mapping keys must be unique within each mapping block
 
 These constraints are intentionally conservative and may expand in later versions.

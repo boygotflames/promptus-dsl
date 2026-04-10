@@ -76,6 +76,28 @@ system:
 }
 
 #[test]
+fn empty_agent_scalar_is_rejected() {
+    let source = include_str!("../examples/invalid/empty-agent.llm");
+    let document = parse_str(source).expect("empty-agent fixture should parse");
+    let diagnostics = validate_document(&document);
+
+    assert!(
+        diagnostics.has_errors(),
+        "expected validation errors for empty agent scalar"
+    );
+    let diagnostic = diagnostics
+        .iter()
+        .find(|d| d.code == Some("E103"))
+        .expect("expected a diagnostic with code E103");
+    assert!(
+        diagnostic.message.contains("agent") || diagnostic.message.contains("must not be empty"),
+        "expected diagnostic message to mention agent or emptiness, got: {}",
+        diagnostic.message
+    );
+    assert_eq!(diagnostic.phase, DiagnosticPhase::Semantic);
+}
+
+#[test]
 fn missing_agent_key_is_rejected() {
     let source = include_str!("../examples/invalid/missing-agent.llm");
     let document = parse_str(source).expect("missing-agent fixture should parse");
