@@ -18,7 +18,7 @@ pub enum SupportStatus {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ShadowProfile {
-    ProvisionalV0,
+    V0,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -74,7 +74,7 @@ impl ProviderProfile {
 
     pub fn shadow_profile(self) -> Result<ShadowProfile> {
         match self.provider {
-            Provider::Generic | Provider::Openai => Ok(ShadowProfile::ProvisionalV0),
+            Provider::Generic | Provider::Openai => Ok(ShadowProfile::V0),
             Provider::Anthropic => Err(anyhow!(
                 "provider {} does not have a supported shadow profile yet",
                 self.provider.as_str()

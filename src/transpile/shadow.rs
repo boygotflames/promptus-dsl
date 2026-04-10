@@ -72,7 +72,7 @@ const SHADOW_SYNTAX: ShadowSyntax = ShadowSyntax {
 impl Emitter for ShadowEmitter {
     fn emit(&self, document: &Document) -> String {
         emit_with_provider(document, Provider::Generic)
-            .expect("generic provider must support the provisional v0 shadow profile")
+            .expect("generic provider must support the v0 shadow profile")
     }
 }
 
@@ -83,7 +83,7 @@ pub fn emit_with_provider(document: &Document, provider: Provider) -> Result<Str
 
 fn render_document(document: &Document, shadow_profile: ShadowProfile) -> String {
     match shadow_profile {
-        ShadowProfile::ProvisionalV0 => render_v0_document(document),
+        ShadowProfile::V0 => render_v0_document(document),
     }
 }
 

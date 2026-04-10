@@ -121,6 +121,24 @@ Current validation rules:
 - `vars` must be a mapping whose values are non-empty scalars
 - mapping keys must be unique within each mapping block
 
+Key name grammar (enforced at parse time, applies to all mapping keys
+including `vars`, `system`, `user`, and `output` sub-keys):
+
+- All mapping keys must match `/[A-Za-z_][A-Za-z0-9_-]*/`; keys
+  that violate this grammar are rejected by the lexer (E005) before
+  they reach the validator. The validator adds no further key-name
+  constraints at v0.
+
+Mapping key behavior per top-level block:
+
+- `vars` mapping keys: any key matching the key grammar is accepted;
+  no reserved key set is enforced at v0. Key grammar is enforced by
+  the parser, not the validator.
+- `system` and `user` mapping values: any keys matching the key
+  grammar are accepted; no reserved key set is enforced at v0.
+- `output` mapping values: any keys matching the key grammar are
+  accepted; no reserved key set is enforced at v0.
+
 These constraints are intentionally conservative and may expand in later versions.
 
 ### Diagnostic Codes

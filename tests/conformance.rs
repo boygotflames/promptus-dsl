@@ -401,3 +401,15 @@ fn conformance_validation_rejects_empty_agent_scalar() {
         .expect("expected a diagnostic with code E103 for empty agent scalar");
     assert_eq!(e103.phase, DiagnosticPhase::Semantic);
 }
+
+#[test]
+fn conformance_vars_key_grammar_is_enforced_at_parse_time() {
+    // The key grammar /[A-Za-z_][A-Za-z0-9_-]*/ is enforced by the lexer (E005).
+    // A vars key starting with a digit is rejected before the validator is reached.
+    let diagnostics = parse_str(include_str!("../examples/invalid/vars-invalid-key.llm"))
+        .expect_err("invalid key should fail to parse");
+    assert_eq!(
+        diagnostics.to_string(),
+        "syntax error at 4:3: [E005] expected an identifier at the start of a mapping entry"
+    );
+}

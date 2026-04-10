@@ -1,0 +1,4 @@
+agent: TestAgent
+vars:
+  valid_key: ok
+  123invalid: bad

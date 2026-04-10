@@ -92,10 +92,15 @@ Enforce semantic correctness beyond raw syntax.
 - ✓ empty scalar enforcement: agent, sequence items
   (memory/tools/constraints), and vars values reject empty strings
   (E103); SPEC.md Type Constraints updated with explicit rule
-- remaining: define required status for other keys (spec decision
-  needed per key — deferred until use cases justify)
-- remaining: richer semantic contracts beyond current conservative
-  v0 checks
+- ✓ vars key name constraint: specced and tested; enforced at parse
+  time by lexer (E005 for invalid identifier); SPEC.md documents this
+  accurately (no E111 needed — parser-enforced)
+- ✓ system/user/output mapping key behavior: explicitly documented
+  in SPEC.md (no reserved key set at v0; key grammar is parser-enforced)
+- remaining: define required status for keys beyond agent
+  (deferred — no use cases justify it yet)
+- remaining: error-code strategy expansion as new validators added
+  (ongoing — add codes as constraints are added)
 
 ---
 
@@ -119,6 +124,8 @@ Generate useful outputs from the AST.
 - ✓ internal vs public contract boundary explicit in SPEC.md
   Public Contract Status (stable / partial / provisional /
   unsupported split with per-section links)
+- ✓ ShadowProfile::ProvisionalV0 renamed to V0 (internal cleanup;
+  shadow is stable, name now matches)
 - remaining: provider differentiation — `plain`, `json-ir`, and
   `shadow` currently ignore provider; real per-provider behavior
   is a post-v0 concern

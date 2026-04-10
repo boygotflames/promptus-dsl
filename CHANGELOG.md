@@ -40,6 +40,16 @@ surfaces are always noted explicitly.
 
 ## Notable Changes
 
+### Internal cleanup + validator type constraint hardening
+- src/provider.rs: ShadowProfile::ProvisionalV0 renamed to V0
+  (shadow is stable; internal name updated to match)
+- SPEC.md: vars key grammar constraint, system/user/output mapping
+  key behavior documented explicitly in Type Constraints; key grammar
+  enforced at parse time (E005), not validator — documented accurately
+- examples/invalid/vars-invalid-key.llm: new fixture (key starting
+  with digit triggers E005 at parse time)
+- tests/conformance.rs: conformance_vars_key_grammar_is_enforced_at_parse_time
+
 ### Benchmarking: richer baselines and token savings proof
 - examples/baselines/extractor.md: honest Markdown equivalent added
 - examples/baselines/json-output.md: honest Markdown equivalent added
