@@ -17,6 +17,8 @@ const SHADOW_QUOTED: &str = "@a=\"Data Extractor\"\n@s={role=\"financial analyst
 const FORMATTER_CANONICAL_MESSY: &str = "agent: \"Data Extractor\"\nsystem:\n  role: \"financial analyst\"\nuser: \"Summarize \\\"Q1\\\" results\"\nvars:\n  region: apac\n  company: \"Acme Corp\"";
 const BENCH_GENERIC_MINIMAL: &str = "provider: generic\ntokenizer: cl100k_base\nsource  | bytes=101 | tokens=27 | delta_bytes=+0 | delta_tokens=+0\nplain   | bytes=94 | tokens=26 | delta_bytes=-7 | delta_tokens=-1\njson-ir | bytes=141 | tokens=46 | delta_bytes=+40 | delta_tokens=+19\nshadow  | bytes=82 | tokens=23 | delta_bytes=-19 | delta_tokens=-4";
 const BENCH_OPENAI_MINIMAL: &str = "provider: openai\ntokenizer: cl100k_base\nsource  | bytes=101 | tokens=27 | delta_bytes=+0 | delta_tokens=+0\nplain   | bytes=94 | tokens=26 | delta_bytes=-7 | delta_tokens=-1\njson-ir | bytes=141 | tokens=46 | delta_bytes=+40 | delta_tokens=+19\nshadow  | bytes=82 | tokens=23 | delta_bytes=-19 | delta_tokens=-4";
+const BENCH_GENERIC_EXTRACTOR_BASELINE: &str = "provider: generic\ntokenizer: cl100k_base\nsource   | bytes=242 | tokens=57 | delta_bytes=+0 | delta_tokens=+0 | delta_bytes_vs_baseline=+25 | delta_tokens_vs_baseline=+3\nbaseline | bytes=217 | tokens=54 | delta_bytes=-25 | delta_tokens=-3 | delta_bytes_vs_baseline=+0 | delta_tokens_vs_baseline=+0\nplain    | bytes=233 | tokens=60 | delta_bytes=-9 | delta_tokens=+3 | delta_bytes_vs_baseline=+16 | delta_tokens_vs_baseline=+6\njson-ir  | bytes=312 | tokens=89 | delta_bytes=+70 | delta_tokens=+32 | delta_bytes_vs_baseline=+95 | delta_tokens_vs_baseline=+35\nshadow   | bytes=202 | tokens=49 | delta_bytes=-40 | delta_tokens=-8 | delta_bytes_vs_baseline=-15 | delta_tokens_vs_baseline=-5";
+const BENCH_GENERIC_JSON_OUTPUT_BASELINE: &str = "provider: generic\ntokenizer: cl100k_base\nsource   | bytes=150 | tokens=42 | delta_bytes=+0 | delta_tokens=+0 | delta_bytes_vs_baseline=+7 | delta_tokens_vs_baseline=+1\nbaseline | bytes=143 | tokens=41 | delta_bytes=-7 | delta_tokens=-1 | delta_bytes_vs_baseline=+0 | delta_tokens_vs_baseline=+0\nplain    | bytes=140 | tokens=41 | delta_bytes=-10 | delta_tokens=-1 | delta_bytes_vs_baseline=-3 | delta_tokens_vs_baseline=+0\njson-ir  | bytes=215 | tokens=72 | delta_bytes=+65 | delta_tokens=+30 | delta_bytes_vs_baseline=+72 | delta_tokens_vs_baseline=+31\nshadow   | bytes=126 | tokens=39 | delta_bytes=-24 | delta_tokens=-3 | delta_bytes_vs_baseline=-17 | delta_tokens_vs_baseline=-2";
 
 fn parse_valid_document(source: &str) -> llm_format::Document {
     let document = parse_str(source).expect("fixture should parse");
@@ -228,6 +230,73 @@ fn conformance_bench_rejects_unsupported_provider_profiles_explicitly() {
         error.to_string(),
         "provider anthropic does not have a supported tokenizer profile yet"
     );
+}
+
+#[test]
+fn conformance_bench_extractor_baseline_is_deterministic() {
+    let first = execute_bench(BenchArgs {
+        input: PathBuf::from("examples/extractor.llm"),
+        provider: Provider::Generic,
+        baseline: Some(PathBuf::from("examples/baselines/extractor.md")),
+    })
+    .expect("extractor bench with baseline should succeed");
+    let second = execute_bench(BenchArgs {
+        input: PathBuf::from("examples/extractor.llm"),
+        provider: Provider::Generic,
+        baseline: Some(PathBuf::from("examples/baselines/extractor.md")),
+    })
+    .expect("extractor bench with baseline should succeed");
+
+    assert_eq!(first, second);
+    assert_eq!(first, BENCH_GENERIC_EXTRACTOR_BASELINE);
+}
+
+#[test]
+fn conformance_bench_json_output_baseline_is_deterministic() {
+    let first = execute_bench(BenchArgs {
+        input: PathBuf::from("examples/json-output.llm"),
+        provider: Provider::Generic,
+        baseline: Some(PathBuf::from("examples/baselines/json-output.md")),
+    })
+    .expect("json-output bench with baseline should succeed");
+    let second = execute_bench(BenchArgs {
+        input: PathBuf::from("examples/json-output.llm"),
+        provider: Provider::Generic,
+        baseline: Some(PathBuf::from("examples/baselines/json-output.md")),
+    })
+    .expect("json-output bench with baseline should succeed");
+
+    assert_eq!(first, second);
+    assert_eq!(first, BENCH_GENERIC_JSON_OUTPUT_BASELINE);
+}
+
+#[test]
+fn conformance_bench_savings_are_positive_for_all_fixtures() {
+    // Shadow must be cheaper than the honest Markdown baseline for every fixture.
+    // delta_tokens_vs_baseline < 0 means shadow used fewer tokens than baseline.
+    let fixtures: &[(&str, &str)] = &[
+        ("examples/minimal.llm", "examples/baselines/minimal.md"),
+        ("examples/extractor.llm", "examples/baselines/extractor.md"),
+        (
+            "examples/json-output.llm",
+            "examples/baselines/json-output.md",
+        ),
+        ("examples/quoted.llm", "examples/baselines/quoted.md"),
+    ];
+
+    for (source_path, baseline_path) in fixtures {
+        let report = execute_bench(BenchArgs {
+            input: PathBuf::from(source_path),
+            provider: Provider::Generic,
+            baseline: Some(PathBuf::from(baseline_path)),
+        })
+        .unwrap_or_else(|e| panic!("bench failed for {source_path}: {e}"));
+
+        assert!(
+            report.contains("shadow") && report.contains("delta_tokens_vs_baseline=-"),
+            "expected shadow to save tokens vs baseline for {source_path}, got:\n{report}"
+        );
+    }
 }
 
 // --- Stable shadow contract conformance ---

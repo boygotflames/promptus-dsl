@@ -136,6 +136,33 @@ json-ir | bytes=141 | tokens=46 | delta_bytes=+40 | delta_tokens=+19
 shadow  | bytes=82  | tokens=23 | delta_bytes=-19 | delta_tokens=-4
 ```
 
+## Token Efficiency
+
+One of the core goals of `.llm` is to reduce token overhead compared
+to Markdown-based prompting. The built-in `bench` command measures
+this directly.
+
+Benchmarked against honest Markdown equivalents of each example
+(using the cl100k tokenizer):
+
+| Fixture | Markdown tokens | Shadow tokens | Savings |
+|---|---|---|---|
+| minimal | 27 | 23 | 14.8% |
+| extractor | 54 | 49 | 9.3% |
+| json-output | 41 | 39 | 4.9% |
+| quoted | 42 | 39 | 7.1% |
+| **average** | | | **9.0%** |
+
+Run the benchmark yourself:
+
+```powershell
+cargo run -- bench examples/extractor.llm \
+  --baseline examples/baselines/extractor.md
+```
+
+Token counts use the cl100k tokenizer (GPT-4 / Claude compatible).
+Savings vary by document complexity and content density.
+
 ## Current Scope
 
 This repository currently acts as a reference implementation and proving ground for the v0 `.llm` language slice documented in [SPEC.md](SPEC.md).

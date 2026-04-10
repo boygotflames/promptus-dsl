@@ -154,9 +154,12 @@ Quantify the value of `.llm`.
 - reports are deterministic and provider-visible
 
 ### Remaining Work
-- conformance around what proof claims are allowed publicly
-- broader benchmark discipline beyond one tokenizer family
-- release-quality benchmark fixtures and reporting conventions
+- ✓ broader benchmark discipline: baselines for all four example
+  fixtures; savings confirmed positive across all cases
+- ✓ token savings demonstrated in README with real numbers
+- remaining: release-quality benchmark reporting conventions
+  (structured output format, CI integration — deferred)
+- remaining: broader tokenizer family support beyond cl100k
 
 ---
 

@@ -40,6 +40,14 @@ surfaces are always noted explicitly.
 
 ## Notable Changes
 
+### Benchmarking: richer baselines and token savings proof
+- examples/baselines/extractor.md: honest Markdown equivalent added
+- examples/baselines/json-output.md: honest Markdown equivalent added
+- examples/baselines/quoted.md: honest Markdown equivalent added
+- README.md: Token Efficiency section added with actual savings table
+- tests/conformance.rs: bench determinism and positive-savings
+  conformance tests added for all four fixtures
+
 ### VS Code: formatter-on-save integration
 - `editors/vscode/extension.js`: new entry point; registers
   `DocumentFormattingEditProvider` for the `llm` language; spawns
