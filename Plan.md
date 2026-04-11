@@ -330,3 +330,12 @@ Post-v1 tracks (future work):
 - VS Code LSP and live validation
 - Tokenizer plurality
 - CI bench integration
+
+---
+
+## v2
+
+See [docs/v2-roadmap.md](docs/v2-roadmap.md) for the full v2
+roadmap and track sequencing.
+
+Active track: Track B — Semantic Validation Depth
