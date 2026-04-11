@@ -14,6 +14,9 @@ This folder contains the first minimal VS Code package for `.llm` files.
   - list markers
   - `#` comments
 - enables line comments and quote auto-closing
+- provides live inline diagnostics as you type (300ms debounce)
+  — requires `llm_format` binary on PATH or `llm.formatterPath`
+  setting
 
 ## Formatter
 
@@ -32,10 +35,24 @@ If the binary is not found, a one-time informational message is shown.
 When a file has validation errors, the formatter shows the diagnostic
 output (including error codes) rather than applying edits.
 
+## Live Validation
+
+The extension validates `.llm` files as you type and shows inline
+error squiggles.
+
+Validation runs 300ms after you stop typing. It requires the same
+`llm_format` binary as the formatter.
+
+Error codes (e.g., `[E101]`) appear in the Problems panel alongside
+the human-readable message. Hover over a squiggle to see the full
+diagnostic.
+
 ## What It Does Not Yet Do
 
 - no language server
-- no live parse or validation diagnostics
+- ✓ live validation: DiagnosticCollection + debounced
+  onDidChangeTextDocument; squiggles appear within 300ms
+  of stopping typing
 - no completion, hover, or code actions
 - ✓ formatter-on-save: DocumentFormattingEditProvider registered
   for the 'llm' language — requires llm_format binary on PATH or

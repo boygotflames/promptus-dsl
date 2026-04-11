@@ -225,18 +225,24 @@ CLI binary — no socket, no protocol, no language server process.
 
 ### Sequence
 
-1. Add `--stdin` flag to `validate` CLI (`src/cli/validate.rs`);
-   when set, read from `io::stdin()` instead of a file path;
-   update CLI help text; add unit test
-2. Add `DiagnosticCollection` and `onDidChangeTextDocument` listener
-   to `editors/vscode/extension.js` with 300ms debounce
-3. Implement `runValidation`: spawn `validate --stdin`, pipe buffer
-   content, parse diagnostic lines, call `diagnostics.set()`
-4. Handle edge cases: binary not found (clear diagnostics, show
-   info message), empty document (clear diagnostics)
-5. Update `editors/vscode/package.json` — no new fields needed
-6. Add tests in `tests/validate.rs` for `--stdin` behavior
-7. Update `editors/vscode/README.md` to document squiggles
+1. ✓ `--stdin` flag added to `validate` CLI (`src/cli/validate.rs`);
+   reads from `io::stdin()`, same diagnostic format, exit 0/1/2;
+   mutually exclusive with file path argument via clap
+2. ✓ `DiagnosticCollection` + `onDidChangeTextDocument` listener
+   added to `editors/vscode/extension.js` with 300ms debounce
+3. ✓ `validateDocument` function: spawns `validate --stdin` via
+   `cp.spawn`, pipes `document.getText()`, parses stderr output,
+   calls `diagnosticCollection.set(uri, [...])`
+4. ✓ Edge cases: ENOENT shows one-time informational message;
+   diagnostics cleared on document close; already-open docs
+   validated at activation time
+5. ✓ `editors/vscode/package.json` — no changes needed
+6. ✓ Conformance tests: stdin valid/invalid (tests parse_str +
+   validate_document pipeline, the path --stdin uses)
+7. ✓ `editors/vscode/README.md`: Live Validation section added;
+   what-it-does list updated
+
+### Status: COMPLETE
 
 ### v2 contract commitment
 

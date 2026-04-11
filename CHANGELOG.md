@@ -10,6 +10,19 @@ surfaces are always noted explicitly.
 
 ## [v2] — In Progress
 
+### v2 Track C — Live editor feedback
+- src/cli/validate.rs: `--stdin` flag added; reads from stdin,
+  emits same diagnostic format, exits 0/1/2; mutually exclusive
+  with file path argument
+- editors/vscode/extension.js: DiagnosticCollection + debounced
+  onDidChangeTextDocument (300ms); parses `[Exxx]` stderr output;
+  inline squiggles for all parse and semantic errors; ENOENT
+  handled gracefully with one-time message
+- editors/vscode/README.md: Live Validation section added;
+  what-it-does list updated
+- tests/conformance.rs: stdin valid/invalid conformance tests added
+- docs/v2-roadmap.md: Track C marked COMPLETE
+
 ### v2 Track B — Semantic validation depth
 - E103 extended: system and user empty scalars now rejected
 - E111 (new): empty mapping block rejected for system/user/output

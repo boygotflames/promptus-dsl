@@ -1,5 +1,5 @@
 use std::fs;
-use std::io::{self, Write};
+use std::io::{self, Read, Write};
 use std::path::PathBuf;
 
 use anyhow::Result;
@@ -11,19 +11,41 @@ use crate::validator::validate_document;
 
 #[derive(Debug, Args)]
 pub struct ValidateArgs {
-    pub input: PathBuf,
+    /// Input file path. Mutually exclusive with --stdin.
+    #[arg(required_unless_present = "stdin")]
+    pub input: Option<PathBuf>,
+
+    /// Read document from stdin instead of a file. Mutually exclusive with INPUT.
+    #[arg(long, conflicts_with = "input")]
+    pub stdin: bool,
 }
 
 pub fn run(args: ValidateArgs) -> Result<()> {
-    let source = match fs::read_to_string(&args.input) {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("error: failed to read {}: {e}", args.input.display());
+    if args.stdin {
+        let mut source = String::new();
+        if let Err(e) = io::stdin().read_to_string(&mut source) {
+            eprintln!("error: failed to read stdin: {e}");
             std::process::exit(2);
         }
-    };
+        run_validation(&source, "<stdin>");
+    } else {
+        let path = args
+            .input
+            .expect("input is required when --stdin is not set");
+        let source = match fs::read_to_string(&path) {
+            Ok(s) => s,
+            Err(e) => {
+                eprintln!("error: failed to read {}: {e}", path.display());
+                std::process::exit(2);
+            }
+        };
+        run_validation(&source, &path.display().to_string());
+    }
+    Ok(())
+}
 
-    let document = match parse_str(&source) {
+fn run_validation(source: &str, label: &str) {
+    let document = match parse_str(source) {
         Ok(d) => d,
         Err(diagnostics) => {
             let error_count = diagnostics
@@ -32,12 +54,7 @@ pub fn run(args: ValidateArgs) -> Result<()> {
                 .count();
             let mut stderr = io::stderr().lock();
             writeln!(stderr, "{diagnostics}").ok();
-            writeln!(
-                stderr,
-                "✗ invalid  {}  ({error_count} error(s))",
-                args.input.display()
-            )
-            .ok();
+            writeln!(stderr, "✗ invalid  {label}  ({error_count} error(s))").ok();
             std::process::exit(1);
         }
     };
@@ -50,15 +67,9 @@ pub fn run(args: ValidateArgs) -> Result<()> {
             .count();
         let mut stderr = io::stderr().lock();
         writeln!(stderr, "{diagnostics}").ok();
-        writeln!(
-            stderr,
-            "✗ invalid  {}  ({error_count} error(s))",
-            args.input.display()
-        )
-        .ok();
+        writeln!(stderr, "✗ invalid  {label}  ({error_count} error(s))").ok();
         std::process::exit(1);
     }
 
-    println!("✓ valid  {}", args.input.display());
-    Ok(())
+    println!("✓ valid  {label}");
 }

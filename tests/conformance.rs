@@ -638,6 +638,44 @@ fn conformance_e113_memory_allows_duplicate_items() {
     );
 }
 
+// --- validate --stdin conformance ---
+// These tests exercise the parse_str + validate_document pipeline that
+// `validate --stdin` uses. The stdin pipe itself (IO plumbing) is not
+// tested here; the goal is coverage of the validation contract for
+// inline source strings.
+
+#[test]
+fn conformance_validate_stdin_flag_accepts_valid_document() {
+    // A fully valid document must produce zero errors — same contract
+    // whether the source came from a file or from stdin.
+    let source = "agent: StdinAgent\nsystem: handle requests\n";
+    let document = parse_str(source).expect("valid stdin source should parse");
+    let diagnostics = validate_document(&document);
+    assert!(
+        !diagnostics.has_errors(),
+        "expected no validation errors for valid stdin document, got: {diagnostics}"
+    );
+}
+
+#[test]
+fn conformance_validate_stdin_flag_rejects_invalid_document() {
+    // A document missing the required `system` key must produce E101,
+    // matching the output of `validate --stdin` on such input.
+    let source = "agent: TestAgent\n";
+    let document = parse_str(source).expect("agent-only source should parse");
+    let diagnostics = validate_document(&document);
+    assert!(
+        diagnostics.has_errors(),
+        "expected E101 for missing system key"
+    );
+    assert!(
+        diagnostics
+            .iter()
+            .any(|d| d.code == Some("E101") && d.message.contains("system")),
+        "expected E101 mentioning 'system', got: {diagnostics}"
+    );
+}
+
 // --- parse --summary conformance ---
 
 #[test]
