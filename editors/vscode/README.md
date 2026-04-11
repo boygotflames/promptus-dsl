@@ -29,6 +29,9 @@ To use it:
 
 If the binary is not found, a one-time informational message is shown.
 
+When a file has validation errors, the formatter shows the diagnostic
+output (including error codes) rather than applying edits.
+
 ## What It Does Not Yet Do
 
 - no language server

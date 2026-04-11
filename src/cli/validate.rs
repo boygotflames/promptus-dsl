@@ -1,9 +1,11 @@
 use std::fs;
+use std::io::{self, Write};
 use std::path::PathBuf;
 
-use anyhow::{Context, Result, anyhow};
+use anyhow::Result;
 use clap::Args;
 
+use crate::diagnostics::Severity;
 use crate::parser::parse_str;
 use crate::validator::validate_document;
 
@@ -13,20 +15,50 @@ pub struct ValidateArgs {
 }
 
 pub fn run(args: ValidateArgs) -> Result<()> {
-    let source = fs::read_to_string(&args.input)
-        .with_context(|| format!("failed to read {}", args.input.display()))?;
+    let source = match fs::read_to_string(&args.input) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("error: failed to read {}: {e}", args.input.display());
+            std::process::exit(2);
+        }
+    };
 
-    let document = parse_str(&source).map_err(|diagnostics| {
-        eprintln!("{diagnostics}");
-        anyhow!("parse failed")
-    })?;
+    let document = match parse_str(&source) {
+        Ok(d) => d,
+        Err(diagnostics) => {
+            let error_count = diagnostics
+                .iter()
+                .filter(|d| d.severity == Severity::Error)
+                .count();
+            let mut stderr = io::stderr().lock();
+            writeln!(stderr, "{diagnostics}").ok();
+            writeln!(
+                stderr,
+                "✗ invalid  {}  ({error_count} error(s))",
+                args.input.display()
+            )
+            .ok();
+            std::process::exit(1);
+        }
+    };
 
     let diagnostics = validate_document(&document);
     if diagnostics.has_errors() {
-        eprintln!("{diagnostics}");
-        return Err(anyhow!("validation failed"));
+        let error_count = diagnostics
+            .iter()
+            .filter(|d| d.severity == Severity::Error)
+            .count();
+        let mut stderr = io::stderr().lock();
+        writeln!(stderr, "{diagnostics}").ok();
+        writeln!(
+            stderr,
+            "✗ invalid  {}  ({error_count} error(s))",
+            args.input.display()
+        )
+        .ok();
+        std::process::exit(1);
     }
 
-    println!("validation passed");
+    println!("✓ valid  {}", args.input.display());
     Ok(())
 }

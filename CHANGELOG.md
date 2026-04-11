@@ -40,6 +40,15 @@ surfaces are always noted explicitly.
 
 ## Notable Changes
 
+### CLI output polish
+- `validate`: success now prints `✓ valid <file>` to stdout;
+  failure prints diagnostics + `✗ invalid <file> (N error(s))`
+  summary to stderr; exit codes: 0=valid, 1=invalid, 2=IO error
+- `parse`: `--summary` flag added for compact key/node summary
+  (`✓ parsed <file>` / `keys: ...` / `nodes: N`); failure prints
+  `✗ parse failed <file>` to stderr
+- editors/vscode/README.md: formatter error behavior documented
+
 ### Validator: system key required + real-world fixtures
 - `system` is now a required key — documents missing it produce
   Error E101 "missing required key: `system`"
