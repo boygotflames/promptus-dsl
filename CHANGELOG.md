@@ -40,6 +40,17 @@ surfaces are always noted explicitly.
 
 ## Notable Changes
 
+### Validator: system key required + real-world fixtures
+- `system` is now a required key — documents missing it produce
+  Error E101 "missing required key: `system`"
+- SPEC.md Required Keys: system added; two-key minimum documented;
+  E101 description generalized to "missing required key"
+- Three real-world example fixtures added:
+  examples/code-reviewer.llm, data-pipeline.llm, support-agent.llm
+- Matching baselines added; Token Efficiency table expanded to 7
+  fixtures (avg savings 8.5% shadow vs Markdown)
+- Conformance tests: system-required and two-key minimum added
+
 ### Internal cleanup + validator type constraint hardening
 - src/provider.rs: ShadowProfile::ProvisionalV0 renamed to V0
   (shadow is stable; internal name updated to match)

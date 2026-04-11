@@ -97,10 +97,12 @@ Enforce semantic correctness beyond raw syntax.
   accurately (no E111 needed — parser-enforced)
 - ✓ system/user/output mapping key behavior: explicitly documented
   in SPEC.md (no reserved key set at v0; key grammar is parser-enforced)
-- remaining: define required status for keys beyond agent
-  (deferred — no use cases justify it yet)
-- remaining: error-code strategy expansion as new validators added
-  (ongoing — add codes as constraints are added)
+- ✓ system required-key rule implemented and conformance-tested;
+  SPEC.md Required Keys updated to two-key minimum (agent + system)
+- remaining: define required status for user/memory/tools/output
+  (deferred — optional by design for v0)
+- remaining: richer semantic contracts beyond current v0 checks
+  (no concrete requirements yet — deferred)
 
 ---
 
@@ -161,11 +163,12 @@ Quantify the value of `.llm`.
 - reports are deterministic and provider-visible
 
 ### Remaining Work
-- ✓ broader benchmark discipline: baselines for all four example
+- ✓ broader benchmark discipline: baselines for all four original
   fixtures; savings confirmed positive across all cases
 - ✓ token savings demonstrated in README with real numbers
-- remaining: release-quality benchmark reporting conventions
-  (structured output format, CI integration — deferred)
+- ✓ three real-world fixtures with baselines; 7-fixture savings table
+  (avg 8.5% shadow savings vs Markdown across all seven)
+- remaining: CI integration for bench regression detection
 - remaining: broader tokenizer family support beyond cl100k
 
 ---

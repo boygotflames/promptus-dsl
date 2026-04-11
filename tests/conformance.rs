@@ -317,17 +317,18 @@ fn conformance_shadow_json_output_fixture_covers_output_and_vars_markers() {
 
 #[test]
 fn conformance_shadow_absent_keys_are_omitted_not_emitted_empty() {
-    let source = "agent: OnlyAgent";
+    // system is now required; use the two-key minimum to test absent-key omission
+    let source = "agent: OnlyAgent\nsystem: handle requests";
     let document = parse_valid_document(source);
     let shadow = transpile::transpile(&document, Target::Shadow);
-    assert_eq!(shadow, "@a=\"OnlyAgent\"");
-    assert!(
-        !shadow.contains("@s"),
-        "absent system key must not appear in shadow output"
-    );
+    assert_eq!(shadow, "@a=\"OnlyAgent\"\n@s=\"handle requests\"");
     assert!(
         !shadow.contains("@m"),
         "absent memory key must not appear in shadow output"
+    );
+    assert!(
+        !shadow.contains("@t"),
+        "absent tools key must not appear in shadow output"
     );
 }
 
@@ -411,5 +412,36 @@ fn conformance_vars_key_grammar_is_enforced_at_parse_time() {
     assert_eq!(
         diagnostics.to_string(),
         "syntax error at 4:3: [E005] expected an identifier at the start of a mapping entry"
+    );
+}
+
+#[test]
+fn conformance_validation_rejects_document_without_system_key() {
+    let source = "agent: TestAgent\n";
+    let document = parse_str(source).expect("agent-only source should parse");
+    let diagnostics = validate_document(&document);
+    assert!(
+        diagnostics.has_errors(),
+        "expected validation errors for document missing the system key"
+    );
+    let e101 = diagnostics
+        .iter()
+        .find(|d| d.code == Some("E101") && d.message.contains("system"))
+        .expect("expected E101 diagnostic mentioning 'system'");
+    assert_eq!(e101.phase, DiagnosticPhase::Semantic);
+    assert_eq!(
+        e101.to_string(),
+        "semantic error at 1:1: [E101] missing required key: `system`"
+    );
+}
+
+#[test]
+fn conformance_validation_accepts_minimal_two_key_document() {
+    let source = "agent: TestAgent\nsystem: Handle requests\n";
+    let document = parse_str(source).expect("two-key document should parse");
+    let diagnostics = validate_document(&document);
+    assert!(
+        !diagnostics.has_errors(),
+        "expected no validation errors for minimal two-key document, got: {diagnostics}"
     );
 }

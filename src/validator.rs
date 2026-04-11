@@ -33,6 +33,12 @@ fn validate_required_structure(document: &Document, diagnostics: &mut Diagnostic
                 .with_code("E101"),
         );
     }
+    if document.system.is_none() {
+        diagnostics.push(
+            Diagnostic::semantic_error("missing required key: `system`", Some(Span::new(1, 1)))
+                .with_code("E101"),
+        );
+    }
 }
 
 fn validate_duplicate_keys(node: &Node, path: &str, diagnostics: &mut DiagnosticBag) {

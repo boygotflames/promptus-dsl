@@ -101,9 +101,10 @@ The v0 formatter emits an AST-normalized surface form.
 The following top-level keys are required in every valid `.llm` document:
 
 - `agent` — every document must declare an agent identity
+- `system` — every document must provide system-level instructions
 
 All other top-level keys are optional. A document containing only
-`agent` is valid.
+`agent` and `system` is valid.
 
 ### Type Constraints
 
@@ -189,7 +190,7 @@ as a `[E001]` prefix before the message text when a code is present.
 
 | Code | Description |
 |---|---|
-| `E101` | missing required key: `agent` |
+| `E101` | missing required key (message carries the specific key name) |
 | `E102` | duplicate key in mapping |
 | `E103` | scalar field value must not be empty |
 | `E104` | field must be a scalar value |

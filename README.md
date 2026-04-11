@@ -151,7 +151,10 @@ Benchmarked against honest Markdown equivalents of each example
 | extractor | 54 | 49 | 9.3% |
 | json-output | 41 | 39 | 4.9% |
 | quoted | 42 | 39 | 7.1% |
-| **average** | | | **9.0%** |
+| code-reviewer | 80 | 75 | 6.3% |
+| data-pipeline | 67 | 61 | 9.0% |
+| support-agent | 77 | 71 | 7.8% |
+| **average** | | | **8.5%** |
 
 Run the benchmark yourself:
 

@@ -1,0 +1,14 @@
+agent: DataPipeline
+system:
+  role: data_engineer
+  objective: transform and load structured data
+tools:
+  - sql_query
+  - file_reader
+  - schema_validator
+output:
+  format: json
+vars:
+  source_table: orders_raw
+  target_table: orders_clean
+  batch_size: 1000
