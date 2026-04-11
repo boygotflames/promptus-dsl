@@ -8,6 +8,33 @@ surfaces are always noted explicitly.
 
 ---
 
+## [v1] — 2026-04-12
+
+### Summary
+v1 declares the `.llm` format and reference transpiler as a
+stable, frozen public contract. All v1 surfaces are conformance-
+tested. Breaking changes require a version bump.
+
+### What changed from v0 to v1
+- `agent` and `system` are required keys (E101)
+- Diagnostic error codes (E001–E110) on all emission sites
+- Shadow output stabilized and fully specified
+- Plain and JSON-IR output contracts fully specified in SPEC.md
+- CLI: `validate` ✓/✗ output, exit codes 0/1/2
+- CLI: `parse --summary` flag
+- VS Code: formatter-on-save (DocumentFormattingEditProvider)
+- 7 example fixtures with Markdown baselines; 8.5% avg token savings
+- Conformance suite: 80+ tests covering all stable surfaces
+
+### Explicit post-v1 deferrals
+- Provider differentiation (distinct shadow encoding per provider)
+- Tokenizer plurality beyond cl100k
+- VS Code LSP, live validation, completion
+- `bench` structured output format / CI integration
+- Additional required keys beyond agent + system
+
+---
+
 ## [v0] — Active
 
 ### Stable surface (no breaking changes)

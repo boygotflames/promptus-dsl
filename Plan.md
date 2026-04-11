@@ -313,67 +313,20 @@ Each new phase or sub-phase should reduce ambiguity, not just add code. The repo
 
 ## v1 Readiness
 
-This section tracks the delta between current state and the v1 bump
-criteria defined in docs/versioning.md. Last assessed: Packet 15.
+**Status: COMPLETE**
 
-### Criterion 1 — Partial surfaces (4 items need resolution or documented deferral)
+All criteria from docs/versioning.md are met:
 
-**Semantic validator** (`partial`): Conservative v0 rules are fully
-implemented for the 8-key slice. The designation reflects that the
-rule set is not yet declared frozen.
-_Action: remove "may expand" language from SPEC.md Type Constraints;
-replace with frozen-scope statement; promote to `stable` in matrix._
+1. ✓ Partial surfaces: semantic validation promoted to stable;
+   provider profiles and VS Code support explicitly deferred post-v1
+   with documented rationale
+2. ✓ Shadow: stable since Packet 6
+3. ✓ SPEC.md: contract language frozen; "may expand" language removed
+4. ✓ Conformance: E101–E110 and all stable CLI behaviors covered
+5. ✓ CHANGELOG.md: v1 entry added
 
-**Provider profile: generic** (`partial`): Functional for shadow and
-bench. No provider-differentiated behavior; generic = openai currently.
-_Action: document explicitly in compatibility-matrix.md that
-provider-specific divergence is deferred post-v1; promote to `stable`
-with documented scope._
-
-**Provider profile: openai** (`partial`): Identical to generic at the
-implementation level.
-_Action: same as generic above._
-
-**VS Code syntax support** (`partial`): File association, syntax
-highlighting, language config, and formatter-on-save exist. LSP and
-live diagnostics absent.
-_Action: explicitly defer VS Code to a post-v1 tooling track; note in
-matrix that the extension is not part of the core language contract._
-
-### Criterion 2 — versioning.md shadow status stale
-
-versioning.md "What v0 Means for Stability" table still shows
-`shadow output | provisional`. compatibility-matrix.md correctly
-shows `stable` (since Packet 6).
-_Action: update versioning.md table to match._
-
-### Criterion 3 — SPEC.md "may expand" language
-
-SPEC.md Type Constraints ends with: "These constraints are
-intentionally conservative and may expand in later versions."
-This prevents SPEC.md from serving as a frozen v1 contract.
-_Action: replace with an explicit frozen-scope statement:
-"The validation rules above constitute the complete v1 semantic
-contract. Adding new validator rules requires a version bump."_
-
-### Criterion 4 — Conformance coverage gaps
-
-- Error codes E104–E110 have no dedicated conformance tests
-  (covered in validate.rs unit tests only). Each error code in
-  the stable contract should have one conformance test.
-- `parse --summary` flag (added Packet 15) is not conformance-tested.
-_Action: add conformance tests for E104–E110 and `parse --summary`._
-
-### Criterion 5 — CHANGELOG v1 entry
-
-Not yet written — expected. Will be added when all other criteria
-are met and v1 is declared.
-
-### v1 Gap Summary
-
-4 gaps must close before v1:
-1. Update versioning.md shadow status (`provisional` → `stable`)
-2. Freeze SPEC.md Type Constraints (remove "may expand" language)
-3. Document deferral/resolution for all 4 partial surfaces in
-   compatibility-matrix.md
-4. Add conformance tests for E104–E110 and `parse --summary`
+Post-v1 tracks (future work):
+- Provider differentiation (distinct per-provider shadow encoding)
+- VS Code LSP and live validation
+- Tokenizer plurality
+- CI bench integration

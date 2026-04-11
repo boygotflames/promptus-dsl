@@ -140,7 +140,7 @@ Mapping key behavior per top-level block:
 - `output` mapping values: any keys matching the key grammar are
   accepted; no reserved key set is enforced at v0.
 
-These constraints are intentionally conservative and may expand in later versions.
+The constraints listed above constitute the complete v1 validation contract. New constraints affecting previously-valid documents require a version bump. Constraints may be added for keys that are currently unconstrained only if the document remains valid under the new rule (i.e., additive-only within v1).
 
 ### Diagnostic Codes
 
@@ -215,10 +215,10 @@ The current public v0 boundary is intentionally split:
   - `plain` output — see [Plain Output](#plain-output)
   - `json-ir` output — see [JSON-IR Output](#json-ir-output)
   - `shadow` output — see [Shadow Representation](#shadow-representation)
-- `partial`
-  - current semantic validation breadth
-  - provider-selection plumbing
-  - minimal VS Code syntax support
+- `stable (scope-limited)` — at v1; post-v1 expansion is explicitly deferred
+  - semantic validation (v1 contract frozen; see §Validation Semantics)
+  - provider profiles: `generic` and `openai` (differentiation deferred post-v1)
+  - VS Code syntax support (LSP/completion deferred post-v1)
 - `provisional`
   - `bench` report behavior
 - `unsupported`
@@ -278,8 +278,9 @@ The shadow emitter accepts a provider profile parameter:
 - other profiles — fail explicitly with a descriptive error; no silent
   fallback
 
-Provider profiles are a plumbing hook for future differentiation.
-At v0, `generic` and `openai` produce identical output.
+At v1, `generic` and `openai` produce identical output. Provider-specific
+divergence (distinct shadow encoding per provider, tokenizer plurality) is
+explicitly deferred to post-v1.
 
 ### Stability
 

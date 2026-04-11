@@ -16,21 +16,23 @@ It is intentionally narrower than the full internal test suite. The goal is to s
 | Capability | Status | Notes | Contract Coverage |
 | --- | --- | --- | --- |
 | Surface syntax parser | `stable` | Reserved top-level keys, indentation-based mappings/sequences, comments, quoted/bare scalars, and deterministic failure on known invalid fixtures are the current public v0 syntax contract. | `tests/conformance.rs` |
-| Semantic validator | `partial` | Current conservative validation rules are implemented and deterministic, but the full semantic language contract is still intentionally narrow. | `tests/conformance.rs` |
+| Semantic validator | `stable` | v1 contract frozen. See SPEC.md Validation Semantics. Additive-only constraints within v1. | `tests/conformance.rs` |
 | Canonical formatter (`fmt`) | `stable` | Canonical 2-space indentation, reserved top-level ordering, source-preserved mapping order, and explicit quoting rules are treated as the current v0 formatting contract. | `tests/conformance.rs` |
 | `transpile --target plain` | `stable` | The plain target is the canonical normalized surface rendering for the current v0 slice. Encoding rules and stability declaration are specified in [SPEC.md §Plain Output](../SPEC.md#plain-output). | `tests/conformance.rs` |
 | `transpile --target json-ir` | `stable` | The JSON IR is deterministic and provider-agnostic for the current v0 slice. It is treated as a public contract for the presently implemented fields. Encoding rules and stability declaration are specified in [SPEC.md §JSON-IR Output](../SPEC.md#json-ir-output). | `tests/conformance.rs` |
 | `transpile --target shadow` | `stable` | The shadow target is deterministic and provider-aware. The v0 shadow format is fully specified as a stable contract in [SPEC.md §Shadow Representation](../SPEC.md#shadow-representation) and covered by the conformance suite. | `tests/conformance.rs` |
 | `bench` report | `provisional` | Bench output is deterministic for supported providers, but it remains tied to the current tokenizer/profile path and may evolve as benchmark discipline grows. | `tests/conformance.rs` |
-| Provider profile: `generic` | `partial` | Supported for current `shadow` and `bench` flows. The profile exists, but provider-specific divergence is still intentionally limited. | `tests/conformance.rs` |
-| Provider profile: `openai` | `partial` | Explicitly selectable and supported, but currently shares the same v0 shadow encoding and tokenizer path as `generic`. | `tests/conformance.rs` |
+| Provider profile: `generic` | `stable (scope-limited)` | Generic profile is stable. Provider-specific divergence (different shadow encoding per provider) is explicitly deferred to post-v1. At v1, all profiles share the v0 shadow encoding. | `tests/conformance.rs` |
+| Provider profile: `openai` | `stable (scope-limited)` | openai profile is stable as an alias for generic at v1. Real provider differentiation (tokenizer plurality, distinct shadow encoding) is explicitly deferred to post-v1. | `tests/conformance.rs` |
 | Provider profile: `anthropic` | `unsupported` | Current provider-aware flows must fail explicitly rather than silently falling back. | `tests/conformance.rs` |
-| VS Code syntax support | `partial` | File association, syntax highlighting, and basic language configuration exist. LSP, live diagnostics, completion, and formatter integration do not. | `tests/vscode.rs` |
+| VS Code syntax support | `stable (scope-limited)` | Syntax highlighting, file association, and formatter-on-save are stable. LSP, live validation, and completion are explicitly deferred to post-v1. | `tests/vscode.rs` |
 
 ## Boundary Notes
 
-- The stable v0 contract covers surface syntax, canonical formatting, `plain`, `json-ir`, and `shadow`.
-- `shadow` is now stable: the v0 format is fully specified in SPEC.md and backed by the conformance suite.
+- The v1 contract covers surface syntax, canonical formatting, `plain`, `json-ir`, `shadow`, semantic validation, provider profiles (`generic`/`openai`), and VS Code syntax support.
+- `shadow` is stable since v0 (Packet 6): the format is fully specified in SPEC.md and backed by the conformance suite.
+- Semantic validation contract is frozen at v1: new constraints affecting previously-valid documents require a version bump.
+- Provider differentiation (distinct shadow encoding per provider, tokenizer plurality) and VS Code LSP/completion are explicitly deferred to post-v1.
 - `bench` remains provisional because its report shape is still tied to a single tokenizer path and may evolve.
 - Provider support is honest by design: explicit support where it exists, explicit failure where it does not.
 - The compatibility matrix should evolve only when the implementation and conformance tests justify it.

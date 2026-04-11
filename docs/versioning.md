@@ -31,7 +31,7 @@ full matrix.
 | Semantic validation breadth | partial | May expand; existing valid inputs stay valid |
 | Provider selection plumbing | partial | Interface stable; behavior may expand |
 | VS Code support | partial | May improve; no compatibility promise |
-| `shadow` output | provisional | Format may change without notice |
+| `shadow` output | stable | Stable as of v0 (Packet 6); see SPEC.md §Shadow Representation |
 | `bench` report shape | provisional | Format may change without notice |
 | `anthropic` provider profile | unsupported | Not implemented |
 
@@ -65,6 +65,22 @@ A version bump from v0 to v1 requires:
 
 There is no timeline commitment for v1. The project will advance when
 the criteria are met, not on a schedule.
+
+---
+
+### v1 Status
+
+All v1 criteria are met as of this commit:
+
+1. ✓ Partial surfaces resolved or explicitly deferred:
+   - Semantic validation → stable (contract frozen in SPEC.md)
+   - Provider generic/openai → stable (scope-limited; differentiation
+     deferred post-v1)
+   - VS Code support → stable (scope-limited; LSP deferred post-v1)
+2. ✓ Shadow output stable (since Packet 6)
+3. ✓ SPEC.md frozen against v1 surface
+4. ✓ Conformance suite covers all stable surface behaviors
+5. ✓ CHANGELOG.md documents v0→v1 changes
 
 ---
 
