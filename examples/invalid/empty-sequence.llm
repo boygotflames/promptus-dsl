@@ -1,0 +1,8 @@
+# This fixture demonstrates an empty sequence block attempt.
+# The parser enforces that sequences must have at least one item.
+# `memory:` with no indented items produces a parse error (E023),
+# not a validator error (E112). E112 is a defensive guard in the
+# validator for programmatic AST construction.
+agent: TestAgent
+system: handle requests
+memory:

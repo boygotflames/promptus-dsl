@@ -1,0 +1,6 @@
+agent: TestAgent
+system: handle requests
+tools:
+  - web_search
+  - calculator
+  - web_search

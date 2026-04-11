@@ -565,6 +565,79 @@ fn conformance_e110_mapping_value_in_vars_is_rejected() {
     assert!(e110.message.contains("vars.key"));
 }
 
+// --- Error code conformance: v2 Track B (E103 extension, E111, E112, E113) ---
+
+#[test]
+fn conformance_e103_empty_system_scalar_is_rejected() {
+    // E103 extension (v2): system and user empty scalars are now rejected,
+    // matching the existing empty-scalar check on agent.
+    let source = "agent: TestAgent\nsystem: \"\"\n";
+    let document = parse_str(source).expect("e103 system source should parse");
+    let diagnostics = validate_document(&document);
+    assert!(
+        diagnostics.has_errors(),
+        "expected validation errors for empty system scalar"
+    );
+    let e103 = diagnostics
+        .iter()
+        .find(|d| d.code == Some("E103") && d.message.contains("system"))
+        .expect("expected E103 diagnostic mentioning 'system'");
+    assert_eq!(e103.phase, DiagnosticPhase::Semantic);
+    assert_eq!(
+        e103.to_string(),
+        "semantic error at 2:1: [E103] `system` must not be empty"
+    );
+}
+
+// E111: empty mapping block is a validation error.
+// This code is a defensive guard in validate_prompt_field and validate_output_field.
+// It is unreachable through parse_str because the parser requires at least one
+// entry to produce a Mapping node — `key:` with no indented content produces
+// parse error E023 before the validator is reached. A conformance test cannot
+// be written without constructing an AST that bypasses parse_str. E111 is
+// therefore documented here as parser-enforced and intentionally untestable
+// at the conformance level.
+
+// E112: empty sequence is a validation error.
+// Same situation as E111: the parser requires at least one item to produce
+// a Sequence node. `key:` with no indented items produces parse error E023.
+// E112 is a defensive guard unreachable through parse_str.
+
+#[test]
+fn conformance_e113_duplicate_tools_items_are_rejected() {
+    // E113: duplicate items in tools or constraints are rejected.
+    let source = "agent: TestAgent\nsystem: handle requests\ntools:\n  - web_search\n  - calculator\n  - web_search\n";
+    let document = parse_str(source).expect("e113 source should parse");
+    let diagnostics = validate_document(&document);
+    assert!(
+        diagnostics.has_errors(),
+        "expected validation errors for duplicate tool item"
+    );
+    let e113 = diagnostics
+        .iter()
+        .find(|d| d.code == Some("E113"))
+        .expect("expected a diagnostic with code E113");
+    assert_eq!(e113.phase, DiagnosticPhase::Semantic);
+    assert!(
+        e113.message.contains("web_search"),
+        "expected diagnostic mentioning the duplicate value, got: {}",
+        e113.message
+    );
+}
+
+#[test]
+fn conformance_e113_memory_allows_duplicate_items() {
+    // E113 exemption: memory sequences are allowed to have duplicate items
+    // (repeating context items across turns is valid).
+    let source = "agent: TestAgent\nsystem: handle requests\nmemory:\n  - prior_context\n  - prior_context\n";
+    let document = parse_str(source).expect("e113 memory source should parse");
+    let diagnostics = validate_document(&document);
+    assert!(
+        !diagnostics.has_errors(),
+        "expected no validation errors for duplicate memory items, got: {diagnostics}"
+    );
+}
+
 // --- parse --summary conformance ---
 
 #[test]

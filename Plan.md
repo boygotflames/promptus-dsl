@@ -338,4 +338,6 @@ Post-v1 tracks (future work):
 See [docs/v2-roadmap.md](docs/v2-roadmap.md) for the full v2
 roadmap and track sequencing.
 
-Active track: Track B — Semantic Validation Depth
+Active track: Track B [COMPLETE] — see docs/v2-roadmap.md
+Next active track: Track C — live editor feedback (validate --stdin
++ VS Code DiagnosticCollection)

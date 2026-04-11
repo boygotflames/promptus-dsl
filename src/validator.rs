@@ -106,18 +106,45 @@ fn validate_prompt_field(document: &Document, key: TopLevelKey, diagnostics: &mu
         return;
     };
 
-    if !matches!(node, Node::Scalar { .. } | Node::Mapping { .. }) {
-        diagnostics.push(
-            Diagnostic::semantic_error(
-                format!(
-                    "`{}` must be a scalar or mapping, found {}",
-                    key.as_str(),
-                    node.kind_name()
-                ),
-                Some(node.span()),
-            )
-            .with_code("E105"),
-        );
+    match node {
+        Node::Scalar { value, span } => {
+            if value.trim().is_empty() {
+                diagnostics.push(
+                    Diagnostic::semantic_error(
+                        format!("`{}` must not be empty", key.as_str()),
+                        Some(*span),
+                    )
+                    .with_code("E103"),
+                );
+            }
+        }
+        // E111: empty mapping block is a validation error.
+        // Note: the parser requires at least one entry to produce a Mapping node,
+        // so this guard is defensive and unreachable through parse_str.
+        Node::Mapping { entries, span } => {
+            if entries.is_empty() {
+                diagnostics.push(
+                    Diagnostic::semantic_error(
+                        format!("`{}` mapping must not be empty", key.as_str()),
+                        Some(*span),
+                    )
+                    .with_code("E111"),
+                );
+            }
+        }
+        other => {
+            diagnostics.push(
+                Diagnostic::semantic_error(
+                    format!(
+                        "`{}` must be a scalar or mapping, found {}",
+                        key.as_str(),
+                        other.kind_name()
+                    ),
+                    Some(other.span()),
+                )
+                .with_code("E105"),
+            );
+        }
     }
 }
 
@@ -136,6 +163,20 @@ fn validate_sequence_field(document: &Document, key: TopLevelKey, diagnostics: &
         );
         return;
     };
+
+    // E112: empty sequence is a validation error.
+    // Note: the parser requires at least one item to produce a Sequence node,
+    // so this guard is defensive and unreachable through parse_str.
+    if values.is_empty() {
+        diagnostics.push(
+            Diagnostic::semantic_error(
+                format!("`{}` sequence must not be empty", key.as_str()),
+                Some(node.span()),
+            )
+            .with_code("E112"),
+        );
+        return;
+    }
 
     for value in values {
         match value {
@@ -162,6 +203,31 @@ fn validate_sequence_field(document: &Document, key: TopLevelKey, diagnostics: &
             }
         }
     }
+
+    // E113: duplicate items for tools and constraints only (memory is exempt).
+    if matches!(key, TopLevelKey::Tools | TopLevelKey::Constraints) {
+        for (i, item) in values.iter().enumerate() {
+            let Node::Scalar {
+                value: current,
+                span: current_span,
+            } = item
+            else {
+                continue;
+            };
+            let is_duplicate = values[..i]
+                .iter()
+                .any(|earlier| matches!(earlier, Node::Scalar { value: v, .. } if v == current));
+            if is_duplicate {
+                diagnostics.push(
+                    Diagnostic::semantic_error(
+                        format!("duplicate item `{current}` in `{}`", key.as_str()),
+                        Some(*current_span),
+                    )
+                    .with_code("E113"),
+                );
+            }
+        }
+    }
 }
 
 fn validate_output_field(document: &Document, diagnostics: &mut DiagnosticBag) {
@@ -169,11 +235,28 @@ fn validate_output_field(document: &Document, diagnostics: &mut DiagnosticBag) {
         return;
     };
 
-    if !matches!(node, Node::Scalar { .. } | Node::Mapping { .. }) {
-        diagnostics.push(
-            Diagnostic::semantic_error("`output` must be a scalar or mapping", Some(node.span()))
+    match node {
+        Node::Scalar { .. } => {}
+        // E111: empty mapping block is a validation error.
+        // Note: the parser requires at least one entry to produce a Mapping node,
+        // so this guard is defensive and unreachable through parse_str.
+        Node::Mapping { entries, span } => {
+            if entries.is_empty() {
+                diagnostics.push(
+                    Diagnostic::semantic_error("`output` mapping must not be empty", Some(*span))
+                        .with_code("E111"),
+                );
+            }
+        }
+        other => {
+            diagnostics.push(
+                Diagnostic::semantic_error(
+                    "`output` must be a scalar or mapping",
+                    Some(other.span()),
+                )
                 .with_code("E108"),
-        );
+            );
+        }
     }
 }
 

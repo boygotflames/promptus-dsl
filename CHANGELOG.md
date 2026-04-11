@@ -8,6 +8,26 @@ surfaces are always noted explicitly.
 
 ---
 
+## [v2] — In Progress
+
+### v2 Track B — Semantic validation depth
+- E103 extended: system and user empty scalars now rejected
+- E111 (new): empty mapping block rejected for system/user/output
+  (defensive guard — unreachable via parse_str; parser requires
+  at least one entry to produce a Mapping node)
+- E112 (new): empty sequence rejected for memory/tools/constraints
+  (defensive guard — unreachable via parse_str; same reason as E111)
+- E113 (new): duplicate items rejected in tools and constraints
+  (memory exempt — duplicate history items are valid)
+- SPEC.md: four new Type Constraint bullets added; E111/E112/E113
+  added to Diagnostic Codes table
+- Invalid fixtures: empty-system.llm, empty-mapping.llm,
+  empty-sequence.llm, duplicate-tools.llm
+- Conformance tests: 3 new tests (E103 system, E113 tools, E113
+  memory exemption); E111/E112 documented as defensive guards
+
+---
+
 ## [v1] — 2026-04-12
 
 ### Summary

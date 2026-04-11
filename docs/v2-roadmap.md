@@ -146,24 +146,31 @@ should not). Emit E113: `duplicate item \`web_search\` in \`tools\``.
 
 ### Sequence
 
-1. Extend `validate_prompt_field` to check empty scalar (E103)
-2. Add `validate_empty_mapping` helper; call from prompt/output
-   validators (E111)
-3. Add empty-sequence check in `validate_sequence_field` (E112)
-4. Add duplicate-item check in `validate_sequence_field` for
+1. ✓ Extend `validate_prompt_field` to check empty scalar (E103)
+2. ✓ Empty mapping guard in `validate_prompt_field` and
+   `validate_output_field` (E111 — defensive guard; unreachable
+   via parse_str because parser requires at least one entry)
+3. ✓ Empty-sequence check in `validate_sequence_field` (E112 —
+   defensive guard; unreachable via parse_str for same reason)
+4. ✓ Duplicate-item check in `validate_sequence_field` for
    tools and constraints (E113)
-5. Update SPEC.md Type Constraints section and Diagnostic Codes table
-6. Add conformance tests for each new rule
-7. Add example invalid fixtures for each new rule
+5. ✓ SPEC.md Type Constraints section and Diagnostic Codes table
+6. ✓ Conformance tests: E103 + E113 tested; E111/E112 documented
+   as defensive guards (like E107) — unreachable via parse_str
+7. ✓ Four invalid fixtures added
+
+### Status: COMPLETE
 
 ### v2 contract commitment
 
 By end of Track B:
 - E103 covers agent, system, and user empty scalars
 - E111–E113 are stable error codes with documented semantics
-- All new rules are conformance-tested
-- No previously-valid document is invalidated by Rule 1–4
-  (all four rules reject inputs that were never meaningful)
+- E111 and E112 are defensive guards (like E107) — valid in the
+  validator API but unreachable through the normal parse_str path
+- E113 is fully testable and conformance-tested
+- No previously-valid document is invalidated by Rule 1/4
+  (E103 extension and E113 reject inputs that were never meaningful)
 
 ---
 

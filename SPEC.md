@@ -140,6 +140,18 @@ Mapping key behavior per top-level block:
 - `output` mapping values: any keys matching the key grammar are
   accepted; no reserved key set is enforced at v0.
 
+Additional validation rules added in v2:
+
+- `system` and `user` scalar values must not be empty (zero-length
+  after trimming) — E103
+- A `system`, `user`, or `output` mapping block must contain at
+  least one entry. An empty mapping block is a validation error — E111
+- `memory`, `tools`, and `constraints` sequences must contain at
+  least one item. An empty sequence is a validation error — E112
+- `tools` and `constraints` sequences must not contain duplicate
+  items (case-sensitive comparison). Duplicate items are a
+  validation error — E113. `memory` is exempt from this rule.
+
 The constraints listed above constitute the complete v1 validation contract. New constraints affecting previously-valid documents require a version bump. Constraints may be added for keys that are currently unconstrained only if the document remains valid under the new rule (i.e., additive-only within v1).
 
 ### Diagnostic Codes
@@ -200,6 +212,9 @@ as a `[E001]` prefix before the message text when a code is present.
 | `E108` | `output` must be a scalar or mapping |
 | `E109` | `vars` must be a mapping |
 | `E110` | `vars` entry must be a scalar value |
+| `E111` | mapping block has no entries |
+| `E112` | sequence has no items |
+| `E113` | duplicate item in sequence |
 
 Diagnostic codes are part of the stable public contract. Once assigned,
 a code's meaning does not change. New codes may be added; existing codes

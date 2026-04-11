@@ -1,0 +1,9 @@
+# This fixture demonstrates an empty mapping block attempt.
+# The parser enforces that mapping blocks must have at least one entry.
+# `output:` with no indented content produces a parse error (E023),
+# not a validator error (E111). E111 is a defensive guard in the
+# validator for programmatic AST construction.
+agent: TestAgent
+system:
+  role: assistant
+output:
