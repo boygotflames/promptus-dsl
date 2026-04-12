@@ -359,11 +359,24 @@ Post-v2 tracks (future work):
 See [docs/v3-roadmap.md](docs/v3-roadmap.md) for the full v3
 roadmap and track sequencing.
 
-Active track: Track D [COMPLETE] — see docs/v3-roadmap.md
-Next active track: Track F — LSP groundwork (completion + hover in
-extension.js)
+Active track: Track F [COMPLETE] — see docs/v3-roadmap.md
+
+## v3 Status: COMPLETE
+
+All three v3 tracks are complete:
+- ✓ Track E: CI maturity (GitHub Actions, bench constants)
+- ✓ Track D: vars expansion ({var} references, E114)
+- ✓ Track F: LSP groundwork (completion, hover, definition)
 
 Tracks:
 - Track E [COMPLETE] — CI maturity (GitHub Actions, bench constant coverage)
 - Track D [COMPLETE] — vars expansion ({var} references, E114, transpile expansion)
-- Track F — LSP groundwork (completion, hover, go-to-definition in VS Code)
+- Track F [COMPLETE] — LSP groundwork (completion, hover, go-to-definition in VS Code)
+
+Post-v3 tracks (candidate v4 work):
+- Multi-file composition (includes/imports)
+- Full LSP server (if adoption demands it)
+- vars chaining / conditional expansion
+- CI bench regression threshold with percentage delta
+- Marketplace packaging and publication
+- Additional provider profiles

@@ -17,6 +17,10 @@ This folder contains the first minimal VS Code package for `.llm` files.
 - provides live inline diagnostics as you type (300ms debounce)
   — requires `llm_format` binary on PATH or `llm.formatterPath`
   setting
+- provides completion for top-level keys, sub-keys, and
+  `{var}` references as you type
+- provides hover documentation for keys and `{var}` references
+- provides go-to-definition for `{var}` → `vars:` entry
 
 ## Formatter
 
@@ -47,13 +51,37 @@ Error codes (e.g., `[E101]`) appear in the Problems panel alongside
 the human-readable message. Hover over a squiggle to see the full
 diagnostic.
 
+## IntelliSense
+
+The extension provides three IntelliSense features:
+
+**Completion**
+- Type at column 0 to get suggestions for all 8 top-level
+  keys with snippet inserts
+- Inside a `system:` or `user:` block, get common sub-key
+  suggestions (`role`, `objective`, `tone`, etc.)
+- Inside a quoted string after `{`, get completions for all
+  vars defined in the current document
+
+**Hover**
+- Hover over any top-level key to see its type, required
+  status, and a description
+- Hover over a `{var_name}` reference to see its defined
+  value, or a warning if it is undefined
+
+**Go-to-Definition**
+- Press `F12` (or right-click → Go to Definition) on a
+  `{var_name}` reference to jump to its definition in the
+  `vars:` block
+
 ## What It Does Not Yet Do
 
 - no language server
 - ✓ live validation: DiagnosticCollection + debounced
   onDidChangeTextDocument; squiggles appear within 300ms
   of stopping typing
-- no completion, hover, or code actions
+- ✓ completion, hover, and go-to-definition: implemented via
+  VS Code extension APIs (no language server required)
 - ✓ formatter-on-save: DocumentFormattingEditProvider registered
   for the 'llm' language — requires llm_format binary on PATH or
   configured via llm.formatterPath setting

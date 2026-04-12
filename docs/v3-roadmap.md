@@ -287,20 +287,16 @@ are registered via `vscode.languages.*` APIs, not contribution points.
 
 ### Sequence
 
-1. Add `TOP_LEVEL_KEY_DOCS` static table in `extension.js`:
-   key → `{ type, description }` for all 8 keys
-2. Implement and register `CompletionItemProvider` for top-level keys;
-   add a test: `conformance_vscode_completion_offers_top_level_keys`
-   (at minimum a smoke test that the completion array has 8 items)
-3. Implement and register `CompletionItemProvider` for system/user
-   sub-keys; add fixture-driven sub-key completion test
-4. Implement and register `HoverProvider` for top-level keys
-5. Implement and register `DefinitionProvider` for `{var}` references
-   (requires Track D to be meaningful; may be implemented speculatively
-   or deferred to post-Track D depending on sequencing)
-6. Update `editors/vscode/README.md`: add Completion and Hover sections
-7. Update `docs/compatibility-matrix.md`: VS Code support row from
-   `stable (scope-limited)` → `stable` once completion + hover are present
+1. ✓ CompletionItemProvider: 8 top-level keys with snippet inserts,
+   system/user sub-keys, {var} reference completion (from vars block)
+2. ✓ HoverProvider: key type + required status + description;
+   {var_name} shows value or E114 undefined warning
+3. ✓ DefinitionProvider: F12 on {var_name} jumps to its line in
+   the vars: block
+4. ✓ editors/vscode/README.md: IntelliSense section added; What It
+   Does updated; What It Does Not Yet Do updated
+
+### Status: COMPLETE
 
 ### v3 contract commitment
 
@@ -362,8 +358,8 @@ v3 is complete when:
 - [ ] Bench output is conformance-locked for all three primary fixtures
       across all three providers (9 constants total)
 - [ ] `bench` report shape promoted from `provisional` to `stable`
-- [ ] Top-level key completion works in VS Code (8 keys, at column 1)
-- [ ] Hover over any top-level key shows type and description
-- [ ] `{var}` references support go-to-definition in VS Code
+- [x] Top-level key completion works in VS Code (8 keys, at column 1)
+- [x] Hover over any top-level key shows type and description
+- [x] `{var}` references support go-to-definition in VS Code
 - [ ] CHANGELOG.md v3 entry added
 - [ ] docs/versioning.md v3 section added

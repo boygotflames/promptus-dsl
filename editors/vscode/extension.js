@@ -121,6 +121,295 @@ function validateDocument(document, diagnosticCollection) {
     child.stdin.end();
 }
 
+// ── IntelliSense data ─────────────────────────────────────────────────────────
+
+const TOP_LEVEL_KEY_DOCS = {
+    agent: {
+        required: true,
+        type: 'scalar',
+        description: 'Declares the agent identity for this document.'
+    },
+    system: {
+        required: true,
+        type: 'scalar or mapping',
+        description: 'Provides system-level instructions for the model.'
+    },
+    user: {
+        required: false,
+        type: 'scalar or mapping',
+        description: 'Contains the user request or conversational context.'
+    },
+    memory: {
+        required: false,
+        type: 'sequence of scalars',
+        description: 'Lists memory items available to the agent.'
+    },
+    tools: {
+        required: false,
+        type: 'sequence of scalars',
+        description: 'Declares tools available for the agent to use.'
+    },
+    output: {
+        required: false,
+        type: 'scalar or mapping',
+        description: 'Specifies the expected output format or schema.'
+    },
+    constraints: {
+        required: false,
+        type: 'sequence of scalars',
+        description: 'Lists behavioral constraints the agent must follow.'
+    },
+    vars: {
+        required: false,
+        type: 'mapping of scalars',
+        description: 'Defines template variables for use as {var_name} references.'
+    }
+};
+
+// Snippet text for top-level key completions.
+const TOP_LEVEL_KEY_SNIPPETS = {
+    agent:       'agent: $1',
+    system:      'system:\n  $1',
+    user:        'user: $1',
+    memory:      'memory:\n  - $1',
+    tools:       'tools:\n  - $1',
+    output:      'output: $1',
+    constraints: 'constraints:\n  - $1',
+    vars:        'vars:\n  $1: $2'
+};
+
+const TOP_LEVEL_KEY_DETAILS = {
+    agent:       'Agent identity — required',
+    system:      'System instructions — required',
+    user:        'User request or context',
+    memory:      'Memory items (sequence)',
+    tools:       'Available tools (sequence)',
+    output:      'Output format or schema',
+    constraints: 'Behavioral constraints (sequence)',
+    vars:        'Template variables'
+};
+
+const SYSTEM_USER_SUBKEYS = [
+    { label: 'role',         detail: 'Agent role or persona' },
+    { label: 'objective',    detail: 'Primary objective' },
+    { label: 'tone',         detail: 'Response tone or style' },
+    { label: 'format',       detail: 'Response format' },
+    { label: 'context',      detail: 'Background context' },
+    { label: 'instructions', detail: 'Detailed instructions' }
+];
+
+// ── Vars parsing ──────────────────────────────────────────────────────────────
+
+// Extract all var key→value pairs from a document's vars: block.
+// Returns a Map<string, string>.
+function parseVarsBlock(text) {
+    const vars = new Map();
+    const lines = text.split('\n');
+    let inVars = false;
+    for (const line of lines) {
+        if (/^vars:/.test(line)) {
+            inVars = true;
+            continue;
+        }
+        if (inVars) {
+            // Top-level key ends the vars block
+            if (/^\S/.test(line) && line.trim().length > 0 && !line.startsWith(' ')) {
+                break;
+            }
+            // Match indented key: value pairs
+            const m = line.match(/^  ([\w][\w-]*):\s*(.*)$/);
+            if (m) {
+                vars.set(m[1], m[2].trim());
+            }
+        }
+    }
+    return vars;
+}
+
+// ── Completion ────────────────────────────────────────────────────────────────
+
+function getCompletionItems(document, position) {
+    const lineText = document.lineAt(position.line).text;
+    const textUpToCursor = lineText.substring(0, position.character);
+    const docText = document.getText();
+
+    // --- {var} reference completion inside a quoted string ---
+    // Trigger: cursor is after a `{` that follows a `"` on the same line
+    const openBraceIdx = textUpToCursor.lastIndexOf('{');
+    if (openBraceIdx !== -1) {
+        const textBeforeBrace = textUpToCursor.substring(0, openBraceIdx);
+        const lastQuote = textBeforeBrace.lastIndexOf('"');
+        if (lastQuote !== -1) {
+            // We are inside a quoted string after a `{` — offer var names
+            const vars = parseVarsBlock(docText);
+            if (vars.size > 0) {
+                const items = [];
+                for (const [key, value] of vars) {
+                    const item = new vscode.CompletionItem(
+                        key,
+                        vscode.CompletionItemKind.Variable
+                    );
+                    // `{` is already typed; insert just `key}`
+                    item.insertText = `${key}}`;
+                    item.detail = value ? `= "${value}"` : 'var reference';
+                    item.documentation = new vscode.MarkdownString(
+                        `**{${key}}** — defined in \`vars\`\n\nValue: \`${value}\``
+                    );
+                    items.push(item);
+                }
+                return items;
+            }
+        }
+    }
+
+    // --- Sub-key completion inside system: or user: block ---
+    if (/^\s+/.test(lineText) && position.character >= 2) {
+        // Line is indented — check if we're inside system: or user:
+        for (let i = position.line - 1; i >= 0; i--) {
+            const prevLine = document.lineAt(i).text;
+            if (/^(system|user):/.test(prevLine)) {
+                return SYSTEM_USER_SUBKEYS.map(({ label, detail }) => {
+                    const item = new vscode.CompletionItem(
+                        label,
+                        vscode.CompletionItemKind.Field
+                    );
+                    item.insertText = new vscode.SnippetString(`${label}: $1`);
+                    item.detail = detail;
+                    return item;
+                });
+            }
+            // Stop if we hit another top-level key
+            if (/^\S/.test(prevLine) && prevLine.trim().length > 0) {
+                break;
+            }
+        }
+    }
+
+    // --- Top-level key completion at column 0 ---
+    if (position.character === 0 || !/.*:/.test(textUpToCursor)) {
+        return Object.keys(TOP_LEVEL_KEY_DOCS).map((key) => {
+            const item = new vscode.CompletionItem(
+                key,
+                vscode.CompletionItemKind.Keyword
+            );
+            item.insertText = new vscode.SnippetString(TOP_LEVEL_KEY_SNIPPETS[key]);
+            item.detail = TOP_LEVEL_KEY_DETAILS[key];
+            const doc = TOP_LEVEL_KEY_DOCS[key];
+            item.documentation = new vscode.MarkdownString(
+                `**\`${key}\`** — ${doc.required ? 'required' : 'optional'}\n\n` +
+                `Type: \`${doc.type}\`\n\n${doc.description}`
+            );
+            return item;
+        });
+    }
+
+    return [];
+}
+
+// ── Hover ─────────────────────────────────────────────────────────────────────
+
+function getHoverInfo(document, position) {
+    const lineText = document.lineAt(position.line).text;
+    const docText = document.getText();
+
+    // --- {var_name} hover ---
+    // Check if cursor is on a {var_name} pattern
+    const varRefRegex = /\{([\w][\w-]*)\}/g;
+    let m;
+    while ((m = varRefRegex.exec(lineText)) !== null) {
+        const start = m.index;
+        const end = m.index + m[0].length;
+        if (position.character >= start && position.character <= end) {
+            const varName = m[1];
+            const vars = parseVarsBlock(docText);
+            const range = new vscode.Range(
+                position.line, start,
+                position.line, end
+            );
+            if (vars.has(varName)) {
+                const value = vars.get(varName);
+                return new vscode.Hover(
+                    new vscode.MarkdownString(
+                        `**{${varName}}** = \`"${value}"\`\n\nDefined in \`vars\``
+                    ),
+                    range
+                );
+            } else {
+                return new vscode.Hover(
+                    new vscode.MarkdownString(
+                        `**{${varName}}** — ⚠ undefined var reference (\`E114\`)`
+                    ),
+                    range
+                );
+            }
+        }
+    }
+
+    // --- Top-level key hover (only at column 0) ---
+    const topLevelMatch = lineText.match(/^(\w[\w-]*):/);
+    if (topLevelMatch) {
+        const key = topLevelMatch[1];
+        const doc = TOP_LEVEL_KEY_DOCS[key];
+        if (doc) {
+            const range = new vscode.Range(
+                position.line, 0,
+                position.line, key.length
+            );
+            return new vscode.Hover(
+                new vscode.MarkdownString(
+                    `**\`${key}\`** — ${doc.required ? 'required' : 'optional'}\n\n` +
+                    `Type: \`${doc.type}\`\n\n${doc.description}`
+                ),
+                range
+            );
+        }
+    }
+
+    return null;
+}
+
+// ── Definition ────────────────────────────────────────────────────────────────
+
+function getDefinition(document, position) {
+    const lineText = document.lineAt(position.line).text;
+    const docText = document.getText();
+
+    // Find a {var_name} pattern under the cursor
+    const varRefRegex = /\{([\w][\w-]*)\}/g;
+    let m;
+    while ((m = varRefRegex.exec(lineText)) !== null) {
+        const start = m.index;
+        const end = m.index + m[0].length;
+        if (position.character >= start && position.character <= end) {
+            const varName = m[1];
+            // Find the vars: block, then the var_name: line
+            const lines = docText.split('\n');
+            let inVars = false;
+            for (let i = 0; i < lines.length; i++) {
+                if (/^vars:/.test(lines[i])) {
+                    inVars = true;
+                    continue;
+                }
+                if (inVars) {
+                    if (/^\S/.test(lines[i]) && lines[i].trim().length > 0) {
+                        break; // left vars block
+                    }
+                    const keyMatch = lines[i].match(/^  ([\w][\w-]*):/);
+                    if (keyMatch && keyMatch[1] === varName) {
+                        const targetPos = new vscode.Position(i, 2);
+                        return new vscode.Location(document.uri, targetPos);
+                    }
+                }
+            }
+            return null;
+        }
+    }
+
+    return null;
+}
+
+// ── Extension entry point ─────────────────────────────────────────────────────
+
 function activate(context) {
     const selector = { language: 'llm', scheme: 'file' };
 
@@ -172,7 +461,7 @@ function activate(context) {
 
     context.subscriptions.push(provider);
 
-    // --- Live diagnostics (new) ---
+    // --- Live diagnostics (existing) ---
 
     const diagnosticCollection =
         vscode.languages.createDiagnosticCollection('llm');
@@ -207,6 +496,46 @@ function activate(context) {
     vscode.workspace.textDocuments.forEach((document) => {
         validateDocument(document, diagnosticCollection);
     });
+
+    // --- Completion ---
+
+    const completionProvider =
+        vscode.languages.registerCompletionItemProvider(
+            selector,
+            {
+                provideCompletionItems(document, position) {
+                    return getCompletionItems(document, position);
+                }
+            },
+            ':', ' ', '\n', '{'
+        );
+    context.subscriptions.push(completionProvider);
+
+    // --- Hover ---
+
+    const hoverProvider =
+        vscode.languages.registerHoverProvider(
+            selector,
+            {
+                provideHover(document, position) {
+                    return getHoverInfo(document, position);
+                }
+            }
+        );
+    context.subscriptions.push(hoverProvider);
+
+    // --- Definition (go-to-definition for {var} refs) ---
+
+    const definitionProvider =
+        vscode.languages.registerDefinitionProvider(
+            selector,
+            {
+                provideDefinition(document, position) {
+                    return getDefinition(document, position);
+                }
+            }
+        );
+    context.subscriptions.push(definitionProvider);
 }
 
 function deactivate() {}

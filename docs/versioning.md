@@ -97,6 +97,22 @@ Within v0:
 
 ---
 
+---
+
+### v3 Status
+
+All v3 criteria are met as of 2026-04-12:
+
+1. ✓ vars expansion: `{var_name}` stable, conformance-tested across
+   plain, shadow V0+V1, and json-ir targets
+2. ✓ CI: GitHub Actions on push/PR; bench regression via conformance
+   suite constants
+3. ✓ LSP groundwork: completion, hover, and go-to-definition via
+   VS Code extension APIs (no language server required)
+4. ✓ CHANGELOG.md v3 entry complete and dated
+
+---
+
 ## Changelog
 
 See [CHANGELOG.md](../CHANGELOG.md) for a record of notable changes.

@@ -8,7 +8,41 @@ surfaces are always noted explicitly.
 
 ---
 
-## [v3] — In Progress
+## [v3] — 2026-04-12
+
+### Summary
+v3 makes the format expressive and the tooling production-grade.
+Developers can now write template prompts with `{var}` references,
+get inline completions and hover docs in VS Code, and rely on
+CI to catch regressions before merge.
+
+### What changed from v2 to v3
+- vars expansion: `{var_name}` references in system/user/output/memory/
+  tools/constraints — substituted at transpile time
+- E114: undefined var reference validation
+- CI: GitHub Actions workflow (test, lint, bench-sanity)
+- Bench constants locked for anthropic provider across all fixtures;
+  bench promoted to stable
+- VS Code: completion (8 keys + sub-keys + `{var}`), hover (docs +
+  values), go-to-definition (`{var}` → vars block)
+- SPEC.md: vars Expansion section; Deferred Work cleaned up
+
+### Explicit post-v3 deferrals
+- Multi-file composition (includes/imports)
+- Full LSP server
+- vars chaining / conditional expansion
+- Marketplace packaging
+
+---
+
+### v3 Track F — LSP groundwork (completion, hover, definition)
+- `editors/vscode/extension.js`: `CompletionItemProvider` (8 top-level
+  keys with snippets, system/user sub-keys, `{var}` reference completion),
+  `HoverProvider` (key type/required/description + `{var}` value or E114
+  warning), `DefinitionProvider` (F12 on `{var}` → vars block line)
+- No LSP required — all three features implemented via VS Code extension
+  APIs within existing spawn architecture
+- `editors/vscode/README.md`: IntelliSense section added
 
 ### v3 Track D — vars expansion
 - `src/transpile/vars.rs`: `expand()` helper; substitutes `{var_name}`
