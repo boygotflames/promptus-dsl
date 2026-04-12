@@ -84,6 +84,7 @@ pub fn emit_with_provider(document: &Document, provider: Provider) -> Result<Str
 fn render_document(document: &Document, shadow_profile: ShadowProfile) -> String {
     match shadow_profile {
         ShadowProfile::V0 => render_v0_document(document),
+        ShadowProfile::V1Anthropic => render_v1_anthropic_document(document),
     }
 }
 
@@ -148,4 +149,82 @@ fn render_sequence(values: &[Node]) -> String {
 
     rendered.push_str(SHADOW_SYNTAX.sequence_close);
     rendered
+}
+
+// ── V1 Anthropic (XML-tag) shadow rendering ───────────────────────────────
+
+fn render_v1_anthropic_document(document: &Document) -> String {
+    let mut lines = Vec::new();
+
+    for (key, value) in document.ordered_entries() {
+        let tag = xml_tag_for(key);
+        lines.push(render_v1_node(key, tag, value));
+    }
+
+    lines.join("\n")
+}
+
+fn xml_tag_for(key: TopLevelKey) -> &'static str {
+    match key {
+        TopLevelKey::Agent => "agent",
+        TopLevelKey::System => "system",
+        TopLevelKey::User => "user",
+        TopLevelKey::Memory => "memory",
+        TopLevelKey::Tools => "tools",
+        TopLevelKey::Output => "output",
+        TopLevelKey::Constraints => "constraints",
+        TopLevelKey::Vars => "vars",
+    }
+}
+
+fn render_v1_node(key: TopLevelKey, tag: &str, value: &Node) -> String {
+    match value {
+        Node::Scalar { value: scalar, .. } => {
+            format!("<{tag}>{}</{tag}>", scalar)
+        }
+        Node::Mapping { entries, .. } => {
+            let inner: Vec<String> = entries
+                .iter()
+                .map(|e| format!("{}: {}", e.key, node_to_plain(&e.value)))
+                .collect();
+            format!("<{tag}>\n{}\n</{tag}>", inner.join("\n"))
+        }
+        Node::Sequence { values, .. } => {
+            let item_tag = sequence_item_tag(key);
+            let inner: Vec<String> = values
+                .iter()
+                .map(|v| format!("<{item_tag}>{}</{item_tag}>", node_to_plain(v)))
+                .collect();
+            format!("<{tag}>\n{}\n</{tag}>", inner.join("\n"))
+        }
+    }
+}
+
+/// Returns the XML item tag for each sequence key in V1 encoding.
+fn sequence_item_tag(key: TopLevelKey) -> &'static str {
+    match key {
+        TopLevelKey::Memory => "item",
+        TopLevelKey::Tools => "tool",
+        TopLevelKey::Constraints => "rule",
+        // Vars handled via render_v1_vars; other keys are not sequences.
+        _ => "item",
+    }
+}
+
+/// Render a Node as a plain string value (no quoting, no markers).
+fn node_to_plain(value: &Node) -> String {
+    match value {
+        Node::Scalar { value: scalar, .. } => scalar.clone(),
+        Node::Mapping { entries, .. } => {
+            let pairs: Vec<String> = entries
+                .iter()
+                .map(|e| format!("{}={}", e.key, node_to_plain(&e.value)))
+                .collect();
+            pairs.join(";")
+        }
+        Node::Sequence { values, .. } => {
+            let items: Vec<String> = values.iter().map(node_to_plain).collect();
+            items.join(",")
+        }
+    }
 }

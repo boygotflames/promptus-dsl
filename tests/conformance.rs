@@ -20,6 +20,10 @@ const BENCH_OPENAI_MINIMAL: &str = "provider: openai\ntokenizer: cl100k_base\nso
 const BENCH_GENERIC_EXTRACTOR_BASELINE: &str = "provider: generic\ntokenizer: cl100k_base\nsource   | bytes=242 | tokens=57 | delta_bytes=+0 | delta_tokens=+0 | delta_bytes_vs_baseline=+25 | delta_tokens_vs_baseline=+3\nbaseline | bytes=217 | tokens=54 | delta_bytes=-25 | delta_tokens=-3 | delta_bytes_vs_baseline=+0 | delta_tokens_vs_baseline=+0\nplain    | bytes=233 | tokens=60 | delta_bytes=-9 | delta_tokens=+3 | delta_bytes_vs_baseline=+16 | delta_tokens_vs_baseline=+6\njson-ir  | bytes=312 | tokens=89 | delta_bytes=+70 | delta_tokens=+32 | delta_bytes_vs_baseline=+95 | delta_tokens_vs_baseline=+35\nshadow   | bytes=202 | tokens=49 | delta_bytes=-40 | delta_tokens=-8 | delta_bytes_vs_baseline=-15 | delta_tokens_vs_baseline=-5";
 const BENCH_GENERIC_JSON_OUTPUT_BASELINE: &str = "provider: generic\ntokenizer: cl100k_base\nsource   | bytes=150 | tokens=42 | delta_bytes=+0 | delta_tokens=+0 | delta_bytes_vs_baseline=+7 | delta_tokens_vs_baseline=+1\nbaseline | bytes=143 | tokens=41 | delta_bytes=-7 | delta_tokens=-1 | delta_bytes_vs_baseline=+0 | delta_tokens_vs_baseline=+0\nplain    | bytes=140 | tokens=41 | delta_bytes=-10 | delta_tokens=-1 | delta_bytes_vs_baseline=-3 | delta_tokens_vs_baseline=+0\njson-ir  | bytes=215 | tokens=72 | delta_bytes=+65 | delta_tokens=+30 | delta_bytes_vs_baseline=+72 | delta_tokens_vs_baseline=+31\nshadow   | bytes=126 | tokens=39 | delta_bytes=-24 | delta_tokens=-3 | delta_bytes_vs_baseline=-17 | delta_tokens_vs_baseline=-2";
 
+const SHADOW_V1_MINIMAL: &str = "<agent>DataExtractor</agent>\n<system>\nrole: financial_analyst\noutput: json\n</system>\n<memory>\n<item>user_history</item>\n</memory>";
+const SHADOW_V1_EXTRACTOR: &str = "<agent>Extractor</agent>\n<system>\nrole: financial_analyst\nobjective: extract structured facts\n</system>\n<user>\nprompt: summarize the quarterly filing\n</user>\n<tools>\n<tool>web_search</tool>\n<tool>calculator</tool>\n</tools>\n<constraints>\n<rule>cite_sources</rule>\n<rule>stay_provider_agnostic</rule>\n</constraints>";
+const BENCH_ANTHROPIC_MINIMAL: &str = "provider: anthropic\ntokenizer: o200k_base\nsource  | bytes=101 | tokens=27 | delta_bytes=+0 | delta_tokens=+0\nplain   | bytes=94 | tokens=26 | delta_bytes=-7 | delta_tokens=-1\njson-ir | bytes=141 | tokens=46 | delta_bytes=+40 | delta_tokens=+19\nshadow  | bytes=129 | tokens=39 | delta_bytes=+28 | delta_tokens=+12";
+
 fn parse_valid_document(source: &str) -> llm_format::Document {
     let document = parse_str(source).expect("fixture should parse");
     let diagnostics = validate_document(&document);
@@ -173,15 +177,31 @@ fn conformance_shadow_output_is_deterministic_for_supported_providers() {
 }
 
 #[test]
-fn conformance_shadow_rejects_unsupported_provider_profiles_explicitly() {
+fn conformance_anthropic_shadow_produces_v1_xml_encoding() {
     let document = parse_valid_document(include_str!("../examples/minimal.llm"));
-    let error = transpile::transpile_with_provider(&document, Target::Shadow, Provider::Anthropic)
-        .expect_err("unsupported shadow provider should fail");
+    let output =
+        transpile::transpile_with_provider(&document, Target::Shadow, Provider::Anthropic)
+            .expect("anthropic shadow should succeed");
+    assert_eq!(output, SHADOW_V1_MINIMAL);
+}
 
-    assert_eq!(
-        error.to_string(),
-        "provider anthropic does not have a supported shadow profile yet"
-    );
+#[test]
+fn conformance_anthropic_shadow_differs_from_generic_v0() {
+    let document = parse_valid_document(include_str!("../examples/minimal.llm"));
+    let v0 = transpile::transpile_with_provider(&document, Target::Shadow, Provider::Generic)
+        .expect("generic shadow should succeed");
+    let v1 = transpile::transpile_with_provider(&document, Target::Shadow, Provider::Anthropic)
+        .expect("anthropic shadow should succeed");
+    assert_ne!(v0, v1, "V0 and V1Anthropic shadow output must differ");
+}
+
+#[test]
+fn conformance_anthropic_shadow_extractor_matches_v1_contract() {
+    let document = parse_valid_document(include_str!("../examples/extractor.llm"));
+    let output =
+        transpile::transpile_with_provider(&document, Target::Shadow, Provider::Anthropic)
+            .expect("anthropic extractor shadow should succeed");
+    assert_eq!(output, SHADOW_V1_EXTRACTOR);
 }
 
 #[test]
@@ -218,18 +238,14 @@ fn conformance_bench_reports_are_deterministic_for_supported_providers() {
 }
 
 #[test]
-fn conformance_bench_rejects_unsupported_provider_profiles_explicitly() {
-    let error = execute_bench(BenchArgs {
+fn conformance_bench_anthropic_provider_is_supported() {
+    let result = execute_bench(BenchArgs {
         input: PathBuf::from("examples/minimal.llm"),
         provider: Provider::Anthropic,
         baseline: None,
     })
-    .expect_err("unsupported bench provider should fail");
-
-    assert_eq!(
-        error.to_string(),
-        "provider anthropic does not have a supported tokenizer profile yet"
-    );
+    .expect("anthropic bench should succeed");
+    assert_eq!(result, BENCH_ANTHROPIC_MINIMAL);
 }
 
 #[test]

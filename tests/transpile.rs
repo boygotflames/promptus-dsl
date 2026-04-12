@@ -183,17 +183,20 @@ fn shadow_transpile_matches_explicit_openai_provider() {
 }
 
 #[test]
-fn shadow_transpile_reports_unsupported_providers_explicitly() {
+fn shadow_transpile_anthropic_produces_v1_xml_output() {
     let source = include_str!("../examples/minimal.llm");
     let document = parse_valid_document(source);
-    let error = transpile::transpile_with_provider(&document, Target::Shadow, Provider::Anthropic)
-        .expect_err("unsupported provider should fail for shadow transpilation");
+    let output =
+        transpile::transpile_with_provider(&document, Target::Shadow, Provider::Anthropic)
+            .expect("anthropic shadow transpilation should succeed");
 
     assert!(
-        error
-            .to_string()
-            .contains("provider anthropic does not have a supported shadow profile yet"),
-        "expected explicit unsupported shadow-provider message, got: {error}"
+        output.contains("<agent>"),
+        "expected XML-tag output for anthropic shadow, got: {output}"
+    );
+    assert!(
+        output.starts_with("<agent>DataExtractor</agent>"),
+        "expected agent XML tag first, got: {output}"
     );
 }
 
@@ -349,7 +352,7 @@ fn transpile_execute_reports_missing_output_directories() {
 }
 
 #[test]
-fn transpile_execute_reports_unsupported_provider_selection() {
+fn transpile_execute_anthropic_shadow_succeeds() {
     let result = execute(TranspileArgs {
         input: PathBuf::from("examples/minimal.llm"),
         target: TargetArg::Shadow,
@@ -358,11 +361,10 @@ fn transpile_execute_reports_unsupported_provider_selection() {
         force: false,
     });
 
-    let error = result.expect_err("unsupported shadow provider should fail");
+    let execution = result.expect("anthropic shadow transpile should succeed");
     assert!(
-        error
-            .to_string()
-            .contains("provider anthropic does not have a supported shadow profile yet"),
-        "expected explicit unsupported provider message, got: {error}"
+        execution.rendered.contains("<agent>"),
+        "expected XML-tag shadow output for anthropic, got: {}",
+        execution.rendered
     );
 }

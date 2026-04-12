@@ -22,17 +22,19 @@ It is intentionally narrower than the full internal test suite. The goal is to s
 | `transpile --target json-ir` | `stable` | The JSON IR is deterministic and provider-agnostic for the current v0 slice. It is treated as a public contract for the presently implemented fields. Encoding rules and stability declaration are specified in [SPEC.md §JSON-IR Output](../SPEC.md#json-ir-output). | `tests/conformance.rs` |
 | `transpile --target shadow` | `stable` | The shadow target is deterministic and provider-aware. The v0 shadow format is fully specified as a stable contract in [SPEC.md §Shadow Representation](../SPEC.md#shadow-representation) and covered by the conformance suite. | `tests/conformance.rs` |
 | `bench` report | `provisional` | Bench output is deterministic for supported providers, but it remains tied to the current tokenizer/profile path and may evolve as benchmark discipline grows. | `tests/conformance.rs` |
-| Provider profile: `generic` | `stable (scope-limited)` | Generic profile is stable. Provider-specific divergence (different shadow encoding per provider) is explicitly deferred to post-v1. At v1, all profiles share the v0 shadow encoding. | `tests/conformance.rs` |
-| Provider profile: `openai` | `stable (scope-limited)` | openai profile is stable as an alias for generic at v1. Real provider differentiation (tokenizer plurality, distinct shadow encoding) is explicitly deferred to post-v1. | `tests/conformance.rs` |
-| Provider profile: `anthropic` | `unsupported` | Current provider-aware flows must fail explicitly rather than silently falling back. | `tests/conformance.rs` |
+| Provider profile: `generic` | `stable` | Generic profile uses the V0 compact `@`-marker shadow encoding. Encoding is fully specified in [SPEC.md §Shadow Representation](../SPEC.md#shadow-representation). | `tests/conformance.rs` |
+| Provider profile: `openai` | `stable` | openai profile uses the same V0 shadow encoding as `generic`. Identical output for all documents. | `tests/conformance.rs` |
+| Provider profile: `anthropic` | `stable` | Anthropic profile uses the V1 XML-tag shadow encoding and `o200k_base` tokenizer (proxy for Anthropic's tokenizer). V1 format fully specified in [SPEC.md §V1 Anthropic Shadow Encoding](../SPEC.md#v1-anthropic-shadow-encoding). | `tests/conformance.rs` |
 | VS Code syntax support | `stable (scope-limited)` | Syntax highlighting, file association, and formatter-on-save are stable. LSP, live validation, and completion are explicitly deferred to post-v1. | `tests/vscode.rs` |
 
 ## Boundary Notes
 
-- The v1 contract covers surface syntax, canonical formatting, `plain`, `json-ir`, `shadow`, semantic validation, provider profiles (`generic`/`openai`), and VS Code syntax support.
-- `shadow` is stable since v0 (Packet 6): the format is fully specified in SPEC.md and backed by the conformance suite.
+- The v2 contract adds: V1 Anthropic shadow encoding, `o200k_base` tokenizer profile for `anthropic`, and live VS Code diagnostics (`validate --stdin`).
+- The v1 contract covers surface syntax, canonical formatting, `plain`, `json-ir`, `shadow` (V0), semantic validation, provider profiles (`generic`/`openai`), and VS Code syntax support.
+- `shadow` V0 is stable since v0 (Packet 6): the format is fully specified in SPEC.md and backed by the conformance suite.
+- `shadow` V1 (Anthropic XML-tag encoding) is stable as of v2: fully specified in SPEC.md and backed by conformance tests.
 - Semantic validation contract is frozen at v1: new constraints affecting previously-valid documents require a version bump.
-- Provider differentiation (distinct shadow encoding per provider, tokenizer plurality) and VS Code LSP/completion are explicitly deferred to post-v1.
-- `bench` remains provisional because its report shape is still tied to a single tokenizer path and may evolve.
-- Provider support is honest by design: explicit support where it exists, explicit failure where it does not.
+- VS Code LSP/completion are explicitly deferred to post-v2.
+- `bench` remains provisional because its report shape may evolve with tokenizer plurality.
+- Provider support is honest by design: explicit support where it exists, documented clearly.
 - The compatibility matrix should evolve only when the implementation and conformance tests justify it.

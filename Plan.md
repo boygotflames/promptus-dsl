@@ -335,9 +335,19 @@ Post-v1 tracks (future work):
 
 ## v2
 
+**Status: COMPLETE**
+
 See [docs/v2-roadmap.md](docs/v2-roadmap.md) for the full v2
 roadmap and track sequencing.
 
-Active track: Track C [COMPLETE] — see docs/v2-roadmap.md
-Next active track: Track A — provider differentiation
-(anthropic XML shadow encoding + o200k tokenizer profile)
+All three v2 tracks are complete:
+- Track B [COMPLETE] — semantic validation depth (E103 ext, E111–E113)
+- Track C [COMPLETE] — live editor feedback (validate --stdin, VS Code squiggles)
+- Track A [COMPLETE] — provider differentiation (Anthropic V1 XML shadow + o200k_base)
+
+Post-v2 tracks (future work):
+- Real Anthropic tokenizer (proprietary; o200k_base remains a proxy)
+- Provider-specific tool call encoding (OpenAI function-calling JSON format)
+- VS Code LSP, completion, hover diagnostics
+- CI bench regression detection
+- Additional provider profiles beyond generic, openai, anthropic

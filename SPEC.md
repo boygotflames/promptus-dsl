@@ -288,24 +288,93 @@ Each supported top-level key maps to a two-character reserved marker:
 
 The shadow emitter accepts a provider profile parameter:
 
-- `generic` — default; uses the v0 shadow encoding described above
-- `openai` — currently maps to the same v0 shadow encoding as `generic`
-- other profiles — fail explicitly with a descriptive error; no silent
-  fallback
+- `generic` — default; uses the V0 shadow encoding described above
+- `openai` — uses the same V0 shadow encoding as `generic`
+- `anthropic` — uses the V1 shadow encoding described below
 
-At v1, `generic` and `openai` produce identical output. Provider-specific
-divergence (distinct shadow encoding per provider, tokenizer plurality) is
-explicitly deferred to post-v1.
+### V1 Anthropic Shadow Encoding
 
-### Stability
+The `anthropic` provider uses an XML-tag shadow encoding. Anthropic models
+process `<system>`, `<user>`, and similar XML tags natively because Claude's
+training data uses these patterns. The V0 `@`-marker format is OpenAI-neutral
+but not Claude-optimized; V1 replaces markers with named XML tags.
 
-The shadow format described in this section is **stable** as of v0.
+**Tag table:**
+
+| Key | XML tag | Item tag |
+|---|---|---|
+| `agent` | `<agent>` | — |
+| `system` | `<system>` | — |
+| `user` | `<user>` | — |
+| `memory` | `<memory>` | `<item>` |
+| `tools` | `<tools>` | `<tool>` |
+| `output` | `<output>` | — |
+| `constraints` | `<constraints>` | `<rule>` |
+| `vars` | `<vars>` | — |
+
+**Encoding rules:**
+
+1. **Scalar key** (`agent`): `<agent>value</agent>` on a single line.
+   Value is emitted bare (no quoting).
+2. **Scalar prompt** (`system`, `user`, `output` when scalar):
+   `<system>value</system>` on a single line.
+3. **Mapping prompt** (`system`, `user`, `output` when mapping):
+   ```
+   <system>
+   key1: val1
+   key2: val2
+   </system>
+   ```
+   Entries are `key: value` lines, one per entry, no indentation inside
+   the tag.
+4. **Sequence** (`memory`, `tools`, `constraints`):
+   ```
+   <tools>
+   <tool>web_search</tool>
+   <tool>calculator</tool>
+   </tools>
+   ```
+   Each item is wrapped in the key-specific item tag on its own line.
+5. **Vars** (mapping of scalars):
+   ```
+   <vars>
+   region: apac
+   currency: usd
+   </vars>
+   ```
+   Entries are `key: value` lines, one per entry, no indentation.
+6. **Absent keys** are omitted entirely — same rule as V0.
+7. **Key ordering** follows Document field order — same rule as V0.
+8. **Blocks are joined** with `\n` (no trailing newline) — same rule as V0.
+
+**Example** (minimal.llm with `--provider anthropic`):
+
+```text
+<agent>DataExtractor</agent>
+<system>
+role: financial_analyst
+output: json
+</system>
+<memory>
+<item>user_history</item>
+</memory>
+```
+
+**Stability:** The V1 Anthropic shadow format is **stable** as of v2.
+The same `.llm` input with `--provider anthropic` will always produce
+the same V1 shadow output. Breaking changes require a version bump and
+a CHANGELOG entry.
+
+### V0 Stability
+
+The V0 shadow format described in the Marker Table and Encoding Rules
+above is **stable** as of v0. `generic` and `openai` both use V0.
 
 The same `.llm` input will always produce the same shadow output.
 Downstream tooling may depend on this format. Breaking changes to
 the shadow format require a version bump and a CHANGELOG entry.
 
-### Example
+### V0 Example
 
 ```text
 @a="DataExtractor"

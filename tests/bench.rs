@@ -286,18 +286,20 @@ fn bench_cli_output_is_deterministic_for_openai_provider() {
 }
 
 #[test]
-fn bench_cli_rejects_unsupported_provider_selection() {
+fn bench_cli_anthropic_provider_is_supported() {
     let result = execute(BenchArgs {
         input: PathBuf::from("examples/minimal.llm"),
         provider: Provider::Anthropic,
         baseline: None,
     });
 
-    let error = result.expect_err("unsupported provider should fail");
+    let report = result.expect("anthropic bench should succeed");
     assert!(
-        error
-            .to_string()
-            .contains("provider anthropic does not have a supported tokenizer profile yet"),
-        "expected unsupported provider/tokenizer message, got: {error}"
+        report.contains("provider: anthropic"),
+        "expected anthropic provider in report, got: {report}"
+    );
+    assert!(
+        report.contains("tokenizer: o200k_base"),
+        "expected o200k_base tokenizer in report, got: {report}"
     );
 }

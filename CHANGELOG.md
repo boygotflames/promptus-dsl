@@ -8,7 +8,38 @@ surfaces are always noted explicitly.
 
 ---
 
-## [v2] — In Progress
+## [v2] — 2026-04-12
+
+### Summary
+v2 adds real provider differentiation (Anthropic XML shadow encoding +
+o200k_base tokenizer), deeper semantic validation (E103 extension,
+E111–E113), and live VS Code diagnostics (`validate --stdin` +
+DiagnosticCollection squiggles). All v1 stable surfaces remain unchanged.
+
+### v2 Track A — Provider differentiation
+- Cargo.toml: tiktoken-rs upgraded 0.9.1 → 0.11.0 (adds o200k_base)
+- src/provider.rs: `ShadowProfile::V1Anthropic` added; `TokenizerProfile::O200kBase`
+  added; `Provider::Anthropic` now returns `Supported` for both shadow and
+  tokenizer; `shadow_profile()` returns `V1Anthropic`; `tokenizer_profile()`
+  returns `O200kBase`; unused `anyhow` import removed
+- src/transpile/shadow.rs: `V1Anthropic` match arm dispatches to
+  `render_v1_anthropic_document`; XML helpers added: `xml_tag_for`,
+  `render_v1_node`, `sequence_item_tag`, `node_to_plain`
+- src/bench/tokenizer.rs: `o200k_base` import added; `from_profile`
+  now matches on profile variant, uses `cl100k_base` or `o200k_base`
+- SPEC.md Shadow Representation: Provider Profiles updated; new
+  `### V1 Anthropic Shadow Encoding` subsection added (tag table,
+  encoding rules, stability declaration, example)
+- docs/compatibility-matrix.md: anthropic row `unsupported → stable`;
+  generic/openai rows updated to note V0 encoding; Boundary Notes updated
+- tests/conformance.rs: 4 new anthropic tests; SHADOW_V1_MINIMAL,
+  SHADOW_V1_EXTRACTOR, BENCH_ANTHROPIC_MINIMAL constants added;
+  two old `rejects_unsupported` tests replaced/renamed
+- tests/transpile.rs: two old `unsupported` tests updated to verify V1
+  output instead of error
+- tests/bench.rs: `bench_cli_rejects_unsupported_provider_selection`
+  replaced with `bench_cli_anthropic_provider_is_supported`
+- docs/v2-roadmap.md: Track A Sequence items ✓; Status: COMPLETE
 
 ### v2 Track C — Live editor feedback
 - src/cli/validate.rs: `--stdin` flag added; reads from stdin,

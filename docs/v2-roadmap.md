@@ -69,19 +69,25 @@ provider binding.
 
 ### Sequence
 
-1. Add `TokenizerProfile::O200kBase` to `src/provider.rs`; bind
+1. ✓ Add `TokenizerProfile::O200kBase` to `src/provider.rs`; bind
    `Provider::Anthropic` to it; update `tokenizer_support` to
    `Supported` for Anthropic; update `bench` conformance tests
-2. Add `ShadowProfile::V1` to `src/provider.rs`; bind
+2. ✓ Add `ShadowProfile::V1Anthropic` to `src/provider.rs`; bind
    `Provider::Anthropic` to it; update `shadow_support` to
    `Supported` for Anthropic
-3. Implement `render_v1_document` in `src/transpile/shadow.rs`
-   using XML-tag syntax; dispatch from `render_document` match arm
-4. Update SPEC.md Shadow Representation section with V1 encoding
-   specification
-5. Add conformance tests proving Anthropic shadow differs from
-   generic/openai for the same document; add bench tests for
-   Anthropic provider
+3. ✓ Implement `render_v1_anthropic_document` in
+   `src/transpile/shadow.rs` using XML-tag syntax; dispatch from
+   `render_document` match arm
+4. ✓ Update SPEC.md Shadow Representation section with V1 encoding
+   specification and V1 Anthropic Shadow Encoding subsection
+5. ✓ Conformance tests: `conformance_anthropic_shadow_produces_v1_xml_encoding`,
+   `conformance_anthropic_shadow_differs_from_generic_v0`,
+   `conformance_anthropic_shadow_extractor_matches_v1_contract`,
+   `conformance_bench_anthropic_provider_is_supported` added;
+   tiktoken-rs upgraded to 0.11.0 for `o200k_base` support;
+   compatibility-matrix.md updated: anthropic row `unsupported→stable`
+
+### Status: COMPLETE
 
 ### v2 contract commitment
 

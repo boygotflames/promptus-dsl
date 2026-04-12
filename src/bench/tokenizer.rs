@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use tiktoken_rs::{CoreBPE, cl100k_base};
+use tiktoken_rs::{CoreBPE, cl100k_base, o200k_base};
 
 use crate::provider::{Provider, TokenizerProfile};
 
@@ -21,9 +21,14 @@ impl TokenCounter {
     }
 
     fn from_profile(profile: TokenizerProfile) -> Result<Self> {
-        let encoder = cl100k_base().context(format!(
-            "failed to initialize tokenizer encoding {DEFAULT_ENCODING_NAME}"
-        ))?;
+        let encoder = match profile {
+            TokenizerProfile::Cl100kBase => cl100k_base().context(
+                "failed to initialize tokenizer encoding cl100k_base",
+            )?,
+            TokenizerProfile::O200kBase => o200k_base().context(
+                "failed to initialize tokenizer encoding o200k_base",
+            )?,
+        };
 
         Ok(Self { encoder, profile })
     }
