@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MjirihYoussef/llm-format",
+    "url": "https://github.com/boygotflames/llm-format",
     "directory": "editors/vscode"
   },
   "icon": "images/Promptus 128x128.png",

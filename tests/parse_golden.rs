@@ -8,6 +8,7 @@ fn parses_minimal_example_into_a_stable_ast() {
     assert_eq!(
         format!("{document:#?}"),
         r#"Document {
+    include: None,
     agent: Some(
         Scalar {
             value: "DataExtractor",

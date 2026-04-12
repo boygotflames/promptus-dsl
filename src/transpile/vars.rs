@@ -148,6 +148,8 @@ pub fn expand_document(document: &Document) -> Document {
             .map(|n| expand_node_tree(n, &vars_map)),
         // vars is the expansion source — never expand its own values
         vars: document.vars.as_ref().map(clone_node),
+        // include is a composition directive consumed before transpilation
+        include: document.include.as_ref().map(clone_node),
     }
 }
 

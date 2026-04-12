@@ -29,6 +29,10 @@ The v0 parser recognizes exactly these top-level keys:
 - `output`
 - `constraints`
 - `vars`
+- `include`
+
+The `include` key is a composition directive, not a prompt key.
+It does not appear in transpiled output.
 
 Unknown top-level keys are rejected.
 
@@ -216,6 +220,9 @@ as a `[E001]` prefix before the message text when a code is present.
 | `E112` | sequence has no items |
 | `E113` | duplicate item in sequence |
 | `E114` | undefined var reference: `{name}` is not defined in `vars` |
+| `E115` | invalid `include` path (absolute path or empty path) |
+| `E116` | circular include detected |
+| `E117` | key conflict during include merge: scalar key defined in both files |
 
 Diagnostic codes are part of the stable public contract. Once assigned,
 a code's meaning does not change. New codes may be added; existing codes
@@ -292,6 +299,65 @@ The validator checks for undefined var references:
 The vars expansion behavior is **stable** as of v3. The `{var_name}`
 reference syntax is stable. The expansion-at-transpile-time contract
 is stable. Breaking changes require a version bump and a CHANGELOG entry.
+
+## Multi-file Includes
+
+### Surface Syntax
+
+The `include` key accepts a scalar (single file) or a sequence
+(multiple files):
+
+```text
+include: shared/base-system.llm
+
+# or multiple files:
+include:
+  - shared/base-system.llm
+  - shared/common-vars.llm
+```
+
+Paths are relative to the directory of the including file.
+Absolute paths are not supported. `include` as a mapping is not
+supported.
+
+### Merge Semantics
+
+When an included file is merged into the parent document:
+
+- **Scalar keys** (`agent`, `system`, `user`, `output`): conflict
+  is a validation error (E117) if both parent and included file
+  declare the same key. The parent always wins if the key appears
+  in both — but the error is still emitted unless suppressed.
+- **Sequence keys** (`memory`, `tools`, `constraints`): sequences
+  are concatenated. `tools` and `constraints` items are deduplicated
+  after merge (first occurrence wins). `memory` items are not
+  deduplicated.
+- **`vars`**: merged with parent winning on key conflict. No error
+  on duplicate var keys — parent silently overrides.
+- **`include`**: the `include` key itself is consumed during
+  composition and never appears in the merged document or any
+  transpiled output.
+
+### var Expansion Across Boundaries
+
+Each file expands using its own vars only. After merge, the composed
+document's unified vars map (parent wins) is used for final expansion.
+
+### Circular Include Detection
+
+Circular includes are a validation error (E116). Detection uses the
+inclusion chain (stack of file paths currently being resolved). If a
+file appears twice in the chain, E116 is emitted and resolution stops.
+
+### Diagnostic Codes
+
+| `E115` | validator | invalid include path (absolute, empty, or missing) |
+| `E116` | validator | circular include detected |
+| `E117` | validator | key conflict: scalar key defined in both parent and included file |
+
+### Stability
+
+Multi-file includes are **stable** as of v4.
 
 ## Shadow Representation
 

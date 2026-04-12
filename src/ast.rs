@@ -2,6 +2,9 @@ use crate::diagnostics::Span;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Document {
+    /// Composition directive: resolved before validation/transpilation.
+    /// Never appears in transpiled output.
+    pub include: Option<Node>,
     pub agent: Option<Node>,
     pub system: Option<Node>,
     pub user: Option<Node>,

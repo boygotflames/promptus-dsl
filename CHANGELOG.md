@@ -10,6 +10,21 @@ surfaces are always noted explicitly.
 
 ## [v4] — In Progress
 
+### v4 Track I (1/3) — Multi-file includes: parser + AST
+- `SPEC.md`: `include` key added to Supported Top-Level Keys;
+  Multi-file Includes section added (syntax, merge semantics,
+  var expansion across boundaries, circular detection, E115/E116/E117)
+- `src/ast.rs`: `Document.include: Option<Node>` field added
+- `src/parser.rs`: `include` handled before `TopLevelKey::from_keyword`;
+  composition directive, not a prompt key — never in transpile output
+- `src/include.rs`: `resolve_include_paths()` + `check_circular()`;
+  relative-only enforcement; platform-aware tests (9 unit tests)
+- `src/lib.rs`: `pub mod include` added
+- `src/transpile/vars.rs`: `expand_document` carries `include` field
+- `tests/parse_golden.rs`: golden AST updated to include `include: None`
+- `editors/vscode/package.json`: repository URL corrected to
+  `github.com/boygotflames/llm-format`
+
 ### v4 Track H — Inlay hints + packaging fixes
 - `editors/vscode/extension.js`: `InlayHintsProvider` added;
   `{var_name}` references show `= "value"` ghost text for defined

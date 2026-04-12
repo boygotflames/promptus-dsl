@@ -30,6 +30,20 @@ impl Parser {
             }
 
             let (key, value, span) = self.parse_top_level_entry()?;
+
+            // `include` is a composition directive, not a prompt key.
+            // Handle it before TopLevelKey dispatch.
+            if key == "include" {
+                if document.include.replace(value).is_some() {
+                    return Err(single_error(
+                        "duplicate top-level key `include`",
+                        span,
+                        "E014",
+                    ));
+                }
+                continue;
+            }
+
             let Some(key) = TopLevelKey::from_keyword(&key) else {
                 return Err(single_error(
                     format!("unknown top-level key `{key}`"),
