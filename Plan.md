@@ -351,3 +351,18 @@ Post-v2 tracks (future work):
 - VS Code LSP, completion, hover diagnostics
 - CI bench regression detection
 - Additional provider profiles beyond generic, openai, anthropic
+
+---
+
+## v3
+
+See [docs/v3-roadmap.md](docs/v3-roadmap.md) for the full v3
+roadmap and track sequencing.
+
+Active track: Track E — CI and tooling maturity (first, lowest risk,
+unblocks everything else)
+
+Tracks:
+- Track E — CI maturity (GitHub Actions, bench constant coverage)
+- Track D — vars expansion ({var} references, E114, transpile expansion)
+- Track F — LSP groundwork (completion, hover, go-to-definition in VS Code)
