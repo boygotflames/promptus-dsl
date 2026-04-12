@@ -380,3 +380,18 @@ Post-v3 tracks (candidate v4 work):
 - CI bench regression threshold with percentage delta
 - Marketplace packaging and publication
 - Additional provider profiles
+
+---
+
+## v4
+
+See [docs/v4-roadmap.md](docs/v4-roadmap.md) for the full v4
+roadmap and track sequencing.
+
+Active track: Track G — VS Code marketplace packaging (.vsix
+pipeline, .vscodeignore, CI artifact upload)
+
+Tracks:
+- Track G — VS Code marketplace packaging (.vsix build pipeline)
+- Track H — Inlay hints (expanded {var} values as ghost text)
+- Track I — Multi-file includes (include: key, merge semantics, E115/E116/E117)
