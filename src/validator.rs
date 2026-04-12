@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use crate::ast::{Document, Node, TopLevelKey};
 use crate::diagnostics::{Diagnostic, DiagnosticBag, Span};
+use crate::transpile::vars;
 
 pub fn validate_document(document: &Document) -> DiagnosticBag {
     let mut diagnostics = DiagnosticBag::new();
@@ -22,6 +23,7 @@ pub fn validate_document(document: &Document) -> DiagnosticBag {
     validate_output_field(document, &mut diagnostics);
     validate_sequence_field(document, TopLevelKey::Constraints, &mut diagnostics);
     validate_vars_field(document, &mut diagnostics);
+    validate_var_references(document, &mut diagnostics);
 
     diagnostics
 }
@@ -256,6 +258,62 @@ fn validate_output_field(document: &Document, diagnostics: &mut DiagnosticBag) {
                 )
                 .with_code("E108"),
             );
+        }
+    }
+}
+
+/// E114: scan scalar values in expandable keys for `{var_name}` references
+/// that are not defined in the document's `vars` block.
+///
+/// Expansion scope: system, user, output, memory, tools, constraints.
+/// `agent` and `vars` itself are excluded — vars is the definition source.
+fn validate_var_references(document: &Document, diagnostics: &mut DiagnosticBag) {
+    let vars_map = vars::build_vars_map(document);
+
+    for key in [
+        TopLevelKey::System,
+        TopLevelKey::User,
+        TopLevelKey::Output,
+        TopLevelKey::Memory,
+        TopLevelKey::Tools,
+        TopLevelKey::Constraints,
+    ] {
+        if let Some(node) = document.get(key) {
+            check_node_references(node, key.as_str(), &vars_map, diagnostics);
+        }
+    }
+}
+
+fn check_node_references(
+    node: &Node,
+    context: &str,
+    vars_map: &std::collections::HashMap<String, String>,
+    diagnostics: &mut DiagnosticBag,
+) {
+    match node {
+        Node::Scalar { value, span } => {
+            let mut seen = HashSet::new();
+            for name in vars::extract_references(value) {
+                if !vars_map.contains_key(&name) && seen.insert(name.clone()) {
+                    diagnostics.push(
+                        Diagnostic::semantic_error(
+                            format!("undefined var reference `{{{name}}}` in `{context}`"),
+                            Some(*span),
+                        )
+                        .with_code("E114"),
+                    );
+                }
+            }
+        }
+        Node::Mapping { entries, .. } => {
+            for entry in entries {
+                check_node_references(&entry.value, context, vars_map, diagnostics);
+            }
+        }
+        Node::Sequence { values, .. } => {
+            for value in values {
+                check_node_references(value, context, vars_map, diagnostics);
+            }
         }
     }
 }

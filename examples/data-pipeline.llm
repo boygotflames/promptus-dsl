@@ -1,7 +1,7 @@
 agent: DataPipeline
 system:
   role: data_engineer
-  objective: transform and load structured data
+  objective: "transform and load data from {source_table} to {target_table}"
 tools:
   - sql_query
   - file_reader

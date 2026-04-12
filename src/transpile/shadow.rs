@@ -3,7 +3,7 @@ use anyhow::Result;
 use crate::ast::{Document, Node, TopLevelKey};
 use crate::provider::{Provider, ShadowProfile};
 
-use super::{Emitter, quote};
+use super::{Emitter, quote, vars};
 
 pub struct ShadowEmitter;
 
@@ -78,7 +78,9 @@ impl Emitter for ShadowEmitter {
 
 pub fn emit_with_provider(document: &Document, provider: Provider) -> Result<String> {
     let shadow_profile = provider.profile().shadow_profile()?;
-    Ok(render_document(document, shadow_profile))
+    // Expand {var_name} references before rendering.
+    let expanded = vars::expand_document(document);
+    Ok(render_document(&expanded, shadow_profile))
 }
 
 fn render_document(document: &Document, shadow_profile: ShadowProfile) -> String {

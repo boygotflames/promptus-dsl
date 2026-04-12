@@ -1,13 +1,16 @@
 use crate::ast::{Document, Node};
 
+use super::vars;
 use super::{Emitter, quote};
 
 pub struct JsonIrEmitter;
 
 impl Emitter for JsonIrEmitter {
     fn emit(&self, document: &Document) -> String {
+        // Expand {var_name} references before emitting.
+        let expanded = vars::expand_document(document);
         render_object_from_pairs(
-            document
+            expanded
                 .ordered_entries()
                 .into_iter()
                 .map(|(key, value)| (key.as_str(), value))

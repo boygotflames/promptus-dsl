@@ -184,25 +184,20 @@ substitution is not in scope for v3.
 
 ### Sequence
 
-1. Update SPEC.md: add "Var References" subsection to Surface Syntax;
-   add E114 to the Diagnostic Codes table; freeze the var reference
-   contract as stable from v3
-2. Add `validate_var_references` to `src/validator.rs`; collect var
-   names from `document.vars`, scan all scalar values for `{identifier}`
-   patterns using a simple regex or manual parser, emit E114 for each
-   undefined reference
-3. Implement `expand_vars` helper in a new `src/transpile/vars.rs`
-   module; import and call it from plain, json-ir, and shadow emitters
-4. Create conformance fixtures: `examples/vars-expansion.llm` (a
-   document with `{var}` references that expand correctly) and
-   `examples/invalid/undefined-var.llm` (E114 fixture)
-5. Add conformance tests:
-   - `conformance_vars_references_expand_in_plain_output`
-   - `conformance_vars_references_expand_in_shadow_output`
-   - `conformance_vars_references_expand_in_json_ir_output`
-   - `conformance_e114_undefined_var_reference_is_rejected`
-   - `conformance_formatter_preserves_var_references_verbatim`
-6. Update `docs/compatibility-matrix.md`: `vars` expansion row added as stable
+1. ✓ SPEC.md: vars Expansion section added; E114 defined;
+   Deferred Work bullet updated
+2. ✓ src/transpile/vars.rs: expand() helper with unit tests;
+   non-recursive; unknown refs pass through verbatim
+3. ✓ src/validator.rs: validate_var_references pass; E114 emitted
+   for each undefined var reference
+4. ✓ plain/shadow/json_ir emitters: expand_vars wired at scalar
+   emit sites; vars_map built once per document render
+5. ✓ examples/data-pipeline.llm: updated with {var} references
+6. ✓ examples/invalid/undefined-var-ref.llm: new invalid fixture
+7. ✓ Conformance tests: 7 new tests (E114, expansion in plain/shadow
+   V0/V1 Anthropic, fmt preservation, non-recursive)
+
+### Status: COMPLETE
 
 ### v3 contract commitment
 
@@ -357,11 +352,11 @@ the go-to-definition feature needs Track D to land first.
 
 v3 is complete when:
 
-- [ ] `{var_name}` references inside quoted scalars expand at transpile
+- [x] `{var_name}` references inside quoted scalars expand at transpile
       time in `plain`, `json-ir`, and `shadow` targets
-- [ ] Undefined var references emit E114 and fail validation
-- [ ] vars expansion is conformance-tested across all three output targets
-- [ ] `fmt` preserves `{var}` references verbatim (no formatter expansion)
+- [x] Undefined var references emit E114 and fail validation
+- [x] vars expansion is conformance-tested across all three output targets
+- [x] `fmt` preserves `{var}` references verbatim (no formatter expansion)
 - [ ] GitHub Actions CI runs `cargo test`, `cargo clippy -- -D warnings`,
       and `cargo fmt --check` on every push and PR
 - [ ] Bench output is conformance-locked for all three primary fixtures

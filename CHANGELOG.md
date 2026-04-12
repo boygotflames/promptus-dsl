@@ -10,6 +10,24 @@ surfaces are always noted explicitly.
 
 ## [v3] — In Progress
 
+### v3 Track D — vars expansion
+- `src/transpile/vars.rs`: `expand()` helper; substitutes `{var_name}`
+  references at transpile time; non-recursive; unknown references passed
+  through verbatim
+- `src/validator.rs`: `validate_var_references` pass; E114 emitted for
+  each undefined var reference in `system`, `user`, `output`, `memory`,
+  `tools`, or `constraints` scalars
+- `plain`, `shadow` (V0 + V1Anthropic), `json_ir` emitters: vars expanded
+  before output is written
+- `fmt` formatter: preserves `{var_name}` verbatim (no change)
+- `SPEC.md`: vars Expansion section added with full specification;
+  E114 added to diagnostic codes table; Deferred Work updated
+- `examples/data-pipeline.llm`: updated to use `{source_table}` and
+  `{target_table}` references
+- `examples/invalid/undefined-var-ref.llm`: new invalid fixture for E114
+- Conformance: 7 new tests — E114 rejection, expansion in plain/shadow
+  V0/V1 Anthropic, fmt preservation, non-recursive expansion
+
 ### v3 Track E — CI and tooling maturity
 - `.github/workflows/ci.yml` created: 3 jobs (test, lint, bench-sanity);
   triggers on push and PR to `LLM-Promptus` and `main`; bench regression

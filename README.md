@@ -166,6 +166,11 @@ cargo run -- bench examples/extractor.llm \
 Token counts use the cl100k tokenizer (GPT-4 / Claude compatible).
 Savings vary by document complexity and content density.
 
+Note: the generic/openai V0 shadow encoding is optimized for token
+efficiency. The anthropic V1 XML encoding prioritizes model
+comprehension over token count — XML tags are larger than @-markers.
+Choose the provider profile that matches your target model.
+
 ## Current Scope
 
 This repository currently acts as a reference implementation and proving ground for the v0 `.llm` language slice documented in [SPEC.md](SPEC.md).

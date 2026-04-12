@@ -215,6 +215,7 @@ as a `[E001]` prefix before the message text when a code is present.
 | `E111` | mapping block has no entries |
 | `E112` | sequence has no items |
 | `E113` | duplicate item in sequence |
+| `E114` | undefined var reference: `{name}` is not defined in `vars` |
 
 Diagnostic codes are part of the stable public contract. Once assigned,
 a code's meaning does not change. New codes may be added; existing codes
@@ -240,6 +241,57 @@ The current public v0 boundary is intentionally split:
   - provider profiles without an explicit supported tokenizer/shadow path
 
 The public compatibility summary lives in [docs/compatibility-matrix.md](docs/compatibility-matrix.md). The current public contract is backed by a dedicated conformance layer in [tests/conformance.rs](tests/conformance.rs).
+
+## vars Expansion
+
+### Template References
+
+Scalar values in `system`, `user`, `output`, `memory`, `tools`, and
+`constraints` may contain template references of the form `{var_name}`,
+where `var_name` matches the key grammar `/[A-Za-z_][A-Za-z0-9_-]*/`.
+
+Template references must appear inside double-quoted strings on the
+surface layer — the bare scalar charset excludes `{`, so `{var}` cannot
+appear in an unquoted value. The canonical formatter preserves `{var_name}`
+verbatim without modification.
+
+`vars` values themselves do not support template references. Expansion
+is non-recursive: a substituted value is not scanned for further `{var}`
+references.
+
+### Expansion Behavior
+
+Template expansion occurs at **transpile time**, not at parse time or
+format time.
+
+- The `fmt` formatter preserves `{var_name}` verbatim. Source files
+  remain editable with references intact.
+- The `plain`, `json-ir`, and `shadow` transpile targets substitute
+  each `{var_name}` with the corresponding value from the `vars` mapping
+  before emitting.
+- If a `vars` mapping is absent, no substitution occurs and references
+  are passed through verbatim.
+- Expansion is non-recursive: substituted values are not scanned for
+  further `{var}` references.
+- For documents without `{var}` references, `plain` output is identical
+  to `fmt` output.
+
+### Validation
+
+The validator checks for undefined var references:
+
+- If a scalar value contains `{var_name}` and no `vars` key named
+  `var_name` is defined, a validation error is emitted with code E114.
+- One E114 is emitted per unique undefined reference name per scalar node.
+- If no `vars` block exists and no references appear, no error is emitted.
+- If no `vars` block exists but references do appear, E114 is emitted
+  for each undefined reference.
+
+### Stability
+
+The vars expansion behavior is **stable** as of v3. The `{var_name}`
+reference syntax is stable. The expansion-at-transpile-time contract
+is stable. Breaking changes require a version bump and a CHANGELOG entry.
 
 ## Shadow Representation
 
@@ -524,9 +576,12 @@ so readers know they are intentionally deferred, not overlooked.
 - **Richer list item structures** — Deferred to post-v0. Sequence items
   are currently scalars only (or nested blocks). Structured list items
   with typed sub-fields are not part of the v0 contract.
-- **Semantic normalization passes** — Deferred to post-v0. The current
-  validator enforces structure constraints only. Value normalization,
-  interpolation, and derived fields are not part of the v0 contract.
+- **Semantic normalization passes — interpolation/vars expansion** —
+  Implemented in v3. `{var_name}` references in scalar values are
+  expanded at transpile time across `plain`, `json-ir`, and `shadow`
+  targets. See [vars Expansion](#vars-expansion). Remaining deferred
+  items: value normalization (trimming, casing) and derived fields
+  (computed from other fields) are deferred to post-v3.
 - **Canonical formatter** — Implemented in v0. The `fmt` CLI command and
   `src/formatter.rs` provide canonical AST-based formatting with
   deterministic scalar quoting and 2-space indentation. See

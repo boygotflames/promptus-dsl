@@ -454,6 +454,117 @@ fn conformance_missing_agent_diagnostic_carries_e101_code() {
     assert!(e101.message.contains("agent"));
 }
 
+// --- vars expansion conformance ---
+
+#[test]
+fn conformance_e114_undefined_var_reference_is_rejected() {
+    let document = parse_str(include_str!("../examples/invalid/undefined-var-ref.llm"))
+        .expect("fixture should parse");
+    let diagnostics = validate_document(&document);
+    assert!(diagnostics.has_errors(), "expected E114 validation error");
+    let e114 = diagnostics
+        .iter()
+        .find(|d| d.code == Some("E114"))
+        .expect("expected E114 diagnostic");
+    assert!(
+        e114.message.contains("unknown_var"),
+        "expected var name in E114 message, got: {}",
+        e114.message
+    );
+}
+
+#[test]
+fn conformance_vars_expansion_in_plain_output() {
+    let source = "agent: Pipeline\nsystem: \"Run query on {source}\"\nvars:\n  source: orders_raw";
+    let document = parse_valid_document(source);
+    let output = transpile::transpile(&document, Target::Plain);
+    assert!(
+        output.contains("orders_raw"),
+        "expected expanded var value in plain output, got: {output}"
+    );
+    assert!(
+        !output.contains("{source}"),
+        "expected {source} to be expanded in plain output, got: {output}"
+    );
+}
+
+#[test]
+fn conformance_vars_expansion_in_shadow_output_v0() {
+    let source = "agent: Pipeline\nsystem: \"Run query on {source}\"\nvars:\n  source: orders_raw";
+    let document = parse_valid_document(source);
+    let output = transpile::transpile(&document, Target::Shadow);
+    assert!(
+        output.contains("orders_raw"),
+        "expected expanded var value in V0 shadow output, got: {output}"
+    );
+    assert!(
+        !output.contains("{source}"),
+        "expected {source} to be expanded in V0 shadow output, got: {output}"
+    );
+}
+
+#[test]
+fn conformance_vars_expansion_in_shadow_output_v1_anthropic() {
+    let source = "agent: Pipeline\nsystem: \"Run query on {source}\"\nvars:\n  source: orders_raw";
+    let document = parse_valid_document(source);
+    let output = transpile::transpile_with_provider(&document, Target::Shadow, Provider::Anthropic)
+        .expect("anthropic shadow should succeed");
+    assert!(
+        output.contains("orders_raw"),
+        "expected expanded var value in V1 anthropic shadow output, got: {output}"
+    );
+    assert!(
+        !output.contains("{source}"),
+        "expected {source} to be expanded in V1 anthropic shadow output, got: {output}"
+    );
+}
+
+#[test]
+fn conformance_fmt_preserves_var_references_verbatim() {
+    let source = "agent: Pipeline\nsystem: \"Run query on {source}\"\nvars:\n  source: orders_raw";
+    let document = parse_valid_document(source);
+    let formatted = format_document(&document);
+    assert!(
+        formatted.contains("{source}"),
+        "expected fmt to preserve {{source}} verbatim, got: {formatted}"
+    );
+}
+
+#[test]
+fn conformance_undefined_var_with_no_vars_block_emits_e114() {
+    // No vars block at all — any {ref} is undefined
+    let source = "agent: Agent\nsystem: \"Connect to {unknown}\"";
+    let document = parse_str(source).expect("should parse");
+    let diagnostics = validate_document(&document);
+    assert!(
+        diagnostics.iter().any(|d| d.code == Some("E114")),
+        "expected E114 when no vars block exists"
+    );
+}
+
+#[test]
+fn conformance_vars_expansion_is_non_recursive() {
+    // vars: a -> "{b}", b -> "final"
+    // system references {a} — must expand to "{b}", not "final"
+    let source = "agent: Agent\nsystem: \"value is {a}\"\nvars:\n  a: \"{b}\"\n  b: final";
+    let document = parse_valid_document(source);
+    let output = transpile::transpile(&document, Target::Plain);
+    // {a} must expand to {b} — non-recursive, so {b} is NOT further expanded
+    assert!(
+        output.contains("{b}"),
+        "expected non-recursive expansion to leave {{b}} unexpanded, got: {output}"
+    );
+    // The system line must not contain "final" (only the vars block has "final")
+    let system_line = output
+        .lines()
+        .find(|l| l.starts_with("system:"))
+        .unwrap_or("");
+    assert!(
+        !system_line.contains("final"),
+        "expected system line to show {{b}}, not 'final', got: {system_line}"
+    );
+}
+
 #[test]
 fn conformance_diagnostic_codes_are_present_on_all_validator_errors() {
     // E101: missing required key: agent

@@ -6,6 +6,7 @@ use crate::provider::Provider;
 pub mod json_ir;
 pub mod plain;
 pub mod shadow;
+pub mod vars;
 
 pub trait Emitter {
     fn emit(&self, document: &Document) -> String;

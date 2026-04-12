@@ -359,11 +359,11 @@ Post-v2 tracks (future work):
 See [docs/v3-roadmap.md](docs/v3-roadmap.md) for the full v3
 roadmap and track sequencing.
 
-Active track: Track E [COMPLETE] — see docs/v3-roadmap.md
-Next active track: Track D — vars expansion ({var} references,
-E114, expand_vars in all three emitters)
+Active track: Track D [COMPLETE] — see docs/v3-roadmap.md
+Next active track: Track F — LSP groundwork (completion + hover in
+extension.js)
 
 Tracks:
 - Track E [COMPLETE] — CI maturity (GitHub Actions, bench constant coverage)
-- Track D — vars expansion ({var} references, E114, transpile expansion)
+- Track D [COMPLETE] — vars expansion ({var} references, E114, transpile expansion)
 - Track F — LSP groundwork (completion, hover, go-to-definition in VS Code)
