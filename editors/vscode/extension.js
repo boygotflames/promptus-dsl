@@ -408,6 +408,42 @@ function getDefinition(document, position) {
     return null;
 }
 
+// ── Inlay hints ───────────────────────────────────────────────────────────────
+
+function getInlayHints(document, range) {
+    const vars = parseVarsBlock(document.getText());
+    if (vars.size === 0) return [];
+
+    const hints = [];
+    const varRefPattern = /\{([A-Za-z_][A-Za-z0-9_-]*)\}/g;
+
+    for (let i = range.start.line; i <= range.end.line; i++) {
+        const lineText = document.lineAt(i).text;
+        let match;
+        varRefPattern.lastIndex = 0;
+
+        while ((match = varRefPattern.exec(lineText)) !== null) {
+            const varName = match[1];
+            if (!vars.has(varName)) continue; // undefined — squiggle handles it
+
+            const value = vars.get(varName);
+            const position = new vscode.Position(i, match.index + match[0].length);
+
+            const hint = new vscode.InlayHint(
+                position,
+                `= "${value}"`,
+                vscode.InlayHintKind.Type
+            );
+            hint.tooltip = new vscode.MarkdownString(
+                `**${varName}** is defined in \`vars\` as \`"${value}"\``
+            );
+            hints.push(hint);
+        }
+    }
+
+    return hints;
+}
+
 // ── Extension entry point ─────────────────────────────────────────────────────
 
 function activate(context) {
@@ -536,6 +572,19 @@ function activate(context) {
             }
         );
     context.subscriptions.push(definitionProvider);
+
+    // --- Inlay Hints ({var} expanded values as ghost text) ---
+
+    const inlayHintsProvider =
+        vscode.languages.registerInlayHintsProvider(
+            selector,
+            {
+                provideInlayHints(document, range) {
+                    return getInlayHints(document, range);
+                }
+            }
+        );
+    context.subscriptions.push(inlayHintsProvider);
 }
 
 function deactivate() {}

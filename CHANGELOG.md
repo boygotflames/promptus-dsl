@@ -10,6 +10,17 @@ surfaces are always noted explicitly.
 
 ## [v4] — In Progress
 
+### v4 Track H — Inlay hints + packaging fixes
+- `editors/vscode/extension.js`: `InlayHintsProvider` added;
+  `{var_name}` references show `= "value"` ghost text for defined
+  vars; hint kind `Type`; tooltip with full definition
+- `editors/vscode/package.json`: publisher `MjirihYoussef`;
+  version `1.0.0`; `repository` field added; icon field already
+  correct (`Promptus 128x128.png`)
+- `editors/vscode/LICENSE`: MIT license file added (required by vsce)
+- `editors/vscode/README.md`: Inlay Hints documented in IntelliSense
+  section; version references updated to 1.0.0
+
 ### v4 Track G — VS Code marketplace packaging
 - `editors/vscode/package.json`: `"icon"` field corrected to
   `images/Promptus 128x128.png` (actual filename); `"scripts"`

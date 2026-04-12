@@ -2,9 +2,14 @@
   "name": "llm-vscode",
   "displayName": ".llm Syntax Support",
   "description": "Minimal VS Code support for .llm surface files",
-  "version": "0.1.0",
-  "publisher": "llm-format",
+  "version": "1.0.0",
+  "publisher": "MjirihYoussef",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MjirihYoussef/llm-format",
+    "directory": "editors/vscode"
+  },
   "icon": "images/Promptus 128x128.png",
   "main": "./extension.js",
   "activationEvents": ["onLanguage:llm"],

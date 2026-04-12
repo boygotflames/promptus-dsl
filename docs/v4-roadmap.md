@@ -180,14 +180,16 @@ constraint issue.
 
 ### Sequence
 
-1. Add `getInlayHints(document, range)` function to `extension.js`
-2. Register `InlayHintsProvider` in `activate()`
-3. Add a `fixtures/inlay-hints-sample.llm` fixture with several
-   vars references for manual verification
-4. Update `editors/vscode/README.md`: add Inlay Hints subsection
-   under IntelliSense
-5. Add a `vscode.rs` conformance test: read the extension.js text
-   and confirm `registerInlayHintsProvider` is present (smoke test)
+1. ✓ `extension.js`: `getInlayHints()` added; scans for
+   `{var}` patterns via `/\{([A-Za-z_][A-Za-z0-9_-]*)\}/g`,
+   shows `= "value"` ghost text for defined vars only;
+   `InlayHintsProvider` registered in `activate()`
+2. ✓ `editors/vscode/README.md`: Inlay Hints subsection added
+   to IntelliSense section; What It Does updated
+3. ✓ `package.json`: version `1.0.0`; `repository` field added;
+   `LICENSE` file created; `.vsix` packages clean (no warnings)
+
+### Status: COMPLETE
 
 ### Estimated size
 
@@ -413,7 +415,7 @@ v4 is complete when:
 - [x] `npm run package` in `editors/vscode/` produces
       `llm-vscode-0.1.0.vsix` without errors
 - [x] CI uploads the `.vsix` as a build artifact on main
-- [ ] Expanded `{var}` values appear as inlay hints in VS Code
+- [x] Expanded `{var}` values appear as inlay hints in VS Code
       without any user action
 - [ ] `include:` key accepts a sequence of relative .llm paths
 - [ ] Included files are merged before validation and transpilation

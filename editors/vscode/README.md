@@ -10,7 +10,7 @@ Download the latest `.vsix` artifact from the GitHub Actions
 `vscode-package` workflow, then install it in VS Code:
 
 ```
-code --install-extension llm-vscode-0.1.0.vsix
+code --install-extension llm-vscode-1.0.0.vsix
 ```
 
 Or: **Extensions** panel → `...` menu → **Install from VSIX…**
@@ -21,8 +21,8 @@ From the `editors/vscode/` directory:
 
 ```bash
 npm install          # installs @vscode/vsce devDependency
-npm run package      # produces llm-vscode-0.1.0.vsix
-code --install-extension llm-vscode-0.1.0.vsix
+npm run package      # produces llm-vscode-1.0.0.vsix
+code --install-extension llm-vscode-1.0.0.vsix
 ```
 
 Requires Node.js 18+ and `@vscode/vsce`.
@@ -51,6 +51,7 @@ and launch the **Run .llm Syntax Extension** configuration.
   `{var}` references as you type
 - provides hover documentation for keys and `{var}` references
 - provides go-to-definition for `{var}` → `vars:` entry
+- shows `{var}` expanded values as inline ghost text (inlay hints)
 
 ## Formatter
 
@@ -103,6 +104,14 @@ The extension provides three IntelliSense features:
 - Press `F12` (or right-click → Go to Definition) on a
   `{var_name}` reference to jump to its definition in the
   `vars:` block
+
+**Inlay Hints**
+- `{var_name}` references show their expanded value as ghost
+  text: `{source_table} = "orders_raw"`
+- Only shown for defined vars — undefined references show
+  a squiggle instead (E114)
+- Can be toggled via VS Code's built-in
+  `Editor > Inlay Hints: Enabled` setting
 
 ## What It Does Not Yet Do
 

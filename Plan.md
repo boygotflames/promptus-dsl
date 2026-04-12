@@ -388,9 +388,9 @@ Post-v3 tracks (candidate v4 work):
 See [docs/v4-roadmap.md](docs/v4-roadmap.md) for the full v4
 roadmap and track sequencing.
 
-Active track: Track G [COMPLETE] — VS Code marketplace packaging
+Active track: Track H [COMPLETE] — Inlay hints
 
 Tracks:
 - Track G [COMPLETE] — VS Code marketplace packaging (.vsix build pipeline)
-- Track H — Inlay hints (expanded {var} values as ghost text)
+- Track H [COMPLETE] — Inlay hints (expanded {var} values as ghost text)
 - Track I — Multi-file includes (include: key, merge semantics, E115/E116/E117)
