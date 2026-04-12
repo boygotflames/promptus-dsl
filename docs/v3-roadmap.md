@@ -68,16 +68,19 @@ already the right design. CI just needs to run the tests.
 
 ### Sequence
 
-1. Capture exact bench output for `extractor.llm` and `json-output.llm`
-   under `anthropic` provider; add `BENCH_ANTHROPIC_EXTRACTOR` and
-   `BENCH_ANTHROPIC_JSON_OUTPUT` constants to `tests/conformance.rs`;
-   add `conformance_bench_anthropic_extractor_is_deterministic` and
-   `conformance_bench_anthropic_json_output_is_deterministic` tests
-2. Create `.github/workflows/ci.yml` with the four jobs listed above;
-   set `on: [push, pull_request]` targeting `main`
-3. Run full local validation to confirm CI config is correct before commit
-4. Update `docs/compatibility-matrix.md` bench row: `provisional → stable`
-   once three-fixture coverage is confirmed across all supported providers
+1. ✓ SPEC.md: stale "provider-specific emission deferred to post-v0"
+   note updated to reflect v2 completion (generic/openai=V0,
+   anthropic=V1 XML-tag)
+2. ✓ Anthropic bench constants added for `extractor`, `json-output`,
+   `quoted` fixtures — `BENCH_ANTHROPIC_EXTRACTOR`,
+   `BENCH_ANTHROPIC_JSON_OUTPUT`, `BENCH_ANTHROPIC_QUOTED`; four new
+   conformance tests including `conformance_bench_anthropic_token_counts_differ_from_generic`
+3. ✓ `docs/compatibility-matrix.md`: bench row `provisional →
+   stable (scope-limited)`; Boundary Notes updated
+4. ✓ `.github/workflows/ci.yml` created: 3 jobs (test, lint,
+   bench-sanity via `cargo test conformance_bench --all-targets`)
+
+### Status: COMPLETE
 
 ### v3 contract commitment
 

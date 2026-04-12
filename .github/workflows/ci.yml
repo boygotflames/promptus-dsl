@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [ LLM-Promptus, main ]
+  pull_request:
+    branches: [ LLM-Promptus, main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+      - name: Run tests
+        run: cargo test --all-targets
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+      - name: Check formatting
+        run: cargo fmt --check
+      - name: Run clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+  bench-sanity:
+    name: Bench Sanity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+      - name: Bench determinism (via conformance suite)
+        run: cargo test conformance_bench --all-targets
+        # Bench regression detection is embedded in the
+        # conformance suite via locked BENCH_* constants.
+        # Any token count or output format change causes
+        # a test failure here.

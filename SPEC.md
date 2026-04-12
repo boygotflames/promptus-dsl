@@ -531,9 +531,11 @@ so readers know they are intentionally deferred, not overlooked.
   `src/formatter.rs` provide canonical AST-based formatting with
   deterministic scalar quoting and 2-space indentation. See
   [Canonical Formatting](#canonical-formatting) above.
-- **Provider-specific emission layers** — Partial in v0. The `generic`
-  and `openai` profiles exist and currently share the same v0 shadow
-  encoding. Real per-provider divergence is deferred to post-v0.
+- **Provider-specific emission layers** — Implemented in v2. `generic`
+  and `openai` use the V0 compact `@`-marker shadow encoding.
+  `anthropic` uses the V1 XML-tag shadow encoding with the `o200k_base`
+  tokenizer profile. See [Provider Profiles](#provider-profiles) and
+  [V1 Anthropic Shadow Encoding](#v1-anthropic-shadow-encoding).
 - **Includes/imports and multi-file composition** — Deferred to post-v0.
   Each `.llm` document is a standalone unit at v0. Cross-file references
   are not part of the v0 contract.

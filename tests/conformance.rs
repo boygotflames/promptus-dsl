@@ -23,6 +23,9 @@ const BENCH_GENERIC_JSON_OUTPUT_BASELINE: &str = "provider: generic\ntokenizer: 
 const SHADOW_V1_MINIMAL: &str = "<agent>DataExtractor</agent>\n<system>\nrole: financial_analyst\noutput: json\n</system>\n<memory>\n<item>user_history</item>\n</memory>";
 const SHADOW_V1_EXTRACTOR: &str = "<agent>Extractor</agent>\n<system>\nrole: financial_analyst\nobjective: extract structured facts\n</system>\n<user>\nprompt: summarize the quarterly filing\n</user>\n<tools>\n<tool>web_search</tool>\n<tool>calculator</tool>\n</tools>\n<constraints>\n<rule>cite_sources</rule>\n<rule>stay_provider_agnostic</rule>\n</constraints>";
 const BENCH_ANTHROPIC_MINIMAL: &str = "provider: anthropic\ntokenizer: o200k_base\nsource  | bytes=101 | tokens=27 | delta_bytes=+0 | delta_tokens=+0\nplain   | bytes=94 | tokens=26 | delta_bytes=-7 | delta_tokens=-1\njson-ir | bytes=141 | tokens=46 | delta_bytes=+40 | delta_tokens=+19\nshadow  | bytes=129 | tokens=39 | delta_bytes=+28 | delta_tokens=+12";
+const BENCH_ANTHROPIC_EXTRACTOR: &str = "provider: anthropic\ntokenizer: o200k_base\nsource  | bytes=242 | tokens=58 | delta_bytes=+0 | delta_tokens=+0\nplain   | bytes=233 | tokens=61 | delta_bytes=-9 | delta_tokens=+3\njson-ir | bytes=312 | tokens=90 | delta_bytes=+70 | delta_tokens=+32\nshadow  | bytes=313 | tokens=85 | delta_bytes=+71 | delta_tokens=+27";
+const BENCH_ANTHROPIC_JSON_OUTPUT: &str = "provider: anthropic\ntokenizer: o200k_base\nsource  | bytes=150 | tokens=41 | delta_bytes=+0 | delta_tokens=+0\nplain   | bytes=140 | tokens=40 | delta_bytes=-10 | delta_tokens=-1\njson-ir | bytes=215 | tokens=71 | delta_bytes=+65 | delta_tokens=+30\nshadow  | bytes=169 | tokens=51 | delta_bytes=+19 | delta_tokens=+10";
+const BENCH_ANTHROPIC_QUOTED: &str = "provider: anthropic\ntokenizer: o200k_base\nsource  | bytes=142 | tokens=44 | delta_bytes=+0 | delta_tokens=+0\nplain   | bytes=136 | tokens=43 | delta_bytes=-6 | delta_tokens=-1\njson-ir | bytes=186 | tokens=64 | delta_bytes=+44 | delta_tokens=+20\nshadow  | bytes=155 | tokens=51 | delta_bytes=+13 | delta_tokens=+7";
 
 fn parse_valid_document(source: &str) -> llm_format::Document {
     let document = parse_str(source).expect("fixture should parse");
@@ -244,6 +247,84 @@ fn conformance_bench_anthropic_provider_is_supported() {
     })
     .expect("anthropic bench should succeed");
     assert_eq!(result, BENCH_ANTHROPIC_MINIMAL);
+}
+
+#[test]
+fn conformance_bench_anthropic_extractor_is_deterministic() {
+    let first = execute_bench(BenchArgs {
+        input: PathBuf::from("examples/extractor.llm"),
+        provider: Provider::Anthropic,
+        baseline: None,
+    })
+    .expect("anthropic extractor bench should succeed");
+    let second = execute_bench(BenchArgs {
+        input: PathBuf::from("examples/extractor.llm"),
+        provider: Provider::Anthropic,
+        baseline: None,
+    })
+    .expect("anthropic extractor bench should succeed");
+
+    assert_eq!(first, second);
+    assert_eq!(first, BENCH_ANTHROPIC_EXTRACTOR);
+}
+
+#[test]
+fn conformance_bench_anthropic_json_output_is_deterministic() {
+    let first = execute_bench(BenchArgs {
+        input: PathBuf::from("examples/json-output.llm"),
+        provider: Provider::Anthropic,
+        baseline: None,
+    })
+    .expect("anthropic json-output bench should succeed");
+    let second = execute_bench(BenchArgs {
+        input: PathBuf::from("examples/json-output.llm"),
+        provider: Provider::Anthropic,
+        baseline: None,
+    })
+    .expect("anthropic json-output bench should succeed");
+
+    assert_eq!(first, second);
+    assert_eq!(first, BENCH_ANTHROPIC_JSON_OUTPUT);
+}
+
+#[test]
+fn conformance_bench_anthropic_quoted_is_deterministic() {
+    let first = execute_bench(BenchArgs {
+        input: PathBuf::from("examples/quoted.llm"),
+        provider: Provider::Anthropic,
+        baseline: None,
+    })
+    .expect("anthropic quoted bench should succeed");
+    let second = execute_bench(BenchArgs {
+        input: PathBuf::from("examples/quoted.llm"),
+        provider: Provider::Anthropic,
+        baseline: None,
+    })
+    .expect("anthropic quoted bench should succeed");
+
+    assert_eq!(first, second);
+    assert_eq!(first, BENCH_ANTHROPIC_QUOTED);
+}
+
+#[test]
+fn conformance_bench_anthropic_token_counts_differ_from_generic() {
+    let generic = execute_bench(BenchArgs {
+        input: PathBuf::from("examples/extractor.llm"),
+        provider: Provider::Generic,
+        baseline: None,
+    })
+    .expect("generic extractor bench should succeed");
+    let anthropic = execute_bench(BenchArgs {
+        input: PathBuf::from("examples/extractor.llm"),
+        provider: Provider::Anthropic,
+        baseline: None,
+    })
+    .expect("anthropic extractor bench should succeed");
+
+    assert_ne!(
+        generic, anthropic,
+        "generic and anthropic bench output must differ (different tokenizer + shadow profiles)"
+    );
 }
 
 #[test]

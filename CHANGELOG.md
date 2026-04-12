@@ -8,6 +8,25 @@ surfaces are always noted explicitly.
 
 ---
 
+## [v3] — In Progress
+
+### v3 Track E — CI and tooling maturity
+- `.github/workflows/ci.yml` created: 3 jobs (test, lint, bench-sanity);
+  triggers on push and PR to `LLM-Promptus` and `main`; bench regression
+  detection runs `cargo test conformance_bench --all-targets`
+- `tests/conformance.rs`: `BENCH_ANTHROPIC_EXTRACTOR`, `BENCH_ANTHROPIC_JSON_OUTPUT`,
+  `BENCH_ANTHROPIC_QUOTED` constants added; 4 new tests:
+  `conformance_bench_anthropic_extractor_is_deterministic`,
+  `conformance_bench_anthropic_json_output_is_deterministic`,
+  `conformance_bench_anthropic_quoted_is_deterministic`,
+  `conformance_bench_anthropic_token_counts_differ_from_generic`
+- `docs/compatibility-matrix.md`: `bench` row promoted from `provisional`
+  to `stable (scope-limited)`
+- `SPEC.md`: stale "provider-specific emission layers — deferred to post-v0"
+  note updated to reflect v2 implementation status
+
+---
+
 ## [v2] — 2026-04-12
 
 ### Summary
