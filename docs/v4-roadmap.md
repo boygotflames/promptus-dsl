@@ -87,16 +87,16 @@ automates the `.vsix` artifact; publication remains manual.
 
 ### Sequence
 
-1. Inspect `images/Promptus.png` — confirm it exists and is
-   valid 128×128 PNG; if not, create a minimal placeholder
-2. Create `editors/vscode/.vscodeignore`
-3. Update `editors/vscode/package.json`: add `vsce` devDependency,
-   add `package` script
-4. Run `npm run package` in `editors/vscode/` — confirm
-   `llm-vscode-0.1.0.vsix` is produced without errors
-5. Add `.github/workflows/vscode-package.yml`: artifact upload
-6. Update `editors/vscode/README.md`: installation section
-7. Create `docs/marketplace.md`: publisher token setup guide
+1. ✓ Confirmed `images/Promptus 128x128.png` exists; updated
+   `package.json` `"icon"` field to match actual filename
+2. ✓ `editors/vscode/.vscodeignore` created
+3. ✓ `editors/vscode/package.json`: `"scripts"` added (`package`,
+   `build`); `"@vscode/vsce"` devDependency added
+4. ✓ `.github/workflows/vscode-package.yml` created: artifact upload
+5. ✓ `editors/vscode/README.md`: Installation section added
+6. ✓ `docs/marketplace.md`: publisher token setup guide created
+
+### Status: COMPLETE
 
 ### Estimated size
 
@@ -410,9 +410,9 @@ be confirmed to reject `include:` gracefully).
 
 v4 is complete when:
 
-- [ ] `npm run package` in `editors/vscode/` produces
+- [x] `npm run package` in `editors/vscode/` produces
       `llm-vscode-0.1.0.vsix` without errors
-- [ ] CI uploads the `.vsix` as a build artifact on main
+- [x] CI uploads the `.vsix` as a build artifact on main
 - [ ] Expanded `{var}` values appear as inlay hints in VS Code
       without any user action
 - [ ] `include:` key accepts a sequence of relative .llm paths

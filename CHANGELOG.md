@@ -8,6 +8,24 @@ surfaces are always noted explicitly.
 
 ---
 
+## [v4] — In Progress
+
+### v4 Track G — VS Code marketplace packaging
+- `editors/vscode/package.json`: `"icon"` field corrected to
+  `images/Promptus 128x128.png` (actual filename); `"scripts"`
+  section added (`package`, `build`); `@vscode/vsce` devDependency added
+- `editors/vscode/.vscodeignore`: created; excludes fixtures, SVG
+  source, node_modules, lock files from .vsix bundle
+- `.github/workflows/vscode-package.yml`: Node 20, `npx vsce package
+  --no-dependencies`, artifact upload (30-day retention); triggers on
+  push/PR to main when `editors/vscode/**` changes
+- `editors/vscode/README.md`: Installation section added (.vsix, source,
+  dev mode); icon note updated; packaging status updated
+- `docs/marketplace.md`: publisher account setup, PAT instructions,
+  CI publication extension guide
+
+---
+
 ## [v3] — 2026-04-12
 
 ### Summary

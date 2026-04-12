@@ -1,0 +1,41 @@
+name: VS Code Extension Package
+
+on:
+  push:
+    branches: [main, LLM-Promptus]
+    paths:
+      - 'editors/vscode/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'editors/vscode/**'
+
+jobs:
+  package:
+    name: Package .vsix
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: editors/vscode
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install vsce
+        run: npm install --save-dev @vscode/vsce
+
+      - name: Package extension
+        run: npx vsce package --no-dependencies
+
+      - name: Upload .vsix artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: llm-vscode-vsix
+          path: editors/vscode/*.vsix
+          retention-days: 30

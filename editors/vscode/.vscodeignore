@@ -1,0 +1,24 @@
+# Files and directories excluded from the .vsix package.
+# Everything NOT listed below is excluded by default when using vsce.
+# This file explicitly excludes things that would otherwise be bundled.
+
+# Rust project root (should not be in the .vsix at all — vsce is run
+# from editors/vscode/, but be explicit)
+../../**
+
+# Dev fixtures and test files — not needed at runtime
+fixtures/**
+
+# Source images — only the packaged PNG is needed
+images/Promptus.svg
+
+# Icon readme
+images/README-icon.md
+
+# Node modules (if ever installed locally)
+node_modules/**
+.vscode-test/**
+
+# Package lock files
+package-lock.json
+yarn.lock

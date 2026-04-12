@@ -1,6 +1,36 @@
 # `.llm` VS Code Support
 
-This folder contains the first minimal VS Code package for `.llm` files.
+This folder contains the VS Code extension package for `.llm` files.
+
+## Installation
+
+### From .vsix (recommended)
+
+Download the latest `.vsix` artifact from the GitHub Actions
+`vscode-package` workflow, then install it in VS Code:
+
+```
+code --install-extension llm-vscode-0.1.0.vsix
+```
+
+Or: **Extensions** panel → `...` menu → **Install from VSIX…**
+
+### Build from source
+
+From the `editors/vscode/` directory:
+
+```bash
+npm install          # installs @vscode/vsce devDependency
+npm run package      # produces llm-vscode-0.1.0.vsix
+code --install-extension llm-vscode-0.1.0.vsix
+```
+
+Requires Node.js 18+ and `@vscode/vsce`.
+
+### Development mode (no build required)
+
+Open `editors/vscode/` as the VS Code workspace, press `F5`,
+and launch the **Run .llm Syntax Extension** configuration.
 
 ## What It Does
 
@@ -85,13 +115,16 @@ The extension provides three IntelliSense features:
 - ✓ formatter-on-save: DocumentFormattingEditProvider registered
   for the 'llm' language — requires llm_format binary on PATH or
   configured via llm.formatterPath setting
-- no marketplace packaging or publishing workflow
+- ✓ marketplace packaging: `npm run package` produces a `.vsix`; CI
+  uploads it as an artifact on every push
+- no marketplace account / publication (requires human-held PAT —
+  see `docs/marketplace.md`)
 
 ## Icon
 
-Icon source: `images/Promptus.svg` — export to `images/Promptus.png`
-before marketplace publication. VS Code marketplace requires a PNG icon;
-the SVG is stored here as the source of truth.
+Icon: `images/Promptus 128x128.png` (referenced by `package.json`).
+SVG source: `images/Promptus.svg`.
+Marketplace requires a PNG at 128×128; both are already present.
 
 ## Local Manual Verification
 

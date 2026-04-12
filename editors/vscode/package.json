@@ -5,9 +5,16 @@
   "version": "0.1.0",
   "publisher": "llm-format",
   "license": "MIT",
-  "icon": "images/Promptus.png",
+  "icon": "images/Promptus 128x128.png",
   "main": "./extension.js",
   "activationEvents": ["onLanguage:llm"],
+  "scripts": {
+    "package": "vsce package",
+    "build": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.0.0"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
