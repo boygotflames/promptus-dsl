@@ -22,12 +22,12 @@ impl TokenCounter {
 
     fn from_profile(profile: TokenizerProfile) -> Result<Self> {
         let encoder = match profile {
-            TokenizerProfile::Cl100kBase => cl100k_base().context(
-                "failed to initialize tokenizer encoding cl100k_base",
-            )?,
-            TokenizerProfile::O200kBase => o200k_base().context(
-                "failed to initialize tokenizer encoding o200k_base",
-            )?,
+            TokenizerProfile::Cl100kBase => {
+                cl100k_base().context("failed to initialize tokenizer encoding cl100k_base")?
+            }
+            TokenizerProfile::O200kBase => {
+                o200k_base().context("failed to initialize tokenizer encoding o200k_base")?
+            }
         };
 
         Ok(Self { encoder, profile })

@@ -179,9 +179,8 @@ fn conformance_shadow_output_is_deterministic_for_supported_providers() {
 #[test]
 fn conformance_anthropic_shadow_produces_v1_xml_encoding() {
     let document = parse_valid_document(include_str!("../examples/minimal.llm"));
-    let output =
-        transpile::transpile_with_provider(&document, Target::Shadow, Provider::Anthropic)
-            .expect("anthropic shadow should succeed");
+    let output = transpile::transpile_with_provider(&document, Target::Shadow, Provider::Anthropic)
+        .expect("anthropic shadow should succeed");
     assert_eq!(output, SHADOW_V1_MINIMAL);
 }
 
@@ -198,9 +197,8 @@ fn conformance_anthropic_shadow_differs_from_generic_v0() {
 #[test]
 fn conformance_anthropic_shadow_extractor_matches_v1_contract() {
     let document = parse_valid_document(include_str!("../examples/extractor.llm"));
-    let output =
-        transpile::transpile_with_provider(&document, Target::Shadow, Provider::Anthropic)
-            .expect("anthropic extractor shadow should succeed");
+    let output = transpile::transpile_with_provider(&document, Target::Shadow, Provider::Anthropic)
+        .expect("anthropic extractor shadow should succeed");
     assert_eq!(output, SHADOW_V1_EXTRACTOR);
 }
 

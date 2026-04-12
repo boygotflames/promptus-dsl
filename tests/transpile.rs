@@ -186,9 +186,8 @@ fn shadow_transpile_matches_explicit_openai_provider() {
 fn shadow_transpile_anthropic_produces_v1_xml_output() {
     let source = include_str!("../examples/minimal.llm");
     let document = parse_valid_document(source);
-    let output =
-        transpile::transpile_with_provider(&document, Target::Shadow, Provider::Anthropic)
-            .expect("anthropic shadow transpilation should succeed");
+    let output = transpile::transpile_with_provider(&document, Target::Shadow, Provider::Anthropic)
+        .expect("anthropic shadow transpilation should succeed");
 
     assert!(
         output.contains("<agent>"),
