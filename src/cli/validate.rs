@@ -1,6 +1,6 @@
 use std::fs;
 use std::io::{self, Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 use clap::Args;
@@ -27,7 +27,8 @@ pub fn run(args: ValidateArgs) -> Result<()> {
             eprintln!("error: failed to read stdin: {e}");
             std::process::exit(2);
         }
-        run_validation(&source, "<stdin>");
+        // stdin mode: no file path available, include composition skipped
+        run_validation(&source, "<stdin>", None);
     } else {
         let path = args
             .input
@@ -39,12 +40,12 @@ pub fn run(args: ValidateArgs) -> Result<()> {
                 std::process::exit(2);
             }
         };
-        run_validation(&source, &path.display().to_string());
+        run_validation(&source, &path.display().to_string(), Some(&path));
     }
     Ok(())
 }
 
-fn run_validation(source: &str, label: &str) {
+fn run_validation(source: &str, label: &str, source_path: Option<&Path>) {
     let document = match parse_str(source) {
         Ok(d) => d,
         Err(diagnostics) => {
@@ -59,14 +60,26 @@ fn run_validation(source: &str, label: &str) {
         }
     };
 
-    let diagnostics = validate_document(&document);
-    if diagnostics.has_errors() {
-        let error_count = diagnostics
+    // Compose includes if a file path is available.
+    // stdin mode passes None — include resolution requires a known source directory.
+    let (document, compose_diags) = if let Some(path) = source_path {
+        crate::composer::compose(document, path, &[])
+    } else {
+        (document, crate::diagnostics::DiagnosticBag::new())
+    };
+
+    // Collect compose + validate diagnostics together
+    let mut all_diagnostics = compose_diags;
+    let validate_diags = validate_document(&document);
+    all_diagnostics.extend(validate_diags);
+
+    if all_diagnostics.has_errors() {
+        let error_count = all_diagnostics
             .iter()
             .filter(|d| d.severity == Severity::Error)
             .count();
         let mut stderr = io::stderr().lock();
-        writeln!(stderr, "{diagnostics}").ok();
+        writeln!(stderr, "{all_diagnostics}").ok();
         writeln!(stderr, "✗ invalid  {label}  ({error_count} error(s))").ok();
         std::process::exit(1);
     }

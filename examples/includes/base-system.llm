@@ -1,0 +1,9 @@
+system: You are a helpful assistant.
+
+tools:
+  - web_search
+  - calculator
+
+constraints:
+  - Be concise.
+  - Cite sources.

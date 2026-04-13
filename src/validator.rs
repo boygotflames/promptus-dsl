@@ -4,6 +4,8 @@ use crate::ast::{Document, Node, TopLevelKey};
 use crate::diagnostics::{Diagnostic, DiagnosticBag, Span};
 use crate::transpile::vars;
 
+// Note: E115 (include conflict / unreadable include) and E116 (circular include)
+// are emitted by merge.rs and include.rs respectively, not by this validator.
 pub fn validate_document(document: &Document) -> DiagnosticBag {
     let mut diagnostics = DiagnosticBag::new();
 

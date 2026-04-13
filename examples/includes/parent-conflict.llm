@@ -1,0 +1,9 @@
+include:
+  - base-system.llm
+
+# E115: `system` is also defined in base-system.llm — conflict
+system: You are a specialized coding assistant.
+
+agent: conflict-bot
+
+user: Help me write code.

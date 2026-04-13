@@ -1,0 +1,12 @@
+include:
+  - base-system.llm
+
+agent: research-bot
+
+user: Summarize the latest news about {topic}.
+
+tools:
+  - summarizer
+
+vars:
+  topic: AI safety

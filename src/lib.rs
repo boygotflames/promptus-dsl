@@ -1,10 +1,12 @@
 pub mod ast;
 pub mod bench;
 pub mod cli;
+pub mod composer;
 pub mod diagnostics;
 pub mod formatter;
 pub mod include;
 pub mod lexer;
+pub mod merge;
 pub mod parser;
 pub mod provider;
 pub mod transpile;

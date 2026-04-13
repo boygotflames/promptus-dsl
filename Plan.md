@@ -388,9 +388,8 @@ Post-v3 tracks (candidate v4 work):
 See [docs/v4-roadmap.md](docs/v4-roadmap.md) for the full v4
 roadmap and track sequencing.
 
-Active track: Track I in progress (1/3 complete)
-Next: Track I Part 2 — merge logic (src/merge.rs, validator E115/E116/E117,
-transpile include stripping)
+Active track: Track I in progress (2/3 complete)
+Next: Track I Part 3 — conformance tests for include composition
 
 Tracks:
 - Track G [COMPLETE] — VS Code marketplace packaging (.vsix build pipeline)

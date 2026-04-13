@@ -10,6 +10,21 @@ surfaces are always noted explicitly.
 
 ## [v4] — In Progress
 
+### v4 Track I (2/3) — Multi-file includes: merge + composer
+- `src/merge.rs`: `merge_into()` — scalar conflict → E115 (parent wins);
+  sequences concatenated (tools/constraints deduped, memory not);
+  vars merged (parent wins silently); include consumed/dropped
+- `src/composer.rs`: `compose()` — recursive include resolution;
+  circular detection via E116; file I/O error → E115;
+  parse error forwarded; `document.include` consumed in output
+- `src/lib.rs`: `pub mod composer` + `pub mod merge` added
+- `src/cli/validate.rs`: composer wired in for file mode;
+  stdin mode skips composition (no known source dir)
+- `src/cli/transpile.rs`: composer wired in after parse, before validate
+- `src/validator.rs`: E115/E116 origin comment added
+- `examples/includes/`: fixtures for clean merge (`parent-clean.llm`),
+  conflict (`parent-conflict.llm`), and shared base (`base-system.llm`)
+
 ### v4 Track I (1/3) — Multi-file includes: parser + AST
 - `SPEC.md`: `include` key added to Supported Top-Level Keys;
   Multi-file Includes section added (syntax, merge semantics,
