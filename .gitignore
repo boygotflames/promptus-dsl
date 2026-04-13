@@ -21,3 +21,4 @@ Desktop.ini
 
 # VS Code extension packaging artifacts.
 *.vsix
+.claude/worktrees/relaxed-beaver/
