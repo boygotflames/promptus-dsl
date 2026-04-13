@@ -8,7 +8,42 @@ surfaces are always noted explicitly.
 
 ---
 
-## [v4] — In Progress
+## [v4] — 2026-04-13
+
+### Summary
+v4 completes the single-file authoring story and prepares
+the extension for distribution. Developers can now compose
+prompts from multiple .llm files, get {var} inlay hints in
+VS Code, and distribute the extension as a .vsix.
+
+### What changed from v3 to v4
+- Multi-file includes: include key, merge semantics
+  (scalar conflict E115, sequence dedup, vars parent-wins),
+  circular detection E116, composer pipeline
+- VS Code: inlay hints ({var} expanded values as ghost text)
+- VS Code packaging: v1.0.0, publisher MjirihYoussef,
+  .vsix CI workflow, marketplace-ready
+- Repository URL corrected: github.com/boygotflames/llm-format
+
+### Explicit post-v4 deferrals
+- Programmatic API (PyO3/WASM bindings)
+- Full LSP server
+- Marketplace publication (manual PAT step)
+- vars chaining/conditional expansion
+
+---
+
+### v4 Track I (3/3) — Multi-file includes: conformance + closure
+- `tests/conformance.rs`: 8 conformance tests covering clean
+  merge, E115 scalar conflict, E116 circular, sequence dedup,
+  memory no-dedup, vars parent-wins, missing file, output
+  exclusion of include key
+- `SPEC.md`: Multi-file Includes example added (actual fixture
+  content + transpile output)
+- `docs/v4-roadmap.md`: Track I COMPLETE; v4 Status COMPLETE
+- `Cargo.toml`: `tempfile = "3"` dev dependency (temp dir tests)
+- `src/cli/bench.rs`: composer wired in (consistent with
+  validate and transpile CLI paths)
 
 ### v4 Track I (2/3) — Multi-file includes: merge + composer
 - `src/merge.rs`: `merge_into()` — scalar conflict → E115 (parent wins);

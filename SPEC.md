@@ -359,6 +359,54 @@ file appears twice in the chain, E116 is emitted and resolution stops.
 
 Multi-file includes are **stable** as of v4.
 
+### Example
+
+**`examples/includes/base-system.llm`:**
+```text
+system: You are a helpful assistant.
+
+tools:
+  - web_search
+  - calculator
+
+constraints:
+  - Be concise.
+  - Cite sources.
+```
+
+**`examples/includes/parent-clean.llm`:**
+```text
+include:
+  - base-system.llm
+
+agent: research-bot
+
+user: Summarize the latest news about {topic}.
+
+tools:
+  - summarizer
+
+vars:
+  topic: AI safety
+```
+
+**Composed plain output
+(`llm_format transpile parent-clean.llm --target plain`):**
+```text
+agent: research-bot
+system: "You are a helpful assistant."
+user: "Summarize the latest news about AI safety."
+tools:
+  - summarizer
+  - web_search
+  - calculator
+constraints:
+  - "Be concise."
+  - "Cite sources."
+vars:
+  topic: "AI safety"
+```
+
 ## Shadow Representation
 
 The v0 transpiler emits a Shadow target intended as a compact,

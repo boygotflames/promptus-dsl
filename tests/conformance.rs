@@ -913,3 +913,344 @@ fn conformance_parse_summary_present_keys_match_document() {
     assert!(document.system.is_some(), "system must be present");
     assert!(document.memory.is_some(), "memory must be present");
 }
+
+// === Multi-file includes (Track I) ===
+
+fn sequence_values(node: &llm_format::Node) -> Vec<String> {
+    if let llm_format::Node::Sequence { values, .. } = node {
+        values
+            .iter()
+            .filter_map(|n| {
+                if let llm_format::Node::Scalar { value, .. } = n {
+                    Some(value.clone())
+                } else {
+                    None
+                }
+            })
+            .collect()
+    } else {
+        vec![]
+    }
+}
+
+fn mapping_value(node: &llm_format::Node, key: &str) -> Option<String> {
+    if let llm_format::Node::Mapping { entries, .. } = node {
+        entries.iter().find(|e| e.key == key).and_then(|e| {
+            if let llm_format::Node::Scalar { value, .. } = &e.value {
+                Some(value.clone())
+            } else {
+                None
+            }
+        })
+    } else {
+        None
+    }
+}
+
+#[test]
+fn conformance_include_clean_merge_produces_correct_document() {
+    // Compose examples/includes/parent-clean.llm with its real path.
+    // parent-clean.llm: agent, user, tools:[summarizer], vars:{topic}
+    // base-system.llm: system, tools:[web_search, calculator], constraints
+    let source = include_str!("../examples/includes/parent-clean.llm");
+    let document = parse_str(source).expect("parent-clean.llm should parse");
+    let path = PathBuf::from("examples/includes/parent-clean.llm");
+    let (composed, diags) = llm_format::composer::compose(document, &path, &[]);
+
+    assert!(
+        !diags.has_errors(),
+        "expected no compose errors, got: {diags}"
+    );
+
+    // agent from parent
+    assert!(
+        composed.agent.is_some(),
+        "agent must be present after merge"
+    );
+
+    // system came via include (parent-clean has no system)
+    assert!(
+        composed.system.is_some(),
+        "system must be present after merge (from base-system.llm)"
+    );
+
+    // tools: parent [summarizer] first, then included [web_search, calculator]
+    let tools = composed.tools.as_ref().expect("tools must be present");
+    let tool_values = sequence_values(tools);
+    assert_eq!(
+        tool_values,
+        vec!["summarizer", "web_search", "calculator"],
+        "tools must be parent-first, then included (deduped)"
+    );
+
+    // constraints came exclusively from base-system.llm
+    assert!(
+        composed.constraints.is_some(),
+        "constraints must be present after merge (from base-system.llm)"
+    );
+
+    // vars from parent
+    let vars = composed.vars.as_ref().expect("vars must be present");
+    assert_eq!(
+        mapping_value(vars, "topic"),
+        Some("AI safety".to_string()),
+        "vars.topic must survive from parent"
+    );
+
+    // include field consumed by composer
+    assert!(
+        composed.include.is_none(),
+        "include field must be None after composition"
+    );
+}
+
+#[test]
+fn conformance_include_e115_emitted_on_scalar_key_conflict() {
+    // parent-conflict.llm defines `system` AND includes base-system.llm
+    // which also defines `system` — E115 expected.
+    let source = include_str!("../examples/includes/parent-conflict.llm");
+    let document = parse_str(source).expect("parent-conflict.llm should parse");
+    let path = PathBuf::from("examples/includes/parent-conflict.llm");
+    let (composed, diags) = llm_format::composer::compose(document, &path, &[]);
+
+    assert!(
+        diags.has_errors(),
+        "expected E115 error for scalar key conflict, got clean diagnostics"
+    );
+    let e115 = diags
+        .iter()
+        .find(|d| d.code == Some("E115"))
+        .expect("expected at least one E115 diagnostic");
+    assert!(
+        e115.message.contains("system"),
+        "E115 message must name the conflicting key, got: {}",
+        e115.message
+    );
+
+    // Parent value must be preserved (not overwritten by include)
+    if let Some(llm_format::Node::Scalar { value, .. }) = &composed.system {
+        assert!(
+            value.contains("coding assistant") || !value.contains("helpful assistant"),
+            "parent system value must be preserved on conflict"
+        );
+    }
+}
+
+#[test]
+fn conformance_include_tools_are_deduplicated_after_merge() {
+    // base.llm: agent+system+tools:[search, calc]
+    // parent.llm: include base, tools:[calc, fetch]
+    // calc appears in both — result must contain exactly 3 items, no duplicate
+    let tmp = tempfile::tempdir().expect("temp dir should be created");
+    let base_path = tmp.path().join("base.llm");
+    let parent_path = tmp.path().join("parent.llm");
+
+    std::fs::write(
+        &base_path,
+        "agent: Base\nsystem: handle requests\ntools:\n  - search\n  - calc\n",
+    )
+    .unwrap();
+    std::fs::write(
+        &parent_path,
+        "include:\n  - base.llm\ntools:\n  - calc\n  - fetch\n",
+    )
+    .unwrap();
+
+    let source = std::fs::read_to_string(&parent_path).unwrap();
+    let document = parse_str(&source).expect("parent.llm should parse");
+    let (composed, diags) = llm_format::composer::compose(document, &parent_path, &[]);
+
+    assert!(
+        !diags.has_errors(),
+        "expected no compose errors, got: {diags}"
+    );
+
+    let tools = composed.tools.as_ref().expect("tools must be present");
+    let tool_values = sequence_values(tools);
+    assert_eq!(
+        tool_values.len(),
+        3,
+        "expected exactly 3 tool items (calc, fetch, search — calc deduped), got: {tool_values:?}"
+    );
+    assert!(
+        !tool_values.iter().filter(|v| v.as_str() == "calc").count() > 1,
+        "calc must not appear more than once, got: {tool_values:?}"
+    );
+    assert!(
+        tool_values.contains(&"search".to_string()),
+        "search must be present, got: {tool_values:?}"
+    );
+}
+
+#[test]
+fn conformance_include_memory_allows_duplicates_after_merge() {
+    // parent.llm: include base, memory:[context_a, context_b]
+    // base.llm: agent+system, memory:[context_a]
+    // context_a appears in both — memory is NOT deduped (3 items expected)
+    let tmp = tempfile::tempdir().expect("temp dir should be created");
+    let base_path = tmp.path().join("base.llm");
+    let parent_path = tmp.path().join("parent.llm");
+
+    std::fs::write(
+        &base_path,
+        "agent: Base\nsystem: handle requests\nmemory:\n  - context_a\n",
+    )
+    .unwrap();
+    std::fs::write(
+        &parent_path,
+        "include:\n  - base.llm\nmemory:\n  - context_a\n  - context_b\n",
+    )
+    .unwrap();
+
+    let source = std::fs::read_to_string(&parent_path).unwrap();
+    let document = parse_str(&source).expect("parent.llm should parse");
+    let (composed, diags) = llm_format::composer::compose(document, &parent_path, &[]);
+
+    assert!(
+        !diags.has_errors(),
+        "expected no compose errors, got: {diags}"
+    );
+
+    let memory = composed.memory.as_ref().expect("memory must be present");
+    let memory_values = sequence_values(memory);
+    assert_eq!(
+        memory_values.len(),
+        3,
+        "memory must allow duplicates: expected [context_a, context_b, context_a], got: {memory_values:?}"
+    );
+    assert_eq!(
+        memory_values
+            .iter()
+            .filter(|v| v.as_str() == "context_a")
+            .count(),
+        2,
+        "context_a must appear twice (memory is not deduped), got: {memory_values:?}"
+    );
+}
+
+#[test]
+fn conformance_include_vars_parent_wins_on_conflict() {
+    // base.llm: agent+system, vars:{env:staging}
+    // parent.llm: include base, vars:{env:production, region:us}
+    // env conflict: parent wins; region is parent-only; no diagnostics
+    let tmp = tempfile::tempdir().expect("temp dir should be created");
+    let base_path = tmp.path().join("base.llm");
+    let parent_path = tmp.path().join("parent.llm");
+
+    std::fs::write(
+        &base_path,
+        "agent: Base\nsystem: handle requests\nvars:\n  env: staging\n",
+    )
+    .unwrap();
+    std::fs::write(
+        &parent_path,
+        "include:\n  - base.llm\nvars:\n  env: production\n  region: us\n",
+    )
+    .unwrap();
+
+    let source = std::fs::read_to_string(&parent_path).unwrap();
+    let document = parse_str(&source).expect("parent.llm should parse");
+    let (composed, diags) = llm_format::composer::compose(document, &parent_path, &[]);
+
+    assert!(
+        !diags.has_errors(),
+        "vars conflict must not produce errors (parent wins silently), got: {diags}"
+    );
+
+    let vars = composed.vars.as_ref().expect("vars must be present");
+    assert_eq!(
+        mapping_value(vars, "env"),
+        Some("production".to_string()),
+        "parent env must win over included env:staging"
+    );
+    assert_eq!(
+        mapping_value(vars, "region"),
+        Some("us".to_string()),
+        "region must be present from parent"
+    );
+    // staging must NOT appear
+    assert_eq!(
+        mapping_value(vars, "env"),
+        Some("production".to_string()),
+        "staging from base must not overwrite parent production"
+    );
+}
+
+#[test]
+fn conformance_include_e116_emitted_on_circular_include() {
+    // a.llm includes b.llm, b.llm includes a.llm → circular E116
+    // Must not panic or infinite loop
+    let tmp = tempfile::tempdir().expect("temp dir should be created");
+    let a_path = tmp.path().join("a.llm");
+    let b_path = tmp.path().join("b.llm");
+
+    std::fs::write(
+        &a_path,
+        "agent: A\nsystem: handle requests\ninclude:\n  - b.llm\n",
+    )
+    .unwrap();
+    std::fs::write(&b_path, "include:\n  - a.llm\nmemory:\n  - b_context\n").unwrap();
+
+    let source = std::fs::read_to_string(&a_path).unwrap();
+    let document = parse_str(&source).expect("a.llm should parse");
+    let (_, diags) = llm_format::composer::compose(document, &a_path, &[]);
+
+    assert!(
+        diags.has_errors(),
+        "expected E116 diagnostic for circular include"
+    );
+    assert!(
+        diags.iter().any(|d| d.code == Some("E116")),
+        "expected E116 code, got: {diags}"
+    );
+}
+
+#[test]
+fn conformance_include_missing_file_produces_diagnostic() {
+    // parent.llm includes nonexistent.llm — E115 expected
+    let tmp = tempfile::tempdir().expect("temp dir should be created");
+    let parent_path = tmp.path().join("parent.llm");
+
+    std::fs::write(
+        &parent_path,
+        "agent: Test\nsystem: handle requests\ninclude:\n  - nonexistent.llm\n",
+    )
+    .unwrap();
+
+    let source = std::fs::read_to_string(&parent_path).unwrap();
+    let document = parse_str(&source).expect("parent.llm should parse");
+    let (_, diags) = llm_format::composer::compose(document, &parent_path, &[]);
+
+    assert!(
+        diags.has_errors(),
+        "expected diagnostic for missing include file"
+    );
+    let e115 = diags
+        .iter()
+        .find(|d| d.code == Some("E115"))
+        .expect("expected E115 for unreadable include file");
+    assert!(
+        e115.message.contains("cannot read") || e115.message.contains("nonexistent"),
+        "E115 message must mention the unreadable file, got: {}",
+        e115.message
+    );
+}
+
+#[test]
+fn conformance_include_key_does_not_appear_in_transpile_output() {
+    // Compose parent-clean.llm then transpile to plain — output must not
+    // contain the word "include" (include is a composition directive, not
+    // a prompt key, and must be consumed before transpilation).
+    let source = include_str!("../examples/includes/parent-clean.llm");
+    let document = parse_str(source).expect("parent-clean.llm should parse");
+    let path = PathBuf::from("examples/includes/parent-clean.llm");
+    let (composed, diags) = llm_format::composer::compose(document, &path, &[]);
+
+    assert!(!diags.has_errors(), "expected no compose errors: {diags}");
+
+    let output = transpile::transpile(&composed, Target::Plain);
+    assert!(
+        !output.contains("include"),
+        "plain output must not contain 'include' — include is consumed by composer, got:\n{output}"
+    );
+}

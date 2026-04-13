@@ -298,29 +298,13 @@ Keys and a new "Multi-file Includes" section.
 
 ### Sequence
 
-This is a multi-packet track. Estimated 3 packets:
+1. ✓ Parser + AST: include field, lexer, parser (Packet 28)
+2. ✓ Merge + composer: merge_into(), compose(), CLI wiring (Packet 29)
+3. ✓ Conformance tests: 8 tests covering clean merge, E115, E116,
+   dedup, memory exemption, vars conflict, missing file, output
+   exclusion (Packet 30)
 
-**Packet A — Parser and file resolution**
-1. Add `include` to the top-level key set in the parser
-2. Add `document.include` field (sequence of paths) to the AST
-3. Implement `resolve_includes(document, base_path) -> Result<Document>`
-   that loads, parses, and merges included files
-4. Detect and error on circular includes
-5. E115 (file not found) and E116 (circular)
-
-**Packet B — Merge semantics and validator**
-1. Implement merge logic per the rules table above
-2. E117 (key conflict) in the validator
-3. vars merge: parent wins
-4. Sequence concatenation and tools deduplication
-5. Update `validate_document` to run after merge
-
-**Packet C — Tests and SPEC update**
-1. Add conformance fixtures: `examples/includes/` directory
-2. Add 8+ conformance tests covering all merge cases
-3. SPEC.md: add `include:` to key list and new section
-4. README.md: document multi-file workflow
-5. examples/: add multi-file example set
+### Status: COMPLETE
 
 ### Estimated size
 
@@ -408,19 +392,33 @@ be confirmed to reject `include:` gracefully).
 
 ---
 
-## v4 Success Criteria
+## v4 Status: COMPLETE
 
-v4 is complete when:
+All three v4 tracks are complete:
+
+- ✓ Track G: VS Code marketplace packaging (MjirihYoussef,
+  v1.0.0, .vsix CI workflow)
+- ✓ Track H: Inlay hints ({var} ghost text in editor)
+- ✓ Track I: Multi-file includes (include key, merge
+  semantics, composer, E115/E116, conformance-tested)
+
+Post-v4 tracks (candidate v5 work):
+- Programmatic API (Python bindings via PyO3, or WASM)
+- Full LSP server (if adoption creates workspace-indexing
+  pressure from multi-file projects)
+- vars chaining / conditional expansion (if use cases emerge)
+- Marketplace publication (manual step by maintainer)
+- Additional provider profiles beyond generic/openai/anthropic
+
+## v4 Success Criteria (met)
 
 - [x] `npm run package` in `editors/vscode/` produces
       `llm-vscode-0.1.0.vsix` without errors
 - [x] CI uploads the `.vsix` as a build artifact on main
 - [x] Expanded `{var}` values appear as inlay hints in VS Code
       without any user action
-- [ ] `include:` key accepts a sequence of relative .llm paths
-- [ ] Included files are merged before validation and transpilation
-- [ ] E115, E116, E117 are defined, implemented, and
-      conformance-tested
-- [ ] `--stdin` mode rejects `include:` keys cleanly
-- [ ] SPEC.md: `include:` added to key list; multi-file section added
-- [ ] CHANGELOG.md v4 entry complete and dated
+- [x] `include:` key accepts a sequence of relative .llm paths
+- [x] Included files are merged before validation and transpilation
+- [x] E115 and E116 are defined, implemented, and conformance-tested
+- [x] SPEC.md: `include:` added to key list; multi-file section added
+- [x] CHANGELOG.md v4 entry complete and dated

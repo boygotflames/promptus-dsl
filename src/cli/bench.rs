@@ -42,6 +42,12 @@ pub fn execute(args: BenchArgs) -> Result<String> {
         anyhow!("parse failed")
     })?;
 
+    let (document, compose_diags) = crate::composer::compose(document, &args.input, &[]);
+    if compose_diags.has_errors() {
+        eprintln!("{compose_diags}");
+        return Err(anyhow!("include composition failed"));
+    }
+
     let diagnostics = validate_document(&document);
     if diagnostics.has_errors() {
         eprintln!("{diagnostics}");

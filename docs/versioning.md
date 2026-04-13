@@ -113,6 +113,18 @@ All v3 criteria are met as of 2026-04-12:
 
 ---
 
+### v4 Status
+
+All v4 criteria are met as of 2026-04-13:
+
+1. ✓ Multi-file includes: `include` key stable, E115/E116 stable,
+   8 conformance tests, SPEC.md documented with example
+2. ✓ VS Code: inlay hints stable; extension v1.0.0
+   marketplace-ready (publisher MjirihYoussef)
+3. ✓ CHANGELOG.md v4 entry complete and dated 2026-04-13
+
+---
+
 ## Changelog
 
 See [CHANGELOG.md](../CHANGELOG.md) for a record of notable changes.

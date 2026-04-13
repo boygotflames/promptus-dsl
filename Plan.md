@@ -388,10 +388,15 @@ Post-v3 tracks (candidate v4 work):
 See [docs/v4-roadmap.md](docs/v4-roadmap.md) for the full v4
 roadmap and track sequencing.
 
-Active track: Track I in progress (2/3 complete)
-Next: Track I Part 3 — conformance tests for include composition
+## v4 Status: COMPLETE
 
-Tracks:
-- Track G [COMPLETE] — VS Code marketplace packaging (.vsix build pipeline)
-- Track H [COMPLETE] — Inlay hints (expanded {var} values as ghost text)
-- Track I — Multi-file includes (include: key, merge semantics, E115/E116/E117)
+All three v4 tracks complete:
+- ✓ Track G: marketplace packaging
+- ✓ Track H: inlay hints
+- ✓ Track I: multi-file includes
+
+Post-v4 tracks (v5 candidates):
+- Programmatic API (PyO3/WASM)
+- Full LSP server
+- Marketplace publication
+- vars chaining (if use cases emerge)
