@@ -1,6 +1,8 @@
 <p align="center">
-  <img src="assets/Promptus.svg" width="160" alt="Promptus logo" />
+  <img src="assets/Promptus.svg" width="220"
+       alt="Promptus — .llm transpiler" />
 </p>
+<br>
 
 # `.llm` Transpiler
 
@@ -25,8 +27,8 @@ Markdown is readable, but it is a poor systems language for prompt orchestration
 ### Build and test
 
 ```powershell
-git clone <repo-url>
-cd llm_format
+git clone https://github.com/boygotflames/llmc
+cd llmc
 cargo build
 cargo test
 ```
@@ -130,10 +132,10 @@ memory:
 ```
 provider: generic
 tokenizer: cl100k_base
-source  | bytes=101 | tokens=27 | delta_bytes=+0  | delta_tokens=+0
-plain   | bytes=94  | tokens=26 | delta_bytes=-7  | delta_tokens=-1
-json-ir | bytes=141 | tokens=46 | delta_bytes=+40 | delta_tokens=+19
-shadow  | bytes=82  | tokens=23 | delta_bytes=-19 | delta_tokens=-4
+source  | bytes=95  | tokens=27 | delta_bytes=+0  | delta_tokens=+0
+plain   | bytes=94  | tokens=26 | delta_bytes=-1  | delta_tokens=-1
+json-ir | bytes=141 | tokens=46 | delta_bytes=+46 | delta_tokens=+19
+shadow  | bytes=82  | tokens=23 | delta_bytes=-13 | delta_tokens=-4
 ```
 
 ## Token Efficiency

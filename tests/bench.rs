@@ -129,7 +129,7 @@ fn bench_cli_output_is_deterministic() {
     assert_eq!(first, second);
     assert_eq!(
         first,
-        "provider: generic\ntokenizer: cl100k_base\nsource  | bytes=101 | tokens=27 | delta_bytes=+0 | delta_tokens=+0\nplain   | bytes=94 | tokens=26 | delta_bytes=-7 | delta_tokens=-1\njson-ir | bytes=141 | tokens=46 | delta_bytes=+40 | delta_tokens=+19\nshadow  | bytes=82 | tokens=23 | delta_bytes=-19 | delta_tokens=-4"
+        "provider: generic\ntokenizer: cl100k_base\nsource  | bytes=95 | tokens=27 | delta_bytes=+0 | delta_tokens=+0\nplain   | bytes=94 | tokens=26 | delta_bytes=-1 | delta_tokens=-1\njson-ir | bytes=141 | tokens=46 | delta_bytes=+46 | delta_tokens=+19\nshadow  | bytes=82 | tokens=23 | delta_bytes=-13 | delta_tokens=-4"
     );
 }
 
