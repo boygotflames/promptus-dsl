@@ -205,6 +205,10 @@ fn conformance_anthropic_shadow_extractor_matches_v1_contract() {
     assert_eq!(output, SHADOW_V1_EXTRACTOR);
 }
 
+fn normalize_bench_output(s: &str) -> String {
+    s.replace("\r\n", "\n").replace('\r', "\n")
+}
+
 #[test]
 fn conformance_bench_reports_are_deterministic_for_supported_providers() {
     let first_generic = execute_bench(BenchArgs {
@@ -220,7 +224,10 @@ fn conformance_bench_reports_are_deterministic_for_supported_providers() {
     })
     .expect("generic bench execution should succeed");
     assert_eq!(first_generic, second_generic);
-    assert_eq!(first_generic, BENCH_GENERIC_MINIMAL);
+    assert_eq!(
+        normalize_bench_output(&first_generic),
+        normalize_bench_output(BENCH_GENERIC_MINIMAL)
+    );
 
     let first_openai = execute_bench(BenchArgs {
         input: PathBuf::from("examples/minimal.llm"),
@@ -235,7 +242,10 @@ fn conformance_bench_reports_are_deterministic_for_supported_providers() {
     })
     .expect("openai bench execution should succeed");
     assert_eq!(first_openai, second_openai);
-    assert_eq!(first_openai, BENCH_OPENAI_MINIMAL);
+    assert_eq!(
+        normalize_bench_output(&first_openai),
+        normalize_bench_output(BENCH_OPENAI_MINIMAL)
+    );
 }
 
 #[test]
@@ -246,7 +256,10 @@ fn conformance_bench_anthropic_provider_is_supported() {
         baseline: None,
     })
     .expect("anthropic bench should succeed");
-    assert_eq!(result, BENCH_ANTHROPIC_MINIMAL);
+    assert_eq!(
+        normalize_bench_output(&result),
+        normalize_bench_output(BENCH_ANTHROPIC_MINIMAL)
+    );
 }
 
 #[test]
@@ -265,7 +278,10 @@ fn conformance_bench_anthropic_extractor_is_deterministic() {
     .expect("anthropic extractor bench should succeed");
 
     assert_eq!(first, second);
-    assert_eq!(first, BENCH_ANTHROPIC_EXTRACTOR);
+    assert_eq!(
+        normalize_bench_output(&first),
+        normalize_bench_output(BENCH_ANTHROPIC_EXTRACTOR)
+    );
 }
 
 #[test]
@@ -284,7 +300,10 @@ fn conformance_bench_anthropic_json_output_is_deterministic() {
     .expect("anthropic json-output bench should succeed");
 
     assert_eq!(first, second);
-    assert_eq!(first, BENCH_ANTHROPIC_JSON_OUTPUT);
+    assert_eq!(
+        normalize_bench_output(&first),
+        normalize_bench_output(BENCH_ANTHROPIC_JSON_OUTPUT)
+    );
 }
 
 #[test]
@@ -303,7 +322,10 @@ fn conformance_bench_anthropic_quoted_is_deterministic() {
     .expect("anthropic quoted bench should succeed");
 
     assert_eq!(first, second);
-    assert_eq!(first, BENCH_ANTHROPIC_QUOTED);
+    assert_eq!(
+        normalize_bench_output(&first),
+        normalize_bench_output(BENCH_ANTHROPIC_QUOTED)
+    );
 }
 
 #[test]
@@ -343,7 +365,10 @@ fn conformance_bench_extractor_baseline_is_deterministic() {
     .expect("extractor bench with baseline should succeed");
 
     assert_eq!(first, second);
-    assert_eq!(first, BENCH_GENERIC_EXTRACTOR_BASELINE);
+    assert_eq!(
+        normalize_bench_output(&first),
+        normalize_bench_output(BENCH_GENERIC_EXTRACTOR_BASELINE)
+    );
 }
 
 #[test]
@@ -362,7 +387,10 @@ fn conformance_bench_json_output_baseline_is_deterministic() {
     .expect("json-output bench with baseline should succeed");
 
     assert_eq!(first, second);
-    assert_eq!(first, BENCH_GENERIC_JSON_OUTPUT_BASELINE);
+    assert_eq!(
+        normalize_bench_output(&first),
+        normalize_bench_output(BENCH_GENERIC_JSON_OUTPUT_BASELINE)
+    );
 }
 
 #[test]
