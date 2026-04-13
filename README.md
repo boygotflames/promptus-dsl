@@ -2,6 +2,16 @@
   <img src="assets/Promptus.svg" width="220"
        alt="Promptus — .llm transpiler" />
 </p>
+<p align="center">
+  <a href="https://github.com/boygotflames/llmc/releases">
+    <img src="https://img.shields.io/github/v/release/boygotflames/llmc?label=version&color=0057FF"
+         alt="Latest release" />
+  </a>
+  <a href="https://github.com/boygotflames/llmc/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/boygotflames/llmc/ci.yml?label=CI&branch=main"
+         alt="CI status" />
+  </a>
+</p>
 <br>
 
 # `.llm` Transpiler
@@ -275,3 +285,5 @@ All three must be clean.
 ## Status Note
 
 The project is real, useful, and increasingly disciplined, but it is still in a standardization-prep phase. Treat current behavior as implemented reality, not as a forever-frozen contract unless the spec explicitly says so.
+
+See [CHANGELOG.md](CHANGELOG.md) for the full version history from v1 through v4.

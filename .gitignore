@@ -19,6 +19,12 @@ Desktop.ini
 *.orig
 *.rej
 
-# VS Code extension packaging artifacts.
+# VS Code extension packaging artifacts and local deps.
 *.vsix
-.claude/worktrees/relaxed-beaver/
+editors/vscode/node_modules/
+
+# Claude Code worktrees (all, not just relaxed-beaver).
+.claude/worktrees/
+
+# Windows debug artifacts.
+*.pdb
