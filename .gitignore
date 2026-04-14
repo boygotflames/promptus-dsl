@@ -28,3 +28,4 @@ editors/vscode/node_modules/
 
 # Windows debug artifacts.
 *.pdb
+diagrams/llmc-architecture.html
