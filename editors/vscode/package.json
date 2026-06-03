@@ -10,7 +10,7 @@
     "url": "https://github.com/boygotflames/llmc",
     "directory": "editors/vscode"
   },
-  "icon": "images/Promptus 128x128.png",
+  "icon": "images/Promptus-128x128.png",
   "main": "./extension.js",
   "activationEvents": ["onLanguage:llm"],
   "scripts": {
