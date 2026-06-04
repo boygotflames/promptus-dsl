@@ -1,8 +1,10 @@
 use anyhow::Result;
+#[cfg(not(target_arch = "wasm32"))]
 use clap::ValueEnum;
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, ValueEnum)]
-#[value(rename_all = "lower")]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+#[cfg_attr(not(target_arch = "wasm32"), derive(ValueEnum))]
+#[cfg_attr(not(target_arch = "wasm32"), value(rename_all = "lower"))]
 pub enum Provider {
     #[default]
     Generic,

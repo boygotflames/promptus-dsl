@@ -1,5 +1,7 @@
 pub mod ast;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod bench;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod cli;
 pub mod composer;
 pub mod diagnostics;
@@ -12,6 +14,8 @@ pub mod parser;
 pub mod provider;
 pub mod transpile;
 pub mod validator;
+#[cfg(target_arch = "wasm32")]
+pub mod wasm;
 
 pub use ast::{Document, MappingEntry, Node, TopLevelKey};
 pub use diagnostics::{Diagnostic, DiagnosticBag, DiagnosticPhase, Severity, Span};

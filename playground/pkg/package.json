@@ -1,0 +1,16 @@
+{
+  "name": "llm_format",
+  "type": "module",
+  "description": "A Rust-based transpiler for the .llm token-optimized syntax",
+  "version": "0.1.0",
+  "files": [
+    "llm_format_bg.wasm",
+    "llm_format.js",
+    "llm_format.d.ts"
+  ],
+  "main": "llm_format.js",
+  "types": "llm_format.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

@@ -4,14 +4,22 @@ version = "0.1.0"
 edition = "2024"
 description = "A Rust-based transpiler for the .llm token-optimized syntax"
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
 logos = "0.16.1"          # Blazing fast lexical analyzer
-clap = { version = "4.5", features = ["derive"] } # CLI argument parsing
-tiktoken-rs = "0.11.0"    # Token counting for the benchmark feature
 anyhow = "1.0"            # Easy error handling
-reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+wasm-bindgen = "0.2"
+console_error_panic_hook = "0.1"
+js-sys = "0.3"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+clap = { version = "4.5", features = ["derive"] } # CLI argument parsing
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
+tiktoken-rs = "0.11.0"
 
 [dev-dependencies]
 regex = "1.12"
@@ -20,3 +28,6 @@ tempfile = "3"
 [profile.release]
 lto = true    # link-time optimization — reduces binary size
 strip = true  # remove debug symbols from release binary
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
