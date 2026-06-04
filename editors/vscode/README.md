@@ -126,12 +126,12 @@ The extension provides three IntelliSense features:
   configured via llm.formatterPath setting
 - ✓ marketplace packaging: `npm run package` produces a `.vsix`; CI
   uploads it as an artifact on every push
-- no marketplace account / publication (requires human-held PAT —
-  see `docs/marketplace.md`)
+- ✓ published on VS Code Marketplace:
+  marketplace.visualstudio.com/items?itemName=MjirihYoussef.llm-vscode
 
 ## Icon
 
-Icon: `images/Promptus 128x128.png` (referenced by `package.json`).
+Icon: `images/Promptus-128x128.png` (referenced by `package.json`).
 SVG source: `images/Promptus.svg`.
 Marketplace requires a PNG at 128×128; both are already present.
 

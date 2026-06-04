@@ -75,6 +75,6 @@ The .vsix filename reflects the version: `llm-vscode-0.2.0.vsix`.
 
 ## Icon note
 
-The extension icon is at `editors/vscode/images/Promptus 128x128.png`.
+The extension icon is at `editors/vscode/images/Promptus-128x128.png`.
 VS Code Marketplace requires a PNG icon at 128×128 pixels. The SVG
 source is at `editors/vscode/images/Promptus.svg`.
