@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>promptus-dsl playground</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --border:    #30363d;
+      --text:      #e6edf3;
+      --muted:     #8b949e;
+      --cyan:      #00f0ff;
+      --blue:      #0057ff;
+      --amber:     #ffd700;
+      --orange:    #ff6b00;
+      --error:     #f85149;
+      --success:   #3fb950;
+      --warn:      #d29922;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    header svg { width: 40px; height: 40px; flex-shrink: 0; }
+
+    header h1 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      background: linear-gradient(90deg, var(--cyan), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    header a {
+      margin-left: auto;
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    header a:hover { color: var(--text); }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto 1fr;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    .toolbar {
+      grid-column: 1 / -1;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .btn {
+      padding: 6px 16px;
+      border-radius: 6px;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      color: #000;
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .status {
+      font-size: 0.78rem;
+      padding: 4px 10px;
+      border-radius: 12px;
+      margin-left: auto;
+    }
+    .status.loading { background: #30363d; color: var(--muted); }
+    .status.ready   { background: #1a3a1a; color: var(--success); }
+    .status.error   { background: #3a1a1a; color: var(--error); }
+
+    .pane {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+    .pane:last-child { border-right: none; }
+
+    .pane-header {
+      padding: 8px 14px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    textarea, .output {
+      flex: 1;
+      padding: 16px;
+      font-family: "JetBrains Mono", "Fira Code", "Cascadia Code",
+                   Consolas, monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      overflow: auto;
+      resize: none;
+      background: var(--bg);
+      color: var(--text);
+      border: none;
+      outline: none;
+      white-space: pre;
+    }
+
+    .output {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .output.ok    { color: var(--text); }
+    .output.err   { color: var(--error); }
+    .output.warn  { color: var(--warn); }
+
+    .diagnostics {
+      border-top: 1px solid var(--border);
+      max-height: 120px;
+      overflow-y: auto;
+      font-size: 0.78rem;
+      font-family: monospace;
+    }
+
+    .diag-item {
+      padding: 4px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+    }
+    .diag-item.error { color: var(--error); }
+    .diag-item.warn  { color: var(--warn); }
+
+    .badge {
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 8px 24px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<header>
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="gc" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#00F0FF"/>
+        <stop offset="100%" stop-color="#0057FF"/>
+      </linearGradient>
+      <linearGradient id="ga" x1="100%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#FFD700"/>
+        <stop offset="100%" stop-color="#FF6B00"/>
+      </linearGradient>
+    </defs>
+    <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5"
+             fill="none" stroke="url(#gc)" stroke-width="3" opacity="0.4"/>
+    <path d="M 20,30 L 5,27.5 L 50,5 L 95,27.5 L 80,30 L 50,18 Z"
+          fill="white" opacity="0.9"/>
+    <path d="M 20,30 L 5,27.5 L 5,72.5 L 20,70 L 20,50 L 35,58 L 35,38 Z"
+          fill="url(#ga)" opacity="0.9"/>
+    <path d="M 80,30 L 95,27.5 L 95,72.5 L 80,70 L 80,50 L 65,58 L 65,38 Z"
+          fill="url(#gc)" opacity="0.9"/>
+  </svg>
+  <div>
+    <h1>promptus-dsl playground</h1>
+    <p>Write .llm prompts — compile to provider-native JSON in your browser</p>
+  </div>
+  <a href="https://github.com/boygotflames/promptus-dsl" target="_blank">
+    ★ GitHub
+  </a>
+</header>
+
+<main>
+  <div class="toolbar">
+    <label>Target:</label>
+    <select id="target">
+      <option value="openai-chat">openai-chat</option>
+      <option value="anthropic-messages">anthropic-messages</option>
+      <option value="plain">plain</option>
+      <option value="json-ir">json-ir</option>
+      <option value="shadow">shadow</option>
+    </select>
+    <button class="btn btn-primary" id="btn-compile" disabled>
+      ▶ Compile
+    </button>
+    <button class="btn btn-secondary" id="btn-validate" disabled>
+      ✓ Validate
+    </button>
+    <button class="btn btn-secondary" id="btn-lint" disabled>
+      ⚑ Lint
+    </button>
+    <button class="btn btn-secondary" id="btn-example">
+      Load example
+    </button>
+    <span class="status loading" id="status">Loading WASM…</span>
+  </div>
+
+  <div class="pane">
+    <div class="pane-header">
+      <span>.llm source</span>
+      <span id="char-count">0 chars</span>
+    </div>
+    <textarea id="editor" spellcheck="false"
+      placeholder="Write your .llm prompt here…"></textarea>
+  </div>
+
+  <div class="pane">
+    <div class="pane-header">
+      <span id="output-label">output</span>
+    </div>
+    <div class="output ok" id="output">
+Compile your .llm source to see output here.
+
+Click "Load example" to get started.
+    </div>
+    <div class="diagnostics" id="diagnostics" style="display:none"></div>
+  </div>
+</main>
+
+<footer>
+  <span>promptus-dsl</span>
+  <a href="https://github.com/boygotflames/promptus-dsl" target="_blank">
+    Docs
+  </a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=MjirihYoussef.llm-vscode"
+     target="_blank">
+    VS Code Extension
+  </a>
+  <a href="https://github.com/boygotflames/promptus-dsl/releases"
+     target="_blank">
+    Download CLI
+  </a>
+</footer>
+
+<script type="module">
+import init, { compile, validate, lint }
+  from './pkg/llm_format.js';
+
+const EXAMPLE = `agent: SentimentAnalyzer
+system:
+  role: classifier
+  instruction: "Classify the input as positive, negative, or neutral."
+user: "{input_text}"
+output:
+  sentiment: "one of: positive, negative, neutral"
+  confidence: "float between 0 and 1"
+vars:
+  input_text: "The product broke on day one."
+`;
+
+const editor      = document.getElementById('editor');
+const output      = document.getElementById('output');
+const outputLabel = document.getElementById('output-label');
+const diagnostics = document.getElementById('diagnostics');
+const status      = document.getElementById('status');
+const charCount   = document.getElementById('char-count');
+const btnCompile  = document.getElementById('btn-compile');
+const btnValidate = document.getElementById('btn-validate');
+const btnLint     = document.getElementById('btn-lint');
+const btnExample  = document.getElementById('btn-example');
+const targetSel   = document.getElementById('target');
+
+function setStatus(text, cls) {
+  status.textContent = text;
+  status.className = 'status ' + cls;
+}
+
+function showOutput(text, cls) {
+  output.textContent = text;
+  output.className = 'output ' + cls;
+  diagnostics.style.display = 'none';
+  diagnostics.innerHTML = '';
+}
+
+function showDiagnostics(errors, type) {
+  diagnostics.innerHTML = errors.map(e =>
+    `<div class="diag-item ${type}">
+       <span class="badge">${type === 'error' ? '✗' : '⚑'}</span>
+       <span>${e}</span>
+     </div>`
+  ).join('');
+  diagnostics.style.display = 'block';
+}
+
+editor.addEventListener('input', () => {
+  charCount.textContent = editor.value.length + ' chars';
+});
+
+btnExample.addEventListener('click', () => {
+  editor.value = EXAMPLE;
+  charCount.textContent = EXAMPLE.length + ' chars';
+  editor.focus();
+});
+
+btnCompile.addEventListener('click', () => {
+  const src = editor.value.trim();
+  if (!src) { showOutput('No input.', 'err'); return; }
+  const target = targetSel.value;
+  outputLabel.textContent = target;
+  try {
+    const result = JSON.parse(compile(src, target));
+    if (result.ok) {
+      showOutput(result.output, 'ok');
+    } else {
+      showOutput('Compilation failed.', 'err');
+      showDiagnostics(result.errors, 'error');
+    }
+  } catch (e) {
+    showOutput('Internal error: ' + e.message, 'err');
+  }
+});
+
+btnValidate.addEventListener('click', () => {
+  const src = editor.value.trim();
+  if (!src) return;
+  outputLabel.textContent = 'validate';
+  try {
+    const result = JSON.parse(validate(src));
+    if (result.ok) {
+      showOutput('✓ valid', 'ok');
+    } else {
+      showOutput('✗ invalid', 'err');
+      showDiagnostics(result.errors, 'error');
+    }
+  } catch (e) {
+    showOutput('Internal error: ' + e.message, 'err');
+  }
+});
+
+btnLint.addEventListener('click', () => {
+  const src = editor.value.trim();
+  if (!src) return;
+  outputLabel.textContent = 'lint';
+  try {
+    const result = JSON.parse(lint(src));
+    const w = result.warnings || [];
+    if (w.length === 0) {
+      showOutput('✓ lint clean', 'ok');
+    } else {
+      showOutput(
+        w.map(x => `[${x.code}] ${x.message}`).join('\n'),
+        'warn'
+      );
+      showDiagnostics(
+        w.map(x => `[${x.code}] ${x.message}`),
+        'warn'
+      );
+    }
+  } catch (e) {
+    showOutput('Internal error: ' + e.message, 'err');
+  }
+});
+
+// Init WASM
+try {
+  await init();
+  setStatus('Ready', 'ready');
+  btnCompile.disabled  = false;
+  btnValidate.disabled = false;
+  btnLint.disabled     = false;
+  // Load example by default
+  editor.value = EXAMPLE;
+  charCount.textContent = EXAMPLE.length + ' chars';
+} catch (e) {
+  setStatus('Failed to load', 'error');
+  console.error(e);
+}
+</script>
+</body>
+</html>
