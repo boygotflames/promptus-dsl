@@ -8,7 +8,7 @@ use wasm_bindgen::prelude::*;
 use crate::lint::lint_document;
 use crate::parser::parse_str;
 use crate::provider::Provider;
-use crate::transpile::{transpile_with_provider, Target};
+use crate::transpile::{Target, transpile_with_provider};
 use crate::validator::validate_document;
 
 /// Set up better panic messages in the browser console.
