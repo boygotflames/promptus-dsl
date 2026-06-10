@@ -1,80 +1,110 @@
-# VS Code Marketplace Publishing Guide
+# VS Code Extension Distribution Guide
 
-This document describes how to publish the `.llm` VS Code extension
-to the Visual Studio Code Marketplace.
+> Automated VS Code Marketplace publication is deferred indefinitely.
+> The extension is distributed as a `.vsix` package through local
+> packaging and, when available, GitHub Release artifacts.
+> No `VSCE_PAT` or Azure DevOps Marketplace token is required for the
+> current distribution path.
 
-## Prerequisites
+This guide covers the current `.vsix`-based distribution workflow for
+the `.llm` VS Code extension under `editors/vscode/`.
 
-1. A Visual Studio Marketplace publisher account registered at
-   https://marketplace.visualstudio.com/manage
-2. A Personal Access Token (PAT) from Azure DevOps with
-   **Marketplace → Manage** scope
-3. Node.js 18+ installed
-4. `@vscode/vsce` installed (`npm install -g @vscode/vsce` or use
-   the local devDependency via `npx vsce`)
+## Package Metadata
 
-## One-time publisher setup
+The repository metadata in
+[editors/vscode/package.json](../editors/vscode/package.json) should
+remain:
 
-The `package.json` currently declares `"publisher": "llm-format"`.
-This publisher ID must match your registered Marketplace publisher
-account. If the account name differs, update `package.json` before
-packaging.
+```json
+"repository": {
+  "type": "git",
+  "url": "https://github.com/boygotflames/promptus-dsl",
+  "directory": "editors/vscode"
+}
+```
 
-## Building the .vsix locally
+That URL is part of the extension package metadata and should continue
+to point at this repository, even though Marketplace publication is not
+currently active.
 
-From the `editors/vscode/` directory:
+## Local Packaging
+
+From the extension directory:
 
 ```bash
-npm install          # installs @vscode/vsce as devDependency
-npm run package      # runs: vsce package
+cd editors/vscode
+npm install
+npx vsce package --no-dependencies
 ```
 
-This produces `llm-vscode-0.1.0.vsix` in the current directory.
+Expected output:
 
-To verify the .vsix before publishing, install it locally in VS Code:
-
-```
-code --install-extension llm-vscode-0.1.0.vsix
+```text
+llm-vscode-1.0.0.vsix
 ```
 
-## Publishing to the Marketplace
+## Manual Installation in VS Code
+
+After packaging, install the extension manually:
 
 ```bash
-npx vsce publish --pat <YOUR_PAT>
+code --install-extension llm-vscode-1.0.0.vsix
 ```
 
-Or set the PAT as an environment variable:
+You can also install through the VS Code UI:
 
-```bash
-VSCE_PAT=<YOUR_PAT> npx vsce publish
-```
+1. Open the Extensions panel.
+2. Open the `...` menu.
+3. Choose `Install from VSIX...`.
+4. Select the generated `.vsix` file.
 
-## GitHub Actions — automated packaging
+## CI Packaging Workflow
 
-The workflow `.github/workflows/vscode-package.yml` runs on every
-push to `main` or `LLM-Promptus` that touches `editors/vscode/`.
-It produces a `.vsix` artifact named `llm-vscode-vsix` available
-for download from the Actions run page.
+[.github/workflows/vscode-package.yml](../.github/workflows/vscode-package.yml)
+remains the active validation and packaging workflow.
 
-To automate marketplace publishing from CI, add your PAT as a
-GitHub Actions secret named `VSCE_PAT` and extend the workflow:
+It:
 
-```yaml
-- name: Publish to Marketplace
-  if: github.ref == 'refs/heads/main'
-  run: npx vsce publish --pat ${{ secrets.VSCE_PAT }}
-  working-directory: editors/vscode
-```
+- installs `@vscode/vsce`
+- packages the extension with `npx vsce package --no-dependencies`
+- uploads the resulting `.vsix` as a workflow artifact
 
-## Version bumping
+That workflow is the current automated packaging path for normal repo
+changes.
 
-Before each release, update `"version"` in `editors/vscode/package.json`.
-Follow semantic versioning: `MAJOR.MINOR.PATCH`.
+## Release Artifacts
 
-The .vsix filename reflects the version: `llm-vscode-0.2.0.vsix`.
+The preferred public distribution model is:
 
-## Icon note
+- local `.vsix` packaging for direct/manual installation
+- GitHub Actions `.vsix` artifacts from the packaging workflow
+- GitHub Release assets when the release workflow is extended to ship
+  the packaged `.vsix`
 
-The extension icon is at `editors/vscode/images/Promptus-128x128.png`.
-VS Code Marketplace requires a PNG icon at 128×128 pixels. The SVG
-source is at `editors/vscode/images/Promptus.svg`.
+At the moment, the release-binary workflow is separate from the VS Code
+packaging workflow, so `.vsix` release attachment should be treated as
+an optional future improvement rather than an active guarantee.
+
+## Historical / Deferred Publisher Context
+
+The extension package still carries the publisher field:
+
+- `MjirihYoussef`
+
+Treat that as historical/deferred metadata for future Marketplace use,
+not as a current setup requirement. No Azure DevOps PAT creation, no
+Marketplace onboarding, and no first-publish steps are part of the
+current distribution plan.
+
+## Known Limitation
+
+The extension implementation surface in `extension.js` is broader than
+the package help text fully describes.
+
+Specifically:
+
+- `include:` is implemented in the core language and parser
+- extension completion and hover documentation do not yet fully surface
+  `include:` alongside the older top-level key set
+
+This is a documentation/metadata gap, not a packaging blocker.
