@@ -124,16 +124,16 @@ The extension provides three IntelliSense features:
 - ✓ formatter-on-save: DocumentFormattingEditProvider registered
   for the 'llm' language — requires llm_format binary on PATH or
   configured via llm.formatterPath setting
-- ✓ marketplace packaging: `npm run package` produces a `.vsix`; CI
+- ✓ `.vsix` packaging: `npm run package` produces a `.vsix`; CI
   uploads it as an artifact on every push
-- ✓ published on VS Code Marketplace:
-  marketplace.visualstudio.com/items?itemName=MjirihYoussef.llm-vscode
+- marketplace publication is deferred indefinitely; current
+  distribution is manual `.vsix` installation
 
 ## Icon
 
 Icon: `images/Promptus-128x128.png` (referenced by `package.json`).
 SVG source: `images/Promptus.svg`.
-Marketplace requires a PNG at 128×128; both are already present.
+The `.vsix` package uses the PNG icon; both image assets are present.
 
 ## Local Manual Verification
 
