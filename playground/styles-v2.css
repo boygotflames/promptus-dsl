@@ -490,6 +490,11 @@ pre code {
   gap: 24px;
 }
 
+.page {
+  width: min(calc(100% - 48px), var(--page-width));
+  margin: 0 auto;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -584,9 +589,9 @@ pre code {
 }
 
 .hero h1 {
-  font-size: clamp(2.8rem, 4.5vw, 4rem);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
+  font-size: clamp(2.2rem, 3.8vw, 3.2rem);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
   margin-bottom: 24px;
 }
 
