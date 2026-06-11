@@ -10,30 +10,90 @@
   />
   <link
     rel="icon"
-    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='c' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%234EA2FF'/%3E%3Cstop offset='100%25' stop-color='%230057FF'/%3E%3C/linearGradient%3E%3ClinearGradient id='w' x1='100%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23FFB066'/%3E%3Cstop offset='100%25' stop-color='%23FF7A1A'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5' fill='none' stroke='url(%23c)' stroke-width='3' opacity='0.45'/%3E%3Cpath d='M20,30 5,27.5 50,5 95,27.5 80,30 50,18Z' fill='%23F5FAFF' opacity='0.94'/%3E%3Cpath d='M20,30 5,27.5 5,72.5 20,70 20,50 35,58 35,38Z' fill='url(%23w)' opacity='0.96'/%3E%3Cpath d='M80,30 95,27.5 95,72.5 80,70 80,50 65,58 65,38Z' fill='url(%23c)' opacity='0.96'/%3E%3C/svg%3E"
+    href="./Promptus.svg"
+    type="image/svg+xml"
   />
+  <!-- Premium Web Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
+  <!-- GPU-Accelerated Background Mesh & Grid -->
+  <div class="mesh-bg">
+    <div class="mesh-grid"></div>
+    <div class="mesh-glow-1"></div>
+    <div class="mesh-glow-2"></div>
+    <div class="mesh-glow-3"></div>
+  </div>
+
   <div class="site-shell">
     <header class="site-header">
       <nav class="nav" aria-label="Primary">
         <a class="brand" href="#top">
-          <svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+          <!-- Real Promptus Logo Inlined -->
+          <svg class="brand-mark" viewBox="0 0 1000 1000" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <linearGradient id="brand-cool" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#4EA2FF"/>
+              <linearGradient id="compilerCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#00F0FF"/>
                 <stop offset="100%" stop-color="#0057FF"/>
               </linearGradient>
-              <linearGradient id="brand-warm" x1="100%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#FFB066"/>
-                <stop offset="100%" stop-color="#FF7A1A"/>
+              <linearGradient id="rustEmber" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#FFD700"/>
+                <stop offset="100%" stop-color="#FF6B00"/>
               </linearGradient>
+              <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur1"/>
+                <feGaussianBlur in="SourceGraphic" stdDeviation="30" result="blur2"/>
+                <feMerge>
+                  <feMergeNode in="blur2"/>
+                  <feMergeNode in="blur1"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <filter id="lineGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+                <feMerge>
+                  <feMergeNode in="blur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
             </defs>
-            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="none" stroke="url(#brand-cool)" stroke-width="3" opacity="0.45"/>
-            <path d="M20,30 5,27.5 50,5 95,27.5 80,30 50,18Z" fill="#F5FAFF" opacity="0.94"/>
-            <path d="M20,30 5,27.5 5,72.5 20,70 20,50 35,58 35,38Z" fill="url(#brand-warm)" opacity="0.96"/>
-            <path d="M80,30 95,27.5 95,72.5 80,70 80,50 65,58 65,38Z" fill="url(#brand-cool)" opacity="0.96"/>
+            <g transform="translate(500, 500)" stroke="#FFFFFF" fill="none" opacity="0.65" stroke-width="1.5" filter="url(#lineGlow)">
+              <circle r="34"/>
+              <circle r="55"/>
+              <circle r="89"/>
+              <circle r="144"/>
+              <circle r="233"/>
+              <circle r="377"/>
+              <path d="M 0,-34 A 34,34 0 0 1 34,0 A 55,55 0 0 1 -21,55 A 89,89 0 0 1 -110,-34 A 144,144 0 0 1 34,-178 A 233,233 0 0 1 267,55 A 377,377 0 0 1 -110,432" stroke="#FFFFFF" stroke-width="2.5" opacity="0.9"/>
+              <circle cx="0" cy="-34" r="3" fill="#FFFFFF" stroke="none"/>
+              <circle cx="34" cy="0" r="3" fill="#FFFFFF" stroke="none"/>
+              <circle cx="-21" cy="55" r="3" fill="#FFFFFF" stroke="none"/>
+              <circle cx="-110" cy="-34" r="3" fill="#FFFFFF" stroke="none"/>
+              <circle cx="34" cy="-178" r="3" fill="#FFFFFF" stroke="none"/>
+              <circle cx="267" cy="55" r="3" fill="#FFFFFF" stroke="none"/>
+            </g>
+            <g transform="translate(500, 500)" stroke="url(#compilerCyan)" stroke-width="3" fill="none" opacity="0.25">
+              <polygon points="0,-350 303,-175 303,175 0,350 -303,175 -303,-175"/>
+              <polygon points="0,-150 130,-75 130,75 0,150 -130,75 -130,-75"/>
+              <line x1="0" y1="-350" x2="0" y2="-150"/>
+              <line x1="303" y1="-175" x2="130" y2="-75"/>
+              <line x1="303" y1="175" x2="130" y2="75"/>
+              <line x1="0" y1="350" x2="0" y2="150"/>
+              <line x1="-303" y1="175" x2="-130" y2="75"/>
+              <line x1="-303" y1="-175" x2="-130" y2="-75"/>
+              <line x1="-400" y1="0" x2="400" y2="0" stroke-dasharray="5, 15" stroke-width="1"/>
+              <line x1="0" y1="-400" x2="0" y2="400" stroke-dasharray="5, 15" stroke-width="1"/>
+            </g>
+            <g transform="translate(500, 500)" filter="url(#neonGlow)">
+              <path d="M -130,-75 L -260,-150 L -260,100 L -80,204 L -80,124 L -180,66 L -180,-45 L -130,-15 Z" fill="url(#rustEmber)" stroke="#FFF" stroke-width="2" opacity="0.9"/>
+              <path d="M 130,-75 L 260,-150 L 260,100 L 80,204 L 80,124 L 180,66 L 180,-45 L 130,-15 Z" fill="url(#compilerCyan)" stroke="#FFF" stroke-width="2" opacity="0.9"/>
+              <path d="M -130,-75 L -260,-150 L 0,-300 L 260,-150 L 130,-75 L 0,-150 Z" fill="#FFFFFF" opacity="0.9"/>
+              <polygon points="0,-150 -65,-112 0,-75 65,-112" fill="url(#rustEmber)"/>
+              <polygon points="0,-75 -65,-37 0,0 65,-37" fill="url(#compilerCyan)"/>
+            </g>
           </svg>
           <span class="brand-copy">
             <strong>promptus-dsl</strong>
@@ -53,7 +113,10 @@
     <main class="page" id="top">
       <section class="hero">
         <div>
-          <div class="eyebrow">v5.x • deterministic Rust toolchain • OpenAI + Anthropic targets</div>
+          <div class="eyebrow">
+            <span style="display:inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 6px var(--cyan);"></span>
+            v5.x • deterministic Rust toolchain • OpenAI + Anthropic targets
+          </div>
           <h1>
             <span>A structured prompt compiler</span>
             <span class="gradient">for deterministic LLM workflows.</span>
@@ -85,21 +148,22 @@
             <span class="window-label">sentiment.llm → provider-native JSON</span>
           </div>
           <div class="hero-code">
-            <pre><code>agent: SentimentAnalyzer
-system:
-  role: classifier
-  instruction: "Classify the input as positive,
-    negative, or neutral."
-user: "{input_text}"
-output:
-  sentiment: "one of: positive, negative, neutral"
-  confidence: "float between 0 and 1"</code></pre>
+            <!-- Premium static syntax highlighted code -->
+            <pre><code><span class="sk-key">agent:</span> <span class="sk-val">SentimentAnalyzer</span>
+<span class="sk-key">system:</span>
+  <span class="sk-subkey">role:</span> <span class="sk-val">classifier</span>
+  <span class="sk-subkey">instruction:</span> <span class="sk-val">"Classify the input as positive,
+    negative, or neutral."</span>
+<span class="sk-key">user:</span> <span class="sk-val">"{input_text}"</span>
+<span class="sk-key">output:</span>
+  <span class="sk-subkey">sentiment:</span> <span class="sk-val">"one of: positive, negative, neutral"</span>
+  <span class="sk-subkey">confidence:</span> <span class="sk-val">"float between 0 and 1"</span></code></pre>
 
-            <div class="terminal-tease">
-              <pre><code>$ llm_format validate sentiment.llm
-✓ valid sentiment.llm
+            <div class="hero-code terminal-tease">
+              <pre><code><span class="sk-comment">$</span> <span class="sk-cmd">llm_format validate</span> sentiment.llm
+<span class="sk-ok">✓ valid sentiment.llm</span>
 
-$ llm_format transpile sentiment.llm --target openai-chat</code></pre>
+<span class="sk-comment">$</span> <span class="sk-cmd">llm_format transpile</span> sentiment.llm --target openai-chat</code></pre>
             </div>
           </div>
         </aside>
@@ -123,16 +187,16 @@ $ llm_format transpile sentiment.llm --target openai-chat</code></pre>
               <span>authoring layer</span>
             </header>
             <div class="card-body">
-              <pre><code>agent: SentimentAnalyzer
-system:
-  role: classifier
-  instruction: "Classify the input as positive, negative, or neutral."
-user: "{input_text}"
-output:
-  sentiment: "one of: positive, negative, neutral"
-  confidence: "float between 0 and 1"
-vars:
-  input_text: "The product broke on day one."</code></pre>
+              <pre><code><span class="sk-key">agent:</span> <span class="sk-val">SentimentAnalyzer</span>
+<span class="sk-key">system:</span>
+  <span class="sk-subkey">role:</span> <span class="sk-val">classifier</span>
+  <span class="sk-subkey">instruction:</span> <span class="sk-val">"Classify the input as positive, negative, or neutral."</span>
+<span class="sk-key">user:</span> <span class="sk-val">"{input_text}"</span>
+<span class="sk-key">output:</span>
+  <span class="sk-subkey">sentiment:</span> <span class="sk-val">"one of: positive, negative, neutral"</span>
+  <span class="sk-subkey">confidence:</span> <span class="sk-val">"float between 0 and 1"</span>
+<span class="sk-key">vars:</span>
+  <span class="sk-subkey">input_text:</span> <span class="sk-val">"The product broke on day one."</span></code></pre>
             </div>
           </article>
 
@@ -143,14 +207,14 @@ vars:
             </header>
             <div class="card-body">
               <pre><code>{
-  "messages": [
+  <span class="sk-key">"messages"</span>: [
     {
-      "role": "system",
-      "content": "role: classifier\ninstruction: Classify the input as positive, negative, or neutral."
+      <span class="sk-key">"role"</span>: <span class="sk-val">"system"</span>,
+      <span class="sk-key">"content"</span>: <span class="sk-val">"role: classifier\ninstruction: Classify the input as positive, negative, or neutral."</span>
     },
     {
-      "role": "user",
-      "content": "The product broke on day one."
+      <span class="sk-key">"role"</span>: <span class="sk-val">"user"</span>,
+      <span class="sk-key">"content"</span>: <span class="sk-val">"The product broke on day one."</span>
     }
   ]
 }</code></pre>
@@ -158,16 +222,14 @@ vars:
           </article>
         </div>
 
-        <div class="strip" style="margin-top: 18px;">
-          <header class="section-head" style="margin-bottom: 12px;">
-            <div>
-              <h2 style="font-size: 1.25rem;">CLI flow</h2>
-            </div>
+        <div class="strip">
+          <div class="strip-head">
+            <h3>CLI flow</h3>
             <p>Keep the developer loop short: validate first, transpile next, run only when the payload is explicit.</p>
-          </header>
-          <pre class="terminal-card"><code>llm_format validate sentiment.llm
-llm_format transpile sentiment.llm --target openai-chat
-llm_format run sentiment.llm --provider openai --model gpt-4o-mini</code></pre>
+          </div>
+          <pre class="terminal-card"><code><span class="sk-comment">$</span> <span class="sk-cmd">llm_format validate</span> sentiment.llm
+<span class="sk-comment">$</span> <span class="sk-cmd">llm_format transpile</span> sentiment.llm --target openai-chat
+<span class="sk-comment">$</span> <span class="sk-cmd">llm_format run</span> sentiment.llm --provider openai --model gpt-4o-mini</code></pre>
         </div>
       </section>
 
@@ -222,11 +284,9 @@ llm_format run sentiment.llm --provider openai --model gpt-4o-mini</code></pre>
       </section>
 
       <section class="section">
-        <div class="strip">
-          <div class="section-head" style="margin-bottom: 12px;">
-            <div>
-              <h2 style="font-size: 1.25rem;">CLI command strip</h2>
-            </div>
+        <div class="command-strip-box">
+          <div class="command-strip-info">
+            <h3>CLI command surface</h3>
             <p>The command surface is small, explicit, and built around deterministic compiler behavior.</p>
           </div>
           <div class="command-list" aria-label="CLI commands">
@@ -273,7 +333,7 @@ llm_format run sentiment.llm --provider openai --model gpt-4o-mini</code></pre>
 
           <article class="distribution-card">
             <header>GitHub Pages</header>
-            <h3>Landing page and future browser tooling</h3>
+            <h3>Landing page & demo</h3>
             <p>This site is a polished product entry with a lightweight in-browser demo, not a claim that the full web product is complete.</p>
           </article>
         </div>
@@ -372,9 +432,7 @@ llm_format run sentiment.llm --provider openai --model gpt-4o-mini</code></pre>
                 <div class="pane-header">
                   <span id="output-label">output</span>
                 </div>
-                <div class="output-panel ok" id="output">
-Load the example, then compile, validate, or lint it here.
-                </div>
+                <div class="output-panel ok" id="output">Load the example, then compile, validate, or lint it here.</div>
                 <div class="diagnostics" id="diagnostics"></div>
               </section>
             </div>
