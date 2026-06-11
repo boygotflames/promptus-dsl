@@ -13,11 +13,11 @@
     href="./Promptus.svg"
     type="image/svg+xml"
   />
-  <!-- Technical Typography: Inter for UI/Body, JetBrains Mono for Code -->
+  <!-- Premium Web Fonts: Inter for UI/Body, Outfit for Headings -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles-v2.css?v=53" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles-v2.css?v=54" />
   <!-- Inline script to load theme immediately and avoid flash -->
   <script>
     (function() {
@@ -27,13 +27,12 @@
   </script>
 </head>
 <body>
-  <!-- Utilitarian Compiler Grid & Rails -->
+  <!-- GPU-Accelerated Background Mesh & Grid -->
   <div class="mesh-bg">
     <div class="mesh-grid"></div>
-    <div class="ast-bracket bracket-left">[</div>
-    <div class="ast-bracket bracket-right">]</div>
-    <div class="ast-bracket bracket-top-left">{</div>
-    <div class="ast-bracket bracket-top-right">}</div>
+    <div class="mesh-glow-1"></div>
+    <div class="mesh-glow-2"></div>
+    <div class="mesh-glow-3"></div>
   </div>
 
   <div class="site-shell">
@@ -110,13 +109,13 @@
         </a>
 
         <div class="nav-links">
-          <a href="#pipeline">Compiler Pipeline</a>
+          <a href="#features">Features</a>
           <a href="#demo">Demo</a>
           <a href="#distribution">Distribution</a>
           <a class="nav-link-muted" href="https://github.com/boygotflames/promptus-dsl/releases" target="_blank" rel="noreferrer">Releases</a>
-          <!-- Precise Theme Switcher -->
+          <!-- Dark / Light Theme Toggle -->
           <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle dark/light theme">
-            <svg class="sun-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="sun-icon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="5"></circle>
               <line x1="12" y1="1" x2="12" y2="3"></line>
               <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -127,7 +126,7 @@
               <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
               <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
             </svg>
-            <svg class="moon-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="moon-icon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
             </svg>
           </button>
@@ -137,52 +136,54 @@
 
     <main class="page" id="top">
       <section class="hero">
-        <div class="hero-left">
+        <div>
           <div class="eyebrow">
-            <span class="eyebrow-indicator"></span>
+            <span style="display:inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 6px var(--cyan);"></span>
             v5.x • Deterministic Rust Toolchain • OpenAI + Anthropic Targets
           </div>
           <h1>
-            <span>Write Prompt Source.</span>
-            <span>Validate Structure.</span>
-            <span class="gradient">Ship Provider JSON.</span>
+            <span>A Structured Prompt Compiler</span>
+            <span class="gradient">for Deterministic LLM Workflows.</span>
           </h1>
           <p class="hero-lead">
-            A compiler workflow for <code>promptus-dsl</code> prompts. Author in a clean indentation-based DSL, validation-check before spending tokens, and transpile to native provider payloads.
+            Write prompts in <code>.llm</code> files, validate them before spending tokens,
+            compile provider-native JSON, and run them against live APIs.
           </p>
 
           <div class="cta-row">
-            <a class="button button-primary" href="#demo">Try Demo</a>
+            <a class="button button-primary" href="#get-started">Get Started</a>
             <a class="button button-secondary" href="https://github.com/boygotflames/promptus-dsl" target="_blank" rel="noreferrer">View on GitHub</a>
             <a class="button button-tertiary" href="https://github.com/boygotflames/promptus-dsl/blob/main/docs/marketplace.md" target="_blank" rel="noreferrer">VS Code .vsix Guide</a>
           </div>
 
-          <div class="trust-row" aria-label="Project features">
-            <span class="trust-chip">OpenAI Chat Completions</span>
-            <span class="trust-chip">Anthropic Messages</span>
-            <span class="trust-chip">Offline Static Linting</span>
-            <span class="trust-chip">156 Conformance Tests</span>
+          <div class="trust-row" aria-label="Project trust signals">
+            <span class="trust-chip">Native OpenAI Chat JSON</span>
+            <span class="trust-chip">Native Anthropic Messages JSON</span>
+            <span class="trust-chip">Live <code>run</code> Command</span>
+            <span class="trust-chip">156 Rust Tests</span>
           </div>
         </div>
 
-        <aside class="hero-card" aria-label="Compiler workbench preview">
+        <aside class="hero-card" aria-label="Compiler preview">
           <div class="window-bar">
             <div class="window-dots" aria-hidden="true">
               <span></span><span></span><span></span>
             </div>
-            <span class="window-label">sentiment.llm → openai-chat</span>
+            <span class="window-label">sentiment.llm → Provider-Native JSON</span>
             <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
-              <svg class="copy-icon" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <svg class="copy-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
               </svg>
             </button>
           </div>
           <div class="hero-code">
+            <!-- Premium static syntax highlighted code -->
             <pre><code><span class="sk-key">agent:</span> <span class="sk-val">SentimentAnalyzer</span>
 <span class="sk-key">system:</span>
   <span class="sk-subkey">role:</span> <span class="sk-val">classifier</span>
-  <span class="sk-subkey">instruction:</span> <span class="sk-val">"Classify the input as positive, negative, or neutral."</span>
+  <span class="sk-subkey">instruction:</span> <span class="sk-val">"Classify the input as positive,
+    negative, or neutral."</span>
 <span class="sk-key">user:</span> <span class="sk-val">"{input_text}"</span>
 <span class="sk-key">output:</span>
   <span class="sk-subkey">sentiment:</span> <span class="sk-val">"one of: positive, negative, neutral"</span>
@@ -198,90 +199,25 @@
         </aside>
       </section>
 
-      <section class="section" id="pipeline">
+      <section class="section" id="get-started">
         <div class="section-head">
           <div>
-            <h2>Compiler Pipeline</h2>
+            <h2>Write Once. Check Before Runtime. Ship Provider-Native Output.</h2>
           </div>
           <p>
-            Promptus DSL replaces plastic markdown prompt blobs with a structured, compiler-checked pipeline.
+            The compiler enforces structure before execution, keeps prompt sources reviewable,
+            and emits the exact JSON shape your provider APIs expect.
           </p>
         </div>
 
-        <!-- 6 Compiler Phases Flow -->
-        <div class="phases-timeline">
-          <article class="phase-node">
-            <div class="phase-num">01</div>
-            <div class="phase-content">
-              <h3>Authoring Layer</h3>
-              <p>Write prompt structure using an indentation-based DSL that captures logical components: agent metadata, instruction blocks, vars, and validation schemas.</p>
-              <pre class="phase-code"><code><span class="sk-key">agent:</span> <span class="sk-val">SentimentAnalyzer</span>
-<span class="sk-key">system:</span>
-  <span class="sk-subkey">role:</span> <span class="sk-val">classifier</span></code></pre>
-            </div>
-          </article>
-
-          <article class="phase-node">
-            <div class="phase-num">02</div>
-            <div class="phase-content">
-              <h3>Static Validation</h3>
-              <p>Catch structural compile-time errors like missing required fields, undefined variable references, and circular include chains before sending API calls.</p>
-              <pre class="phase-code"><code><span class="sk-error">[E101] missing required key: system</span>
-<span class="sk-error">[E114] undefined var reference: {input_text}</span></code></pre>
-            </div>
-          </article>
-
-          <article class="phase-node">
-            <div class="phase-num">03</div>
-            <div class="phase-content">
-              <h3>Formatting & Linting</h3>
-              <p>Enforce canonical quoting, indentation rails, and file styles. Apply static quality rules like warning on empty schemas or overly long system prompts.</p>
-              <pre class="phase-code"><code><span class="sk-warn">[L001] missing output schema</span>
-<span class="sk-warn">[L003] system prompt very short (&lt; 20 chars)</span></code></pre>
-            </div>
-          </article>
-
-          <article class="phase-node">
-            <div class="phase-num">04</div>
-            <div class="phase-content">
-              <h3>Composition & Variables</h3>
-              <p>Share common files across your workspace using the composition directive <code>include</code>, and expand templates dynamically at compile time.</p>
-              <pre class="phase-code"><code><span class="sk-key">include:</span> <span class="sk-val">shared/base-system.llm</span>
-<span class="sk-key">vars:</span>
-  <span class="sk-subkey">input_text:</span> <span class="sk-val">"Day one break."</span></code></pre>
-            </div>
-          </article>
-
-          <article class="phase-node">
-            <div class="phase-num">05</div>
-            <div class="phase-content">
-              <h3>Provider Target Generation</h3>
-              <p>Generate clean, provider-native JSON payloads mapped to the structural formats expected by OpenAI Chat Completions or Anthropic Messages.</p>
-              <pre class="phase-code"><code><span class="sk-comment"># Mapped system prompt content insideMessages API:</span>
-<span class="sk-key">"system"</span>: <span class="sk-val">"role: classifier\ninstruction: Classify..."</span></code></pre>
-            </div>
-          </article>
-
-          <article class="phase-node">
-            <div class="phase-num">06</div>
-            <div class="phase-content">
-              <h3>Deterministic Execution</h3>
-              <p>Run prompt validation, compile payloads, load models, and run requests against live provider APIs directly from a single CLI execution.</p>
-              <pre class="phase-code"><code><span class="sk-comment">$</span> <span class="sk-cmd">llm_format run</span> sentiment.llm --provider openai</code></pre>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="section">
         <div class="example-grid">
           <article class="code-card">
             <header>
-              <span>LLM Source File</span>
-              <div style="display: flex; align-items: center; gap: 8px;">
+              <span>LLM Source</span>
+              <div style="display: flex; align-items: center; gap: 12px;">
                 <span>Authoring Layer</span>
                 <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
-                  <svg class="copy-icon" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <svg class="copy-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                   </svg>
@@ -305,10 +241,10 @@
           <article class="code-card">
             <header>
               <span>OpenAI Chat Output</span>
-              <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
                 <span>Provider-Native JSON</span>
                 <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
-                  <svg class="copy-icon" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <svg class="copy-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                   </svg>
@@ -334,17 +270,88 @@
 
         <div class="strip">
           <div class="strip-head">
-            <h3>CLI Workspace commands</h3>
-            <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
-              <svg class="copy-icon" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-            </button>
+            <h3>CLI Flow</h3>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <p>Keep the developer loop short: validate first, transpile next, run only when the payload is explicit.</p>
+              <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <svg class="copy-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
           </div>
           <pre class="terminal-card"><code><span class="sk-comment">$</span> <span class="sk-cmd">llm_format validate</span> sentiment.llm
 <span class="sk-comment">$</span> <span class="sk-cmd">llm_format transpile</span> sentiment.llm --target openai-chat
 <span class="sk-comment">$</span> <span class="sk-cmd">llm_format run</span> sentiment.llm --provider openai --model gpt-4o-mini</code></pre>
+        </div>
+      </section>
+
+      <section class="section" id="features">
+        <div class="section-head">
+          <div>
+            <h2>Core Features</h2>
+          </div>
+          <p>
+            The value is not speculative syntax. It is a compiler-backed workflow for
+            structured prompt authoring, validation, transpilation, and execution.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <div class="feature-icon">01</div>
+            <h3>Validate Before Runtime</h3>
+            <p>Catch missing required keys, type mismatches, undefined vars, include cycles, and merge conflicts before any API call is made.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">02</div>
+            <h3>Compile to OpenAI Chat JSON</h3>
+            <p>Emit a clean Chat Completions payload ready for CLI previews, direct HTTP calls, or SDK handoff.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">03</div>
+            <h3>Compile to Anthropic Messages JSON</h3>
+            <p>Generate the Messages API shape directly, with the compiler handling prompt normalization before the request is sent.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">04</div>
+            <h3>Format and Lint .llm Files</h3>
+            <p>Use canonical formatting for stable diffs and lint rules for prompt quality issues that are worth catching before execution.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">05</div>
+            <h3>Compose Prompts with Include and Vars</h3>
+            <p>Share base instructions across files, merge structured prompt sections, and expand vars at compile time.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">06</div>
+            <h3>Execute Live Requests with Run</h3>
+            <p>Validate, transpile, inject model settings, and send provider-native requests from the CLI with a single command.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="command-strip-box">
+          <div class="command-strip-info">
+            <h3>CLI Command Surface</h3>
+            <p>The command surface is small, explicit, and built around deterministic compiler behavior.</p>
+          </div>
+          <div class="command-list" aria-label="CLI commands">
+            <span class="command-pill">parse</span>
+            <span class="command-pill">validate</span>
+            <span class="command-pill">transpile</span>
+            <span class="command-pill">fmt</span>
+            <span class="command-pill">bench</span>
+            <span class="command-pill">run</span>
+            <span class="command-pill">lint</span>
+          </div>
         </div>
       </section>
 
@@ -354,33 +361,34 @@
             <h2>Distribution Surface</h2>
           </div>
           <p>
-            The package ecosystem maps to standard compiler distributions: Rust CLI, tagged releases, and editor extensions.
+            promptus-dsl is already useful in multiple entry modes. The CLI is primary, the VS Code
+            extension supports authoring, and this Pages site can host a lightweight browser demo.
           </p>
         </div>
 
         <div class="distribution-grid">
           <article class="distribution-card">
             <header>Rust CLI</header>
-            <h3>Local Compiler Toolchain</h3>
-            <p>Build from source or run the cargo binary directly for parse, validate, transpile, bench, lint, and run execution.</p>
+            <h3>Compiler-first local workflow</h3>
+            <p>Build from source or run the binary directly for parse, validate, transpile, bench, lint, and live execution.</p>
           </article>
 
           <article class="distribution-card">
             <header>GitHub Releases</header>
-            <h3>Pre-Compiled Binaries</h3>
-            <p>Release actions package compiled static targets for Windows, macOS, and Linux from tagged releases.</p>
+            <h3>Download release binaries</h3>
+            <p>Release automation already stages native binaries for Windows, macOS, and Linux from tagged builds.</p>
           </article>
 
           <article class="distribution-card">
-            <header>VS Code Extension</header>
-            <h3>Authoring Integrations</h3>
-            <p>Completions, inlay hints, hover documentation, validation warnings, and format-on-save integrated directly into your editor.</p>
+            <header>VS Code extension</header>
+            <h3>Author prompts with guardrails</h3>
+            <p>Syntax support, inline diagnostics, completions, hover, go-to-definition, and formatter integration are available today through manual `.vsix` installation.</p>
           </article>
 
           <article class="distribution-card">
             <header>GitHub Pages</header>
-            <h3>Interactive Sandbox</h3>
-            <p>This page serves as the compiler reference documentation, containing an in-browser WebAssembly transpilation playground.</p>
+            <h3>Landing page & demo</h3>
+            <p>This site is a polished product entry with a lightweight in-browser demo, not a claim that the full web product is complete.</p>
           </article>
         </div>
       </section>
@@ -388,10 +396,11 @@
       <section class="section">
         <div class="section-head">
           <div>
-            <h2>Compiler Metrics</h2>
+            <h2>Status and Trust</h2>
           </div>
           <p>
-            Promptus DSL is fully verified by conformance checks and covers multiple target formats.
+            The project is already shipping practical value: deterministic compiler behavior, native provider targets,
+            and a test-backed Rust core rather than a marketing-only format concept.
           </p>
         </div>
 
@@ -399,25 +408,25 @@
           <article class="status-card">
             <header>Release Line</header>
             <strong>v5.x</strong>
-            <span>Active compiler version focusing on provider-native JSON and run targets.</span>
+            <span>Current product direction centers on provider-native JSON and live execution.</span>
           </article>
 
           <article class="status-card">
-            <header>API Providers</header>
-            <strong>2 Targets</strong>
-            <span>First-class compilation support for OpenAI Chat and Anthropic Messages APIs.</span>
+            <header>Providers</header>
+            <strong>2 native</strong>
+            <span>OpenAI Chat and Anthropic Messages targets are implemented as first-class outputs.</span>
           </article>
 
           <article class="status-card">
-            <header>Compiler Conformance</header>
+            <header>Compiler Behavior</header>
             <strong>Deterministic</strong>
-            <span>Full exact-string tests ensuring stability across lexer, validator, and emitter.</span>
+            <span>Exact-string conformance coverage protects parser, validator, formatter, and transpilation surfaces.</span>
           </article>
 
           <article class="status-card">
-            <header>Test Coverage</header>
-            <strong>156 Verified</strong>
-            <span>Robust test suite mapping to language specifications and error codes.</span>
+            <header>Rust Test Suite</header>
+            <strong>156 tests</strong>
+            <span>The current repo state is verified by a broad compiler and CLI test surface.</span>
           </article>
         </div>
       </section>
@@ -425,29 +434,31 @@
       <section class="section" id="demo">
         <div class="section-head">
           <div>
-            <h2>Interactive Sandbox</h2>
+            <h2>Try the Browser Demo</h2>
           </div>
           <p>
-            Transpile, lint, and validate prompts locally using the WebAssembly port of the Promptus compiler.
+            This is a lightweight WASM-powered compiler preview. It validates, transpiles, and lints locally in the browser.
+            Live API execution still belongs in the Rust CLI.
           </p>
         </div>
 
         <div class="demo-shell">
           <aside class="demo-copy">
-            <h3>WebAssembly Port</h3>
+            <h3>In-Browser Preview, Not the Full Product Surface</h3>
             <p>
-              This in-browser sandbox is loaded as a WebAssembly module compiled directly from the Rust core.
+              The browser demo stays deliberately small. It is here to demonstrate the authoring and compiler loop without
+              overclaiming a full hosted platform.
             </p>
             <ul>
-              <li>Select your target format</li>
-              <li>Type source code in the editor</li>
-              <li>Compile, validate, or lint instantly</li>
+              <li>Compile to <code>openai-chat</code>, <code>anthropic-messages</code>, <code>plain</code>, <code>json-ir</code>, or <code>shadow</code>.</li>
+              <li>Validate the current document locally with the same Rust core.</li>
+              <li>Run prompt lint checks without shipping source off-page.</li>
             </ul>
           </aside>
 
           <div class="demo-app">
             <div class="toolbar">
-              <label for="target">Compilation Target</label>
+              <label for="target">Target</label>
               <select id="target">
                 <option value="openai-chat">openai-chat</option>
                 <option value="anthropic-messages">anthropic-messages</option>
@@ -458,14 +469,14 @@
               <button class="primary" id="btn-compile" disabled>Compile</button>
               <button id="btn-validate" disabled>Validate</button>
               <button id="btn-lint" disabled>Lint</button>
-              <button id="btn-example">Load Example</button>
+              <button id="btn-example">Load example</button>
               <span class="status-pill loading" id="status">Loading WASM…</span>
             </div>
 
             <div class="demo-grid">
               <section class="demo-pane" aria-label="LLM source editor">
                 <div class="pane-header">
-                  <span>LLM Source Code</span>
+                  <span>LLM Source</span>
                   <span id="char-count">0 chars</span>
                 </div>
                 <textarea class="editor" id="editor" spellcheck="false" placeholder="Write your .llm source here."></textarea>
@@ -473,7 +484,7 @@
 
               <section class="demo-pane" aria-label="Compiler output">
                 <div class="pane-header">
-                  <span id="output-label">Output Payload</span>
+                  <span id="output-label">Output</span>
                 </div>
                 <div class="output-panel ok" id="output">Load the example, then compile, validate, or lint it here.</div>
                 <div class="diagnostics" id="diagnostics"></div>
@@ -497,21 +508,18 @@
   </div>
 
   <script type="module" src="./script.js"></script>
-  <!-- Global Javascript copy code and theme switcher -->
+  <!-- Global Javascript copy code and theme switch script -->
   <script>
     window.copyCode = function(button) {
-      const container = button.closest('.code-card, .hero-card, .strip, .terminal-card, .phase-node');
+      const container = button.closest('.code-card, .hero-card, .strip, .terminal-card');
       if (!container) return;
       const pre = container.querySelector('pre');
       if (!pre) return;
-      
-      // Get text, stripping out any HTML tags/formatting
       const text = pre.innerText;
-      
       navigator.clipboard.writeText(text).then(() => {
         const originalHTML = button.innerHTML;
         button.innerHTML = `
-          <svg class="copy-icon success" viewBox="0 0 24 24" width="13" height="13" stroke="var(--success)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="copy-icon success" viewBox="0 0 24 24" width="14" height="14" stroke="var(--success)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
         `;
