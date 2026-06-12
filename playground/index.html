@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles-v2.css?v=54" />
+  <link rel="stylesheet" href="./styles-v2.css?v=55" />
   <!-- Inline script to load theme immediately and avoid flash -->
   <script>
     (function() {
@@ -136,7 +136,7 @@
 
     <main class="page" id="top">
       <section class="hero">
-        <div>
+        <div class="hero-intro">
           <div class="eyebrow">
             <span style="display:inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 6px var(--cyan);"></span>
             v5.x • Deterministic Rust Toolchain • OpenAI + Anthropic Targets
@@ -151,7 +151,7 @@
           </p>
 
           <div class="cta-row">
-            <a class="button button-primary" href="#get-started">Get Started</a>
+            <a class="button button-primary" href="#demo">Try the Demo</a>
             <a class="button button-secondary" href="https://github.com/boygotflames/promptus-dsl" target="_blank" rel="noreferrer">View on GitHub</a>
             <a class="button button-tertiary" href="https://github.com/boygotflames/promptus-dsl/blob/main/docs/marketplace.md" target="_blank" rel="noreferrer">VS Code .vsix Guide</a>
           </div>
@@ -164,39 +164,101 @@
           </div>
         </div>
 
-        <aside class="hero-card" aria-label="Compiler preview">
-          <div class="window-bar">
+        <div class="workbench-editor" id="demo">
+          <div class="workbench-header">
             <div class="window-dots" aria-hidden="true">
               <span></span><span></span><span></span>
             </div>
-            <span class="window-label">sentiment.llm → Provider-Native JSON</span>
-            <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
-              <svg class="copy-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-            </button>
-          </div>
-          <div class="hero-code">
-            <!-- Premium static syntax highlighted code -->
-            <pre><code><span class="sk-key">agent:</span> <span class="sk-val">SentimentAnalyzer</span>
-<span class="sk-key">system:</span>
-  <span class="sk-subkey">role:</span> <span class="sk-val">classifier</span>
-  <span class="sk-subkey">instruction:</span> <span class="sk-val">"Classify the input as positive,
-    negative, or neutral."</span>
-<span class="sk-key">user:</span> <span class="sk-val">"{input_text}"</span>
-<span class="sk-key">output:</span>
-  <span class="sk-subkey">sentiment:</span> <span class="sk-val">"one of: positive, negative, neutral"</span>
-  <span class="sk-subkey">confidence:</span> <span class="sk-val">"float between 0 and 1"</span></code></pre>
-
-            <div class="terminal-tease">
-              <pre><code><span class="sk-comment">$</span> <span class="sk-cmd">llm_format validate</span> sentiment.llm
-<span class="sk-ok">✓ valid sentiment.llm</span>
-
-<span class="sk-comment">$</span> <span class="sk-cmd">llm_format transpile</span> sentiment.llm --target openai-chat</code></pre>
+            <div class="workbench-title">
+              <span class="file-status-dot"></span>
+              <span id="active-file-label">sentiment.llm</span> — Promptus DSL Workbench
+            </div>
+            <div class="workbench-controls">
+              <div class="control-item">
+                <label for="target">Target</label>
+                <select id="target">
+                  <option value="openai-chat">openai-chat</option>
+                  <option value="anthropic-messages">anthropic-messages</option>
+                  <option value="plain">plain</option>
+                  <option value="json-ir">json-ir</option>
+                  <option value="shadow">shadow</option>
+                </select>
+              </div>
+              <span class="status-pill loading" id="status">Loading WASM…</span>
             </div>
           </div>
-        </aside>
+
+          <div class="workbench-body">
+            <!-- Left Sidebar File Explorer -->
+            <aside class="editor-sidebar">
+              <div class="sidebar-title">EXPLORER</div>
+              <div class="sidebar-files">
+                <div class="sidebar-file active" data-file="sentiment.llm">
+                  <span class="file-icon">📄</span>
+                  <span class="file-name">sentiment.llm</span>
+                </div>
+                <div class="sidebar-file" data-file="translator.llm">
+                  <span class="file-icon">📄</span>
+                  <span class="file-name">translator.llm</span>
+                </div>
+                <div class="sidebar-file" data-file="schema-validation.llm">
+                  <span class="file-icon">📄</span>
+                  <span class="file-name">schema-validation.llm</span>
+                </div>
+              </div>
+            </aside>
+
+            <!-- Editor workspace (Gutter + Textarea + Bottom console) -->
+            <main class="editor-workspace">
+              <div class="editor-tabs-bar">
+                <div class="editor-tab active">
+                  <span class="tab-icon">📄</span>
+                  <span class="tab-name" id="editor-tab-name">sentiment.llm</span>
+                </div>
+              </div>
+              <div class="editor-area-wrapper">
+                <div class="gutter" id="gutter"></div>
+                <textarea class="editor" id="editor" spellcheck="false" placeholder="Write your .llm source here."></textarea>
+              </div>
+
+              <!-- Console tabs at the bottom -->
+              <div class="console-workspace">
+                <div class="console-tabs-bar">
+                  <button class="console-tab active" data-tab="problems">Problems</button>
+                  <button class="console-tab" data-tab="terminal">Terminal</button>
+                  <span class="char-count-badge" id="char-count">0 chars</span>
+                </div>
+                <div class="console-body">
+                  <div class="console-panel" id="problems-list">
+                    <div class="problem-item clean">✓ 0 problems found</div>
+                  </div>
+                  <div class="console-panel" id="terminal-output" style="display: none;">
+                    [00:00:00] WebAssembly compiler loading...
+                  </div>
+                </div>
+              </div>
+            </main>
+
+            <!-- Right Preview Pane (Payload tab vs AST tab) -->
+            <aside class="editor-preview">
+              <div class="preview-tabs-bar">
+                <button class="preview-tab active" data-tab="payload">Provider JSON</button>
+                <button class="preview-tab" data-tab="ast">Visual AST</button>
+                
+                <button class="copy-btn" onclick="copyActiveOutput(this)" aria-label="Copy output" style="margin-left: auto;">
+                  <svg class="copy-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                </button>
+              </div>
+              <div class="preview-body">
+                <pre class="output-panel ok" id="output-raw">Load the example, then compile, validate, or lint it here.</pre>
+                <div class="output-panel ast-tree-container" id="output-ast" style="display: none;"></div >
+              </div>
+            </aside>
+          </div>
+        </div>
       </section>
 
       <section class="section" id="get-started">
@@ -431,68 +493,7 @@
         </div>
       </section>
 
-      <section class="section" id="demo">
-        <div class="section-head">
-          <div>
-            <h2>Try the Browser Demo</h2>
-          </div>
-          <p>
-            This is a lightweight WASM-powered compiler preview. It validates, transpiles, and lints locally in the browser.
-            Live API execution still belongs in the Rust CLI.
-          </p>
-        </div>
 
-        <div class="demo-shell">
-          <aside class="demo-copy">
-            <h3>In-Browser Preview, Not the Full Product Surface</h3>
-            <p>
-              The browser demo stays deliberately small. It is here to demonstrate the authoring and compiler loop without
-              overclaiming a full hosted platform.
-            </p>
-            <ul>
-              <li>Compile to <code>openai-chat</code>, <code>anthropic-messages</code>, <code>plain</code>, <code>json-ir</code>, or <code>shadow</code>.</li>
-              <li>Validate the current document locally with the same Rust core.</li>
-              <li>Run prompt lint checks without shipping source off-page.</li>
-            </ul>
-          </aside>
-
-          <div class="demo-app">
-            <div class="toolbar">
-              <label for="target">Target</label>
-              <select id="target">
-                <option value="openai-chat">openai-chat</option>
-                <option value="anthropic-messages">anthropic-messages</option>
-                <option value="plain">plain</option>
-                <option value="json-ir">json-ir</option>
-                <option value="shadow">shadow</option>
-              </select>
-              <button class="primary" id="btn-compile" disabled>Compile</button>
-              <button id="btn-validate" disabled>Validate</button>
-              <button id="btn-lint" disabled>Lint</button>
-              <button id="btn-example">Load example</button>
-              <span class="status-pill loading" id="status">Loading WASM…</span>
-            </div>
-
-            <div class="demo-grid">
-              <section class="demo-pane" aria-label="LLM source editor">
-                <div class="pane-header">
-                  <span>LLM Source</span>
-                  <span id="char-count">0 chars</span>
-                </div>
-                <textarea class="editor" id="editor" spellcheck="false" placeholder="Write your .llm source here."></textarea>
-              </section>
-
-              <section class="demo-pane" aria-label="Compiler output">
-                <div class="pane-header">
-                  <span id="output-label">Output</span>
-                </div>
-                <div class="output-panel ok" id="output">Load the example, then compile, validate, or lint it here.</div>
-                <div class="diagnostics" id="diagnostics"></div>
-              </section>
-            </div>
-          </div>
-        </div>
-      </section>
     </main>
 
     <footer class="page site-footer">
@@ -511,11 +512,36 @@
   <!-- Global Javascript copy code and theme switch script -->
   <script>
     window.copyCode = function(button) {
-      const container = button.closest('.code-card, .hero-card, .strip, .terminal-card');
+      const container = button.closest('.code-card, .hero-card, .strip, .terminal-card, .editor-preview');
       if (!container) return;
       const pre = container.querySelector('pre');
       if (!pre) return;
       const text = pre.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const originalHTML = button.innerHTML;
+        button.innerHTML = `
+          <svg class="copy-icon success" viewBox="0 0 24 24" width="14" height="14" stroke="var(--success)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        `;
+        button.classList.add('copied');
+        setTimeout(() => {
+          button.innerHTML = originalHTML;
+          button.classList.remove('copied');
+        }, 2000);
+      });
+    };
+
+    window.copyActiveOutput = function(button) {
+      const rawEl = document.getElementById('output-raw');
+      const astEl = document.getElementById('output-ast');
+      let text = '';
+      if (rawEl && rawEl.style.display !== 'none') {
+        text = rawEl.innerText;
+      } else if (astEl && astEl.style.display !== 'none') {
+        text = astEl.innerText;
+      }
+      if (!text) return;
       navigator.clipboard.writeText(text).then(() => {
         const originalHTML = button.innerHTML;
         button.innerHTML = `
