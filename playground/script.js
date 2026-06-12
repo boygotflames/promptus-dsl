@@ -1,4 +1,4 @@
-import init, { compile, lint, validate } from './pkg/llm_format.js';
+import init, { compile, lint, validate } from './pkg/llm_format.js?v=55';
 
 const FILES = {
   'sentiment.llm': `agent: SentimentAnalyzer
@@ -375,7 +375,7 @@ function runCompiler() {
 // Initial Booting
 async function boot() {
   try {
-    await init();
+    await init('./pkg/llm_format_bg.wasm?v=55');
     setStatus('WASM ready', 'ready');
     terminalOutput.textContent = `[${new Date().toLocaleTimeString()}] WebAssembly compiler loaded successfully.`;
     initExplorer();
